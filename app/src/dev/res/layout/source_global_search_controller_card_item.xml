@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.carousel.MaskableFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/maskable_layout"
+    android:layout_width="match_parent"
+    android:layout_height="112dp"
+    android:layout_marginStart="5dp"
+    android:layout_marginEnd="5dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+    android:foreground="?attr/selectableItemBackground"
+    android:background="@drawable/v21_surface_card">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="7dp">
+
+        <ImageView
+            android:id="@+id/itemImage"
+            android:layout_width="72dp"
+            android:layout_height="98dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/cover_of_image"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:src="@mipmap/ic_launcher" />
+
+        <View
+            android:id="@+id/gradient"
+            android:layout_width="72dp"
+            android:layout_height="30dp"
+            android:alpha="0.65"
+            android:background="@drawable/gradient_shape"
+            app:layout_constraintStart_toStartOf="@id/itemImage"
+            app:layout_constraintEnd_toEndOf="@id/itemImage"
+            app:layout_constraintBottom_toBottomOf="@id/itemImage" />
+
+        <ProgressBar
+            android:id="@+id/progress"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@id/itemImage"
+            app:layout_constraintEnd_toEndOf="@id/itemImage"
+            app:layout_constraintTop_toTopOf="@id/itemImage"
+            app:layout_constraintBottom_toBottomOf="@id/itemImage" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/title"
+            style="?textAppearanceTitleMedium"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="8dp"
+            android:gravity="end"
+            android:textAlignment="viewEnd"
+            android:textColor="@color/v19_text"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:maxLines="3"
+            android:ellipsize="end"
+            app:layout_constraintStart_toEndOf="@id/itemImage"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="عنوان المانجا" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/favorite_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/v19_cyan"
+            app:cardElevation="1dp"
+            app:layout_constraintStart_toStartOf="@id/itemImage"
+            app:layout_constraintTop_toTopOf="parent">
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:text="@string/in_library"
+                android:textColor="@color/v19_bg"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/duplicate_in_library_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/v19_pink"
+            app:cardElevation="1dp"
+            app:layout_constraintStart_toStartOf="@id/itemImage"
+            app:layout_constraintBottom_toBottomOf="parent">
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:text="@string/duplicate_in_library"
+                android:textColor="@color/v19_bg"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.carousel.MaskableFrameLayout>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="nav_home" type="id"/>
+    <item name="reader_pager" type="id"/>
+    <item name="action_remove_from_library" type="id"/>
+    <item name="v22_header_chrome" type="id"/>
+    <item name="v22_header_search" type="id"/>
+    <item name="v22_header_bell" type="id"/>
+    <item name="v22_header_avatar" type="id"/>
+</resources>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- MANGA VIRUS V22 neon palette (violet / cyan / magenta on near-black). -->
+    <color name="v22_bg">#05030F</color>
+    <color name="v22_bg_mid">#0A0720</color>
+    <color name="v22_card_top">#161036</color>
+    <color name="v22_card_bottom">#0A0823</color>
+    <color name="v22_card_flat">#0E0B27</color>
+    <color name="v22_card_raised">#1B1442</color>
+    <color name="v22_text">#FFFFFF</color>
+    <color name="v22_text_soft">#E6E0FF</color>
+    <color name="v22_muted">#B3ABD6</color>
+    <color name="v22_faint">#7F77A8</color>
+    <color name="v22_cyan">#19E6FF</color>
+    <color name="v22_cyan_soft">#6619E6FF</color>
+    <color name="v22_blue">#3D7CFF</color>
+    <color name="v22_violet">#7B2CFF</color>
+    <color name="v22_purple">#A14BFF</color>
+    <color name="v22_purple_soft">#66A14BFF</color>
+    <color name="v22_magenta">#FF2FD0</color>
+    <color name="v22_magenta_soft">#66FF2FD0</color>
+    <color name="v22_green">#2CF0A0</color>
+    <color name="v22_green_soft">#662CF0A0</color>
+    <color name="v22_red">#FF4D6D</color>
+    <color name="v22_red_soft">#66FF4D6D</color>
+    <color name="v22_amber">#FFC247</color>
+    <color name="v22_track">#2B2354</color>
+    <color name="v22_stroke">#7A5BFF</color>
+    <color name="v22_scrim">#E605030F</color>
+    <color name="v22_scrim_clear">#0005030F</color>
+</resources>

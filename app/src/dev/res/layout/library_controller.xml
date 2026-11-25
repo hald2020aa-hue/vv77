@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:id="@+id/library_layout" android:background="@drawable/v22_screen_bg" android:layout_width="match_parent" android:clipChildren="false" android:layout_height="match_parent">
+
+    <com.google.android.material.loadingindicator.LoadingIndicator android:id="@+id/progress" app:indicatorSize="75dp" android:layout_width="75dp" android:layout_height="75dp" android:layout_gravity="center"/>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout android:id="@+id/swipe_refresh" android:layout_width="match_parent" android:layout_height="match_parent">
+
+        <FrameLayout android:id="@+id/recycler_layout" android:layout_width="match_parent" android:layout_height="match_parent">
+
+            <eu.kanade.tachiyomi.ui.library.category.CategoryRecyclerView android:id="@+id/category_recycler" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="?actionBarSize" android:clipToPadding="false" android:visibility="invisible" android:paddingBottom="4dp" android:scrollbars="vertical"/>
+
+            <View android:id="@+id/recycler_shadow" android:layout_width="match_parent" android:layout_height="20dp" android:alpha="0.25" android:background="@drawable/shape_gradient_top_shadow" android:translationY="12dp" app:layout_constraintBottom_toTopOf="@id/recycler" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"/>
+
+            <include layout="@layout/library_grid_recycler" android:id="@+id/library_grid_recycler"/>
+
+            <View android:id="@+id/recycler_cover" android:layout_width="match_parent" android:layout_height="match_parent" android:alpha="0" android:background="@drawable/bottom_sheet_rounded_background" android:backgroundTint="?attr/background"/>
+        </FrameLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.google.android.material.card.MaterialCardView android:id="@+id/header_card" app:strokeWidth="1dp" app:strokeColor="@color/v22_stroke" android:layout_marginTop="6dp" app:cardCornerRadius="18dp" app:cardBackgroundColor="@color/v22_card_flat" app:cardElevation="2dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center|top">
+
+        <TextView android:id="@+id/header_title" style="?textAppearanceTitleSmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@android:color/transparent" android:clickable="true" android:ellipsize="end" android:focusable="true" android:inputType="none" android:maxLines="1" android:textAlignment="center" android:paddingStart="12dp" android:paddingEnd="12dp" android:paddingTop="4dp" android:paddingBottom="4dp" android:textColor="@color/v22_text" android:textSize="14sp" tools:text="Category"/>
+    </com.google.android.material.card.MaterialCardView>
+
+
+    <!-- V22: persistent actions sit below the shared search pill (positioned by LibraryController).
+         Four live stat tiles + the existing action chips; every id and callback is unchanged. -->
+    <FrameLayout
+        android:id="@+id/library_top_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_marginStart="11dp"
+        android:layout_marginEnd="11dp"
+        android:elevation="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <LinearLayout android:layout_width="0dp" android:layout_height="60dp" android:layout_weight="1" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" android:background="@drawable/v22_tile_violet" android:gravity="center" android:orientation="vertical" android:paddingTop="2dp" android:paddingBottom="2dp">
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_marginEnd="4dp" android:src="@drawable/v14_icon_library" app:tint="@color/v22_purple" android:importantForAccessibility="no"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/library" android:maxLines="1" android:ellipsize="end" android:textColor="@color/v22_text_soft" android:textSize="10sp"/>
+                </LinearLayout>
+                <TextView android:id="@+id/library_stat_total" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/v22_text" android:textSize="20sp" android:textStyle="bold"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="60dp" android:layout_weight="1" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" android:background="@drawable/v22_tile_cyan" android:gravity="center" android:orientation="vertical" android:paddingTop="2dp" android:paddingBottom="2dp">
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_marginEnd="4dp" android:src="@drawable/ic_book_open_variant_24dp" app:tint="@color/v22_cyan" android:importantForAccessibility="no"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/reading" android:maxLines="1" android:ellipsize="end" android:textColor="@color/v22_text_soft" android:textSize="10sp"/>
+                </LinearLayout>
+                <TextView android:id="@+id/library_stat_reading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/v22_text" android:textSize="20sp" android:textStyle="bold"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="60dp" android:layout_weight="1" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" android:background="@drawable/v22_tile_green" android:gravity="center" android:orientation="vertical" android:paddingTop="2dp" android:paddingBottom="2dp">
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_marginEnd="4dp" android:src="@drawable/ic_check_circle_24dp" app:tint="@color/v22_green" android:importantForAccessibility="no"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/completed" android:maxLines="1" android:ellipsize="end" android:textColor="@color/v22_text_soft" android:textSize="10sp"/>
+                </LinearLayout>
+                <TextView android:id="@+id/library_stat_completed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/v22_text" android:textSize="20sp" android:textStyle="bold"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="60dp" android:layout_weight="1" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" android:background="@drawable/v22_tile_magenta" android:gravity="center" android:orientation="vertical" android:paddingTop="2dp" android:paddingBottom="2dp">
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_marginEnd="4dp" android:src="@drawable/ic_file_download_24dp" app:tint="@color/v22_magenta" android:importantForAccessibility="no"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/downloaded" android:maxLines="1" android:ellipsize="end" android:textColor="@color/v22_text_soft" android:textSize="10sp"/>
+                </LinearLayout>
+                <TextView android:id="@+id/library_stat_downloaded" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/v22_text" android:textSize="20sp" android:textStyle="bold"/>
+            </LinearLayout>
+            </LinearLayout>
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fillViewport="true"
+                android:scrollbars="none">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                <com.google.android.material.button.MaterialButton android:id="@+id/library_top_categories" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" android:insetTop="0dp" android:insetBottom="0dp" android:paddingStart="12dp" android:paddingEnd="12dp" android:text="@string/library" android:textColor="@color/v22_text" android:textSize="12sp" app:icon="@drawable/v14_icon_library" app:iconSize="18dp" app:iconPadding="6dp" app:iconTint="@color/v22_text" app:backgroundTint="@color/v22_violet" app:strokeColor="@color/v22_purple" app:strokeWidth="1.2dp" app:cornerRadius="20dp"/>
+                <com.google.android.material.button.MaterialButton android:id="@+id/library_top_group" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" android:insetTop="0dp" android:insetBottom="0dp" android:paddingStart="12dp" android:paddingEnd="12dp" android:text="@string/group_library_by" android:textColor="@color/v22_text" android:textSize="12sp" app:icon="@drawable/v14_icon_group" app:iconSize="18dp" app:iconPadding="6dp" app:iconTint="@color/v22_cyan" app:backgroundTint="@color/v22_card_flat" app:strokeColor="@color/v22_stroke" app:strokeWidth="1.2dp" app:cornerRadius="20dp"/>
+                <com.google.android.material.button.MaterialButton android:id="@+id/library_top_display" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" android:insetTop="0dp" android:insetBottom="0dp" android:paddingStart="12dp" android:paddingEnd="12dp" android:text="@string/display_options" android:textColor="@color/v22_text" android:textSize="12sp" app:icon="@drawable/v14_icon_display" app:iconSize="18dp" app:iconPadding="6dp" app:iconTint="@color/v22_magenta" app:backgroundTint="@color/v22_card_flat" app:strokeColor="@color/v22_stroke" app:strokeWidth="1.2dp" app:cornerRadius="20dp"/>
+                <com.google.android.material.button.MaterialButton android:id="@+id/library_top_filter" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" android:insetTop="0dp" android:insetBottom="0dp" android:paddingStart="12dp" android:paddingEnd="12dp" android:text="@string/filter" android:textColor="@color/v22_text" android:textSize="12sp" app:icon="@drawable/v14_icon_filter" app:iconSize="18dp" app:iconPadding="6dp" app:iconTint="@color/v22_cyan" app:backgroundTint="@color/v22_card_flat" app:strokeColor="@color/v22_stroke" app:strokeWidth="1.2dp" app:cornerRadius="20dp"/>
+                <com.google.android.material.button.MaterialButton android:id="@+id/library_top_expand" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" android:insetTop="0dp" android:insetBottom="0dp" android:paddingStart="12dp" android:paddingEnd="12dp" android:text="@string/expand_all_categories" android:textColor="@color/v22_text" android:textSize="12sp" app:icon="@drawable/ic_expand_more_24dp" app:iconSize="18dp" app:iconPadding="6dp" app:iconTint="@color/v22_purple" app:backgroundTint="@color/v22_card_flat" app:strokeColor="@color/v22_stroke" app:strokeWidth="1.2dp" app:cornerRadius="20dp"/>
+                </LinearLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
+    </FrameLayout>
+
+    <eu.kanade.tachiyomi.widget.EmptyView android:id="@+id/empty_view" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:visibility="gone" android:background="@drawable/v22_card" android:padding="16dp"/>
+
+    <com.google.android.material.textview.MaterialTextView android:id="@+id/jumper_category_text" style="@style/FloatingTextView" android:layout_gravity="start|center" android:layout_marginBottom="8dp" android:alpha="0.0" android:gravity="center" app:layout_anchor="@id/category_hopper_frame" app:layout_anchorGravity="start|center" tools:alpha="1" tools:text="Category and a long one"/>
+
+    <FrameLayout android:id="@+id/category_hopper_frame" android:layout_width="wrap_content" tools:layout_marginBottom="62dp" tools:layout_gravity="bottom|end" android:layout_height="wrap_content" android:clipToPadding="false" android:clipChildren="false" android:layout_gravity="top|center">
+
+        <include layout="@layout/rounded_category_hopper" android:id="@+id/rounded_category_hopper"/>
+
+    </FrameLayout>
+
+    <eu.kanade.tachiyomi.ui.library.LibraryFastScroll android:id="@+id/fast_scroller" android:layout_width="match_parent" android:layout_height="match_parent" tools:visibility="gone" app:fastScrollerBubbleEnabled="true"/>
+
+    <!-- Adding bottom sheet after main content -->
+    <include layout="@layout/filter_bottom_sheet" android:id="@+id/filter_bottom_sheet"/>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

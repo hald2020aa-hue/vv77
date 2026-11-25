@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primaryTachiyomi">#B26BFF</color>
+    <color name="primaryContainerTachiyomi">#3A1B6E</color>
+    <color name="secondaryContainerTachiyomi">#1E1A4B</color>
+    <color name="primaryInverseTachiyomi">#D9B8FF</color>
+    <color name="splashBackground">#05030F</color>
+    <color name="enhanced_icon_background">#05030F</color>
+    <color name="background">#05030F</color>
+    <color name="colorOnBackground">#F3F6FF</color>
+    <color name="colorOnSurface">#F3F6FF</color>
+    <color name="onPrimaryTachiyomi">#FFFFFF</color>
+    <color name="tachiyomi_surfaceContainerLow">#0B0822</color>
+    <color name="tachiyomi_surfaceContainer">#100B2E</color>
+    <color name="tachiyomi_surfaceContainerHigh">#171040</color>
+    <color name="tachiyomi_surfaceContainerHighest">#20185A</color>
+    <color name="tachiyomi_surfaceContainerLowest">#07041A</color>
+</resources>

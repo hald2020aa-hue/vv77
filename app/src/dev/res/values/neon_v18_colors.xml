@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="v18_bg">#05030F</color>
+    <color name="v18_deep">#07041A</color>
+    <color name="v18_surface">#0E0B27</color>
+    <color name="v18_surface_raised">#1B1442</color>
+    <color name="v18_surface_top">#161036</color>
+    <color name="v18_chip">#1B1442</color>
+    <color name="v18_text">#FFFFFF</color>
+    <color name="v18_muted">#B3ABD6</color>
+    <color name="v18_cyan">#19E6FF</color>
+    <color name="v18_pink">#FF2FD0</color>
+    <color name="v18_blue">#3D7CFF</color>
+    <color name="v18_purple">#A14BFF</color>
+    <color name="v18_border">#3B2A78</color>
+    <color name="v18_cyan_edge">#A619E6FF</color>
+    <color name="v18_blue_edge">#883D7CFF</color>
+    <color name="v18_pink_edge">#88FF2FD0</color>
+    <color name="v18_track">#2B2354</color>
+    <color name="v18_success">#2CF0A0</color>
+    <color name="v18_warning">#FFC247</color>
+</resources>

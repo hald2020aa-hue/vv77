@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/end_view"
+        style="@style/Widget.Tachiyomi.CardView.Container"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/material_red_500">
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/close_right"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end|center"
+            android:layout_marginEnd="12dp"
+            android:gravity="center"
+            android:text="@string/hide"
+            android:textColor="@color/md_white_1000" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/start_view"
+        style="@style/Widget.Tachiyomi.CardView.Container"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/material_red_500">
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/close_left"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start|center"
+            android:layout_marginStart="12dp"
+            android:gravity="center"
+            android:text="@string/hide"
+            android:textColor="@color/md_white_1000" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/source_card"
+        style="@style/Widget.Tachiyomi.CardView.Container"
+        android:layout_width="match_parent"
+        android:layout_height="136dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="5dp"
+        app:cardBackgroundColor="@color/v22_card_flat"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/v22_stroke"
+        app:strokeWidth="1.2dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/card"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/v22_card_flat">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/source_pin"
+                style="?materialIconButtonStyle"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="2dp"
+                android:layout_marginTop="2dp"
+                android:contentDescription="@string/pin"
+                app:icon="@drawable/ic_pin_24dp"
+                app:iconSize="20dp"
+                app:iconTint="@color/v22_purple"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/source_image"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="12dp"
+                android:padding="3dp"
+                android:scaleType="fitCenter"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:src="@mipmap/ic_launcher_round" />
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="12dp"
+                android:ellipsize="end"
+                android:gravity="start|center_vertical"
+                android:maxLines="2"
+                android:textColor="@color/v22_text"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/source_divider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/source_image"
+                tools:text="Manga source" />
+
+            <View
+                android:id="@+id/source_divider"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/v22_divider"
+                app:layout_constraintBottom_toTopOf="@id/source_latest"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/source_latest"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="8dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:letterSpacing="0.0"
+                android:minWidth="0dp"
+                android:text="@string/latest"
+                android:textAllCaps="false"
+                android:textColor="@color/v22_cyan"
+                android:textSize="12sp"
+                app:backgroundTint="@color/v22_card_flat"
+                app:cornerRadius="17dp"
+                app:iconTint="@color/v22_cyan"
+                app:strokeColor="@color/v22_cyan_soft"
+                app:strokeWidth="1dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

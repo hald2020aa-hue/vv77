@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- V22: dark violet backdrop; the real cover backdrop is drawn above it by MangaHeaderHolder. -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient android:angle="270" android:startColor="#1A1048" android:centerColor="#0C0724" android:endColor="#05030F" />
+        </shape>
+    </item>
+</layer-list>

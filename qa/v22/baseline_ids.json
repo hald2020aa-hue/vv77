@@ -1,0 +1,1328 @@
+{
+"layout-h600dp/common_view_empty.xml": {
+"actions_container": "LinearLayout",
+"image_view": "androidx.appcompat.widget.AppCompatImageView",
+"text_label": "TextView"
+},
+"layout-land/stats_details_controller.xml": {
+"chart_linear_layout": "include",
+"chip_category": "com.google.android.material.chip.Chip",
+"chip_language": "com.google.android.material.chip.Chip",
+"chip_series_type": "com.google.android.material.chip.Chip",
+"chip_source": "com.google.android.material.chip.Chip",
+"chip_stat": "com.google.android.material.chip.Chip",
+"chip_status": "com.google.android.material.chip.Chip",
+"filter_constraint_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"no_chart_data": "eu.kanade.tachiyomi.widget.EmptyView",
+"progress": "ProgressBar",
+"stat_sort": "TextView",
+"stats_chip_group": "com.google.android.material.chip.ChipGroup",
+"stats_clear_button": "ImageView",
+"stats_clear_button_container": "FrameLayout",
+"stats_details_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"stats_filter_layout": "LinearLayout",
+"stats_horizontal_scroll": "HorizontalScrollView",
+"stats_recycler_view": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout-sw600dp-land/manga_header_item.xml": {
+"backdrop": "ImageView",
+"backdrop_fill": "View",
+"backdrop_gradient": "View",
+"bottom_line": "androidx.constraintlayout.widget.Barrier",
+"button_layout": "com.google.android.material.button.MaterialButtonGroup",
+"chapter_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"chapters_title": "com.google.android.material.textview.MaterialTextView",
+"cover_card": "com.google.android.material.card.MaterialCardView",
+"favorite_button": "com.google.android.material.button.MaterialButton",
+"filter_button": "ImageView",
+"filters_text": "com.google.android.material.textview.MaterialTextView",
+"less_button": "com.google.android.material.button.MaterialButton",
+"manga_author": "TextView",
+"manga_cover": "ImageView",
+"manga_genres_tags": "com.google.android.material.chip.ChipGroup",
+"manga_header_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"manga_source": "com.google.android.material.textview.MaterialTextView",
+"manga_status": "TextView",
+"manga_summary": "TextView",
+"manga_summary_label": "com.google.android.material.textview.MaterialTextView",
+"more_bg_gradient": "View",
+"more_bg_solid": "View",
+"more_button": "com.google.android.material.button.MaterialButton",
+"more_button_group": "androidx.constraintlayout.widget.Group",
+"more_end_guide": "View",
+"more_guide": "View",
+"share_button": "com.google.android.material.button.MaterialButton",
+"start_reading_button": "com.google.android.material.button.MaterialButton",
+"sub_item_group": "androidx.constraintlayout.widget.Group",
+"title": "TextView",
+"top_view": "View",
+"track_button": "com.google.android.material.button.MaterialButton",
+"true_backdrop": "View",
+"webview_button": "com.google.android.material.button.MaterialButton"
+},
+"layout-w720dp/main_activity.xml": {
+"action_mode_status_bar": "View",
+"app_bar": "eu.kanade.tachiyomi.ui.base.ExpandedAppBarLayout",
+"back_shadow": "ImageView",
+"big_icon": "androidx.appcompat.widget.AppCompatImageView",
+"big_icon_layout": "FrameLayout",
+"big_title": "com.google.android.material.textview.MaterialTextView",
+"big_toolbar": "androidx.constraintlayout.widget.ConstraintLayout",
+"card_frame": "LinearLayout",
+"card_incog_image": "ImageView",
+"card_subtitle": "com.google.android.material.textview.MaterialTextView",
+"card_title": "com.google.android.material.textview.MaterialTextView",
+"card_view": "com.google.android.material.card.MaterialCardView",
+"controller_container": "com.bluelinelabs.conductor.ChangeHandlerFrameLayout",
+"main_content": "androidx.constraintlayout.widget.ConstraintLayout",
+"main_tabs": "com.google.android.material.tabs.TabLayout",
+"nav_bar": "View",
+"search_toolbar": "eu.kanade.tachiyomi.ui.base.FloatingToolbar",
+"side_nav": "eu.kanade.tachiyomi.ui.base.SideNavView",
+"status_bar": "View",
+"tabs_frame_layout": "FrameLayout",
+"toolbar": "eu.kanade.tachiyomi.ui.base.CenteredToolbar",
+"toolbar_filter_button": "com.google.android.material.button.MaterialButton",
+"toolbar_title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/add_category_item.xml": {
+"category_checkbox": "eu.kanade.tachiyomi.widget.TriStateCheckBox"
+},
+"layout/appwidget_loading.xml": {},
+"layout/bottom_menu_sheet.xml": {
+"divider": "View",
+"menu_sheet_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"menu_sheet_recycler": "androidx.recyclerview.widget.RecyclerView",
+"title_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"toolbar_subtitle": "com.google.android.material.textview.MaterialTextView",
+"toolbar_title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/browse_controller.xml": {
+"bottom_sheet": "include",
+"browse_frame_layout": "FrameLayout",
+"browse_layout": "androidx.coordinatorlayout.widget.CoordinatorLayout",
+"source_recycler": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/browse_source_controller.xml": {
+"buttonGroup": "com.google.android.material.button.MaterialButtonGroup",
+"catalogue_view": "FrameLayout",
+"empty_view": "eu.kanade.tachiyomi.widget.EmptyView",
+"filter_group": "com.google.android.material.button.MaterialButton",
+"floating_browse_bar": "com.google.android.material.floatingtoolbar.FloatingToolbarLayout",
+"latest_group": "com.google.android.material.button.MaterialButton",
+"popular_group": "com.google.android.material.button.MaterialButton",
+"progress": "com.google.android.material.loadingindicator.LoadingIndicator",
+"source_layout": "androidx.coordinatorlayout.widget.CoordinatorLayout"
+},
+"layout/bulk_edit_manga_dialog.xml": {
+"add_tag_chip": "com.google.android.material.chip.Chip",
+"add_tag_edit_text": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"manga_stack": "eu.kanade.tachiyomi.ui.library.MangaStackRecyclerView",
+"manga_status": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"reset_tags": "com.google.android.material.button.MaterialButton",
+"resets_reading_mode": "com.google.android.material.textview.MaterialTextView",
+"series_type": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"shared_tags": "com.google.android.material.chip.ChipGroup"
+},
+"layout/categories_controller.xml": {
+"cat_layout": "androidx.coordinatorlayout.widget.CoordinatorLayout",
+"recycler": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/categories_item.xml": {
+"edit_button": "ImageView",
+"edit_text": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"image": "ImageView",
+"reorder": "ImageView",
+"title": "TextView"
+},
+"layout/catergory_text_view.xml": {
+"category_text": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/chapter_filter_layout.xml": {
+"filter_title": "com.google.android.material.textview.MaterialTextView",
+"reset_as_default_filter": "com.google.android.material.button.MaterialButton",
+"set_as_default_filter": "com.google.android.material.button.MaterialButton",
+"show_all": "eu.kanade.tachiyomi.widget.TriStateCheckBox",
+"show_bookmark": "eu.kanade.tachiyomi.widget.TriStateCheckBox",
+"show_download": "eu.kanade.tachiyomi.widget.TriStateCheckBox",
+"show_unread": "eu.kanade.tachiyomi.widget.TriStateCheckBox"
+},
+"layout/chapter_header_item.xml": {
+"chapter_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"chapters_title": "com.google.android.material.textview.MaterialTextView",
+"filter_button": "ImageView",
+"filters_text": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/chapter_sort_bottom_sheet.xml": {
+"by_chapter_number": "eu.kanade.tachiyomi.widget.SortTextView",
+"by_source": "eu.kanade.tachiyomi.widget.SortTextView",
+"by_upload_date": "eu.kanade.tachiyomi.widget.SortTextView",
+"chapter_filter_layout": "include",
+"display_bottom_sheet": "FrameLayout",
+"filter_groups_button": "com.google.android.material.button.MaterialButton",
+"hide_titles": "com.google.android.material.checkbox.MaterialCheckBox",
+"pill": "ImageView",
+"reset_as_default_sort": "com.google.android.material.button.MaterialButton",
+"set_as_default_sort": "com.google.android.material.button.MaterialButton",
+"settings_scroll_view": "androidx.core.widget.NestedScrollView",
+"sort_layout": "LinearLayout",
+"sort_title": "com.google.android.material.textview.MaterialTextView",
+"sort_title_bar": "androidx.constraintlayout.widget.ConstraintLayout"
+},
+"layout/chapters_item.xml": {
+"bookmark": "ImageView",
+"chapter_card": "com.google.android.material.card.MaterialCardView",
+"chapter_layout": "FrameLayout",
+"chapter_scanlator": "TextView",
+"chapter_title": "TextView",
+"download_button": "include",
+"end_view": "com.google.android.material.card.MaterialCardView",
+"expanded_download_target": "View",
+"front_view": "androidx.constraintlayout.widget.ConstraintLayout",
+"read": "ImageView",
+"start_view": "com.google.android.material.card.MaterialCardView"
+},
+"layout/clear_database_controller.xml": {
+"empty_view": "eu.kanade.tachiyomi.widget.EmptyView",
+"fab": "com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton",
+"fast_scroller": "eu.kanade.tachiyomi.ui.base.MaterialFastScroll",
+"recycler": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/clear_database_source_item.xml": {
+"checkbox": "CheckBox",
+"description": "TextView",
+"thumbnail": "ImageView",
+"title": "TextView"
+},
+"layout/common_spinner_item.xml": {},
+"layout/common_view_empty.xml": {
+"actions_container": "LinearLayout",
+"image_view": "androidx.appcompat.widget.AppCompatImageView",
+"text_label": "TextView"
+},
+"layout/crash_activity.xml": {
+"btn_restart": "com.google.android.material.button.MaterialButton",
+"btn_share_crash_logs": "com.google.android.material.button.MaterialButton",
+"button_container": "LinearLayout",
+"crash_stack_trace": "TextView",
+"crash_subtitle": "TextView",
+"scroll_view": "androidx.core.widget.NestedScrollView"
+},
+"layout/custom_dialog_title_message.xml": {
+"alertTitle": "eu.kanade.tachiyomi.widget.materialdialogs.CustomDialogTitle"
+},
+"layout/custom_marker_view.xml": {
+"marker_card": "com.google.android.material.card.MaterialCardView",
+"marker_text": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/debug_info_item.xml": {
+"debug_summary": "com.google.android.material.textview.MaterialTextView",
+"debug_title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/dialog_quadstate.xml": {
+"list": "androidx.recyclerview.widget.RecyclerView",
+"message": "TextView",
+"scroll_indicator_down": "com.google.android.material.divider.MaterialDivider",
+"scroll_indicator_up": "com.google.android.material.divider.MaterialDivider"
+},
+"layout/download_bottom_sheet.xml": {
+"dl_bottom_sheet": "eu.kanade.tachiyomi.ui.download.DownloadBottomSheet",
+"dl_recycler": "androidx.recyclerview.widget.RecyclerView",
+"download_fab": "com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton",
+"empty_view": "eu.kanade.tachiyomi.widget.EmptyView",
+"fast_scroller": "eu.kanade.tachiyomi.ui.base.MaterialFastScroll",
+"pill": "ImageView",
+"recycler_layout": "androidx.coordinatorlayout.widget.CoordinatorLayout",
+"sheet_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"sheet_toolbar": "eu.kanade.tachiyomi.ui.base.CenteredToolbar",
+"title_text": "com.google.android.material.textview.MaterialTextView",
+"toolbar_title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/download_button.xml": {
+"download_border": "ImageView",
+"download_button": "eu.kanade.tachiyomi.ui.download.DownloadButton",
+"download_icon": "ImageView",
+"download_progress": "com.google.android.material.progressindicator.CircularProgressIndicator"
+},
+"layout/download_header.xml": {
+"container": "com.google.android.material.card.MaterialCardView",
+"reorder": "ImageView",
+"title": "TextView"
+},
+"layout/download_item.xml": {
+"chapter_title": "TextView",
+"close_left": "ImageView",
+"close_right": "ImageView",
+"download_menu": "ImageView",
+"download_progress": "com.google.android.material.progressindicator.LinearProgressIndicator",
+"download_progress_text": "TextView",
+"end_view": "FrameLayout",
+"front_view": "androidx.constraintlayout.widget.ConstraintLayout",
+"progress_guide": "androidx.constraintlayout.widget.Placeholder",
+"reorder": "ImageView",
+"start_view": "FrameLayout",
+"title": "TextView"
+},
+"layout/download_swipe_tut_item.xml": {
+"close_left": "ImageView",
+"close_right": "ImageView",
+"end_view": "FrameLayout",
+"front_view": "androidx.constraintlayout.widget.ConstraintLayout",
+"reorder": "ImageView",
+"start_view": "FrameLayout",
+"title": "TextView"
+},
+"layout/duplicate_in_library_badge.xml": {
+"duplicate_badge": "androidx.cardview.widget.CardView"
+},
+"layout/edit_manga_dialog.xml": {
+"add_tag_chip": "com.google.android.material.chip.Chip",
+"add_tag_edit_text": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"cover_layout": "FrameLayout",
+"manga_artist": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"manga_author": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"manga_cover": "ImageView",
+"manga_description": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"manga_genres_tags": "com.google.android.material.chip.ChipGroup",
+"manga_lang": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"manga_status": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"reset_cover": "com.google.android.material.button.MaterialButton",
+"reset_tags": "com.google.android.material.button.MaterialButton",
+"resets_reading_mode": "com.google.android.material.textview.MaterialTextView",
+"scroll_indicator_down": "com.google.android.material.divider.MaterialDivider",
+"scroll_view": "androidx.core.widget.NestedScrollView",
+"series_type": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"title": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText"
+},
+"layout/expanded_filter_item.xml": {
+"card_view_group": "com.google.android.material.card.MaterialCardView",
+"filter_linear_layout": "androidx.appcompat.widget.LinearLayoutCompat",
+"filter_title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/expanded_filter_item_text_view.xml": {},
+"layout/expanded_filter_sheet.xml": {
+"apply_button": "com.google.android.material.button.MaterialButton",
+"bottom_divider": "View",
+"bottom_spacer": "View",
+"button_layout": "LinearLayout",
+"category_recycler_view": "androidx.recyclerview.widget.RecyclerView",
+"clear_filters_button": "com.google.android.material.button.MaterialButton",
+"close_button": "ImageView",
+"divider": "View",
+"reorder_filters_button": "com.google.android.material.button.MaterialButton",
+"source_filter_sheet": "androidx.constraintlayout.widget.ConstraintLayout",
+"title_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"toolbar_title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/extension_card_header.xml": {
+"ext_button": "com.google.android.material.button.MaterialButton",
+"ext_sort": "TextView",
+"title": "TextView"
+},
+"layout/extension_card_item.xml": {
+"cancel_button": "com.google.android.material.button.MaterialButton",
+"card": "androidx.constraintlayout.widget.ConstraintLayout",
+"date": "TextView",
+"ext_button": "com.google.android.material.button.MaterialButton",
+"ext_button_group": "com.google.android.material.button.MaterialButtonGroup",
+"ext_card": "com.google.android.material.card.MaterialCardView",
+"ext_divider": "View",
+"ext_title": "TextView",
+"install_progress": "com.google.android.material.progressindicator.LinearProgressIndicator",
+"lang": "TextView",
+"source_image": "ImageView",
+"version": "TextView",
+"warning": "TextView",
+"webview_button": "com.google.android.material.button.MaterialButton"
+},
+"layout/extension_detail_controller.xml": {
+"coordinator": "androidx.coordinatorlayout.widget.CoordinatorLayout",
+"extension_prefs_recycler": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/extension_detail_header.xml": {
+"extension_app_info_button": "Button",
+"extension_icon": "ImageView",
+"extension_lang": "TextView",
+"extension_nsfw": "TextView",
+"extension_pkg": "TextView",
+"extension_title": "TextView",
+"extension_uninstall_button": "Button",
+"extension_version": "TextView",
+"extension_warning_banner": "TextView"
+},
+"layout/extensions_bottom_sheet.xml": {
+"ext_bottom_sheet": "eu.kanade.tachiyomi.ui.extension.ExtensionBottomSheet",
+"pager": "androidx.viewpager.widget.ViewPager",
+"pill": "ImageView",
+"sheet_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"sheet_toolbar": "eu.kanade.tachiyomi.ui.base.CenteredToolbar",
+"tabs": "com.google.android.material.tabs.TabLayout",
+"toolbar_title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/filter_bottom_sheet.xml": {
+"clear_filters_button": "com.google.android.material.button.MaterialButton",
+"expand_categories": "com.google.android.material.button.MaterialButton",
+"filter_bottom_sheet": "eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet",
+"filter_button": "ImageView",
+"filter_layout": "LinearLayout",
+"filter_scroll": "HorizontalScrollView",
+"first_layout": "LinearLayout",
+"group_by": "com.google.android.material.button.MaterialButton",
+"pill": "ImageView",
+"second_layout": "LinearLayout",
+"sheet_layout": "LinearLayout",
+"view_options": "com.google.android.material.button.MaterialButton"
+},
+"layout/filter_button.xml": {
+"favorite_button2": "com.google.android.material.button.MaterialButton"
+},
+"layout/filter_tag_group.xml": {
+"fifthButton": "TextView",
+"firstButton": "TextView",
+"fourthButton": "TextView",
+"secondButton": "TextView",
+"separator1": "View",
+"separator2": "View",
+"separator3": "View",
+"separator4": "View",
+"thirdButton": "TextView"
+},
+"layout/full_cover_dialog.xml": {
+"btn_replace": "com.google.android.material.button.MaterialButton",
+"btn_save": "com.google.android.material.button.MaterialButton",
+"btn_share": "com.google.android.material.button.MaterialButton",
+"button_container": "androidx.constraintlayout.widget.ConstraintLayout",
+"manga_cover_full": "com.google.android.material.imageview.ShapeableImageView",
+"manga_cover_zoom": "com.github.chrisbanes.photoview.PhotoView",
+"touch_outside": "View"
+},
+"layout/genre_chip.xml": {
+"action_chip": "com.google.android.material.chip.Chip"
+},
+"layout/home_controller.xml": {
+"home_compose": "androidx.compose.ui.platform.ComposeView"
+},
+"layout/in_library_badge.xml": {
+"badge": "androidx.cardview.widget.CardView"
+},
+"layout/info_repo_message.xml": {
+"front_view": "androidx.constraintlayout.widget.ConstraintLayout",
+"help_icon": "ImageView",
+"title": "TextView"
+},
+"layout/library_badges_layout.xml": {
+"download_badge": "com.google.android.material.checkbox.MaterialCheckBox",
+"hide_reading": "com.google.android.material.checkbox.MaterialCheckBox",
+"language_badge": "com.google.android.material.checkbox.MaterialCheckBox",
+"linear_layout": "LinearLayout",
+"show_number_of_items": "com.google.android.material.checkbox.MaterialCheckBox",
+"unread_badge_group": "RadioGroup"
+},
+"layout/library_category_header_item.xml": {
+"category_header_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"category_sort": "TextView",
+"category_title": "TextView",
+"checkbox": "ImageView",
+"collapse_arrow": "ImageView",
+"end_refresh": "ImageView",
+"main_header_layout": "FrameLayout",
+"rear_view": "FrameLayout",
+"space": "Space",
+"start_barrier": "androidx.constraintlayout.widget.Barrier",
+"start_refresh": "ImageView",
+"start_space": "Space",
+"update_button": "ImageButton"
+},
+"layout/library_category_layout.xml": {
+"add_categories_button": "com.google.android.material.button.MaterialButton",
+"category_show": "com.google.android.material.checkbox.MaterialCheckBox",
+"dynamic_to_bottom": "com.google.android.material.checkbox.MaterialCheckBox",
+"hide_hopper_spinner": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"hopper_long_press": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"linear_layout": "LinearLayout",
+"show_all": "com.google.android.material.checkbox.MaterialCheckBox",
+"show_empty_cats_filtering": "com.google.android.material.checkbox.MaterialCheckBox"
+},
+"layout/library_controller.xml": {
+"category_hopper_frame": "FrameLayout",
+"category_recycler": "eu.kanade.tachiyomi.ui.library.category.CategoryRecyclerView",
+"empty_view": "eu.kanade.tachiyomi.widget.EmptyView",
+"fast_scroller": "eu.kanade.tachiyomi.ui.library.LibraryFastScroll",
+"filter_bottom_sheet": "include",
+"header_card": "com.google.android.material.card.MaterialCardView",
+"header_title": "TextView",
+"jumper_category_text": "com.google.android.material.textview.MaterialTextView",
+"library_grid_recycler": "include",
+"library_layout": "androidx.coordinatorlayout.widget.CoordinatorLayout",
+"library_stat_completed": "TextView",
+"library_stat_downloaded": "TextView",
+"library_stat_reading": "TextView",
+"library_stat_total": "TextView",
+"library_top_actions": "FrameLayout",
+"library_top_categories": "com.google.android.material.button.MaterialButton",
+"library_top_display": "com.google.android.material.button.MaterialButton",
+"library_top_expand": "com.google.android.material.button.MaterialButton",
+"library_top_filter": "com.google.android.material.button.MaterialButton",
+"library_top_group": "com.google.android.material.button.MaterialButton",
+"progress": "com.google.android.material.loadingindicator.LoadingIndicator",
+"recycler_cover": "View",
+"recycler_layout": "FrameLayout",
+"recycler_shadow": "View",
+"rounded_category_hopper": "include",
+"swipe_refresh": "androidx.swiperefreshlayout.widget.SwipeRefreshLayout"
+},
+"layout/library_display_layout.xml": {
+"display_frame_layout": "FrameLayout",
+"display_group": "RadioGroup",
+"grid_seekbar": "com.google.android.material.slider.Slider",
+"grid_size_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"grid_size_text": "com.google.android.material.textview.MaterialTextView",
+"linear_layout": "LinearLayout",
+"outline_on_covers": "com.google.android.material.checkbox.MaterialCheckBox",
+"reset_grid_size": "com.google.android.material.button.MaterialButton",
+"staggered_grid": "com.google.android.material.checkbox.MaterialCheckBox",
+"uniform_grid": "com.google.android.material.checkbox.MaterialCheckBox",
+"v5_display_modes": "com.google.android.material.button.MaterialButton"
+},
+"layout/library_grid_recycler.xml": {
+"recycler": "eu.kanade.tachiyomi.widget.AutofitRecyclerView"
+},
+"layout/list_chart_legend.xml": {
+"legend_color_icon": "androidx.appcompat.widget.AppCompatImageView",
+"legend_description_text": "com.google.android.material.textview.MaterialTextView",
+"legend_value_text": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/list_stats_details.xml": {
+"logo_container": "com.google.android.material.card.MaterialCardView",
+"logo_icon": "ImageView",
+"stats_count_percentage_text": "com.google.android.material.textview.MaterialTextView",
+"stats_count_text": "com.google.android.material.textview.MaterialTextView",
+"stats_data_layout": "LinearLayout",
+"stats_label_layout": "LinearLayout",
+"stats_label_sublayout": "androidx.constraintlayout.widget.ConstraintLayout",
+"stats_label_text": "com.google.android.material.textview.MaterialTextView",
+"stats_mean_score_layout": "LinearLayout",
+"stats_progress_percentage_text": "com.google.android.material.textview.MaterialTextView",
+"stats_progress_text": "com.google.android.material.textview.MaterialTextView",
+"stats_rank_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"stats_rank_text": "com.google.android.material.textview.MaterialTextView",
+"stats_read_duration_layout": "LinearLayout",
+"stats_read_duration_text": "com.google.android.material.textview.MaterialTextView",
+"stats_score_star_image": "ImageView",
+"stats_score_text": "com.google.android.material.textview.MaterialTextView",
+"stats_sublabel_text": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/listitem_tristatechoice.xml": {
+"md_tri_state_checkbox": "eu.kanade.tachiyomi.widget.TriStateCheckBox"
+},
+"layout/main_activity.xml": {
+"action_mode_status_bar": "View",
+"app_bar": "eu.kanade.tachiyomi.ui.base.ExpandedAppBarLayout",
+"back_shadow": "ImageView",
+"big_icon": "androidx.appcompat.widget.AppCompatImageView",
+"big_icon_layout": "FrameLayout",
+"big_title": "com.google.android.material.textview.MaterialTextView",
+"big_toolbar": "androidx.constraintlayout.widget.ConstraintLayout",
+"bottom_nav": "com.google.android.material.bottomnavigation.BottomNavigationView",
+"bottom_view": "View",
+"card_frame": "LinearLayout",
+"card_incog_image": "ImageView",
+"card_subtitle": "com.google.android.material.textview.MaterialTextView",
+"card_title": "com.google.android.material.textview.MaterialTextView",
+"card_view": "com.google.android.material.card.MaterialCardView",
+"controller_container": "com.bluelinelabs.conductor.ChangeHandlerFrameLayout",
+"enhanced_header_subtitle": "com.google.android.material.textview.MaterialTextView",
+"main_content": "androidx.constraintlayout.widget.ConstraintLayout",
+"main_tabs": "com.google.android.material.tabs.TabLayout",
+"nav_bar": "View",
+"search_toolbar": "eu.kanade.tachiyomi.ui.base.FloatingToolbar",
+"status_bar": "View",
+"tabs_frame_layout": "FrameLayout",
+"toolbar": "eu.kanade.tachiyomi.ui.base.CenteredToolbar",
+"toolbar_filter_button": "com.google.android.material.button.MaterialButton",
+"toolbar_title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/manga_category_dialog.xml": {
+"category_text_layout": "com.google.android.material.textfield.TextInputLayout",
+"download_new": "eu.kanade.tachiyomi.widget.TriStateCheckBox",
+"edit_categories": "com.google.android.material.button.MaterialButton",
+"include_global": "eu.kanade.tachiyomi.widget.TriStateCheckBox",
+"title": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText"
+},
+"layout/manga_cover_stack_item.xml": {
+"cover_image": "ImageView"
+},
+"layout/manga_details_controller.xml": {
+"fast_scroller": "eu.kanade.tachiyomi.ui.base.MaterialFastScroll",
+"linear_recycler_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"manga_cover_full": "com.google.android.material.imageview.ShapeableImageView",
+"manga_frame_layout": "androidx.coordinatorlayout.widget.CoordinatorLayout",
+"recycler": "androidx.recyclerview.widget.RecyclerView",
+"swipe_refresh": "androidx.swiperefreshlayout.widget.SwipeRefreshLayout",
+"tablet_divider": "View",
+"tablet_overlay": "View",
+"tablet_recycler": "androidx.recyclerview.widget.RecyclerView",
+"touch_view": "View"
+},
+"layout/manga_grid_item.xml": {
+"badge_guide": "View",
+"behind_title": "com.google.android.material.textview.MaterialTextView",
+"card": "com.google.android.material.card.MaterialCardView",
+"compact_title": "com.google.android.material.textview.MaterialTextView",
+"constraint_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"cover_constraint": "androidx.constraintlayout.widget.ConstraintLayout",
+"cover_thumbnail": "ImageView",
+"gradient": "View",
+"manga_layout": "FrameLayout",
+"play_button": "com.google.android.material.button.MaterialButton",
+"play_layout": "FrameLayout",
+"progress": "ProgressBar",
+"reading_progress": "ProgressBar",
+"subtitle": "com.google.android.material.textview.MaterialTextView",
+"text_layout": "LinearLayout",
+"title": "com.google.android.material.textview.MaterialTextView",
+"unread_download_badge": "include"
+},
+"layout/manga_header_item.xml": {
+"backdrop": "ImageView",
+"backdrop_fill": "View",
+"backdrop_gradient": "View",
+"bottom_line": "androidx.constraintlayout.widget.Barrier",
+"button_layout": "com.google.android.material.button.MaterialButtonGroup",
+"chapter_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"chapters_title": "com.google.android.material.textview.MaterialTextView",
+"cover_card": "com.google.android.material.card.MaterialCardView",
+"favorite_button": "com.google.android.material.button.MaterialButton",
+"filter_button": "ImageView",
+"filters_text": "com.google.android.material.textview.MaterialTextView",
+"less_button": "com.google.android.material.button.MaterialButton",
+"manga_author": "TextView",
+"manga_cover": "ImageView",
+"manga_genres_tags": "com.google.android.material.chip.ChipGroup",
+"manga_header_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"manga_source": "com.google.android.material.textview.MaterialTextView",
+"manga_status": "TextView",
+"manga_summary": "TextView",
+"manga_summary_label": "com.google.android.material.textview.MaterialTextView",
+"more_bg_gradient": "View",
+"more_bg_solid": "View",
+"more_button": "com.google.android.material.button.MaterialButton",
+"more_button_group": "androidx.constraintlayout.widget.Group",
+"more_end_guide": "View",
+"more_guide": "View",
+"share_button": "com.google.android.material.button.MaterialButton",
+"start_reading_button": "com.google.android.material.button.MaterialButton",
+"sub_item_group": "androidx.constraintlayout.widget.Group",
+"title": "TextView",
+"top_view": "View",
+"track_button": "com.google.android.material.button.MaterialButton",
+"true_backdrop": "View",
+"v4_chapter_progress": "ProgressBar",
+"v4_progress_card": "com.google.android.material.card.MaterialCardView",
+"v4_progress_numbers": "TextView",
+"v4_progress_title": "TextView",
+"webview_button": "com.google.android.material.button.MaterialButton"
+},
+"layout/manga_list_item.xml": {
+"bottom_list_line": "androidx.constraintlayout.widget.Barrier",
+"card": "com.google.android.material.card.MaterialCardView",
+"constraint_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"cover_thumbnail": "ImageView",
+"duplicate_in_library_badge": "include",
+"in_library_badge": "include",
+"list_card": "com.google.android.material.card.MaterialCardView",
+"manga_list_layout": "FrameLayout",
+"padding": "View",
+"play_button": "com.google.android.material.button.MaterialButton",
+"play_layout": "FrameLayout",
+"progress": "ProgressBar",
+"reading_progress": "ProgressBar",
+"subtitle": "com.google.android.material.textview.MaterialTextView",
+"title": "com.google.android.material.textview.MaterialTextView",
+"unread_download_badge": "include"
+},
+"layout/manga_recycler_autofit.xml": {
+"catalogue_recycler": "eu.kanade.tachiyomi.widget.AutofitRecyclerView"
+},
+"layout/mark_read_status_dialog.xml": {
+"manga_stack": "eu.kanade.tachiyomi.ui.library.MangaStackRecyclerView",
+"message": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/material_fastscroll.xml": {
+"fast_scroller_bar": "View",
+"fast_scroller_bubble": "com.google.android.material.textview.MaterialTextView",
+"fast_scroller_handle": "ImageView"
+},
+"layout/material_spinner_view.xml": {
+"detail_view": "com.google.android.material.textview.MaterialTextView",
+"dropdown_caret": "ImageView",
+"halfway_point": "androidx.constraintlayout.widget.Guideline",
+"title_view": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/material_text_button.xml": {
+"button": "com.google.android.material.button.MaterialButton"
+},
+"layout/menu_sheet_item.xml": {
+"item_text_view": "com.google.android.material.textview.MaterialTextView",
+"menu_end_item": "ImageView"
+},
+"layout/migration_bottom_sheet.xml": {
+"constraint_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"data_label": "TextView",
+"extra_search_param": "com.google.android.material.materialswitch.MaterialSwitch",
+"extra_search_param_text": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"fab": "com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton",
+"fab_guider": "View",
+"grid_flags_layout": "com.google.android.flexbox.FlexboxLayout",
+"options_label": "TextView",
+"options_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"skip_step": "com.google.android.material.materialswitch.MaterialSwitch",
+"sourceGroup": "RadioGroup"
+},
+"layout/migration_card_item.xml": {
+"card": "androidx.constraintlayout.widget.ConstraintLayout",
+"lang": "TextView",
+"migration_all": "com.google.android.material.button.MaterialButton",
+"source_image": "ImageView",
+"title": "TextView"
+},
+"layout/migration_controller.xml": {
+"migration_layout": "FrameLayout",
+"migration_recycler": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/migration_list_controller.xml": {
+"recycler": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/migration_process_item.xml": {
+"imageView": "ImageView",
+"migration_manga_card_from": "include",
+"migration_manga_card_to": "include",
+"migration_menu": "ImageView",
+"skip_manga": "ImageView"
+},
+"layout/migration_source_item.xml": {
+"reorder": "ImageView",
+"source_image": "ImageView",
+"title": "TextView"
+},
+"layout/missing_chapters_item.xml": {
+"missing_chapters_text": "TextView"
+},
+"layout/navigation_view_checkbox.xml": {
+"nav_view_item": "com.google.android.material.checkbox.MaterialCheckBox"
+},
+"layout/navigation_view_checkedtext.xml": {
+"nav_view_item": "eu.kanade.tachiyomi.widget.SortTextView"
+},
+"layout/navigation_view_group.xml": {
+"expand_icon": "ImageView",
+"title": "TextView"
+},
+"layout/navigation_view_radio.xml": {
+"nav_view_item": "RadioButton"
+},
+"layout/navigation_view_spinner.xml": {
+"nav_view_item": "eu.kanade.tachiyomi.widget.MaterialSpinnerView"
+},
+"layout/navigation_view_text.xml": {
+"nav_view_item": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"nav_view_item_wrapper": "com.google.android.material.textfield.TextInputLayout"
+},
+"layout/navigation_view_tristatebox.xml": {
+"nav_view_item": "eu.kanade.tachiyomi.widget.TriStateCheckBox"
+},
+"layout/pre_migration_controller.xml": {
+"fab": "com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton",
+"recycler": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/pref_about_links.xml": {
+"btn_discord": "ImageButton",
+"btn_facebook": "ImageButton",
+"btn_github": "ImageButton",
+"btn_mihon": "ImageButton",
+"btn_reddit": "ImageButton",
+"btn_website": "ImageButton",
+"btn_x": "ImageButton",
+"main_layout": "LinearLayout"
+},
+"layout/pref_account_login.xml": {
+"dialog_title": "TextView",
+"login": "com.google.android.material.button.MaterialButton",
+"loginProgress": "com.google.android.material.loadingindicator.LoadingIndicator",
+"password": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"username": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"username_input": "com.google.android.material.textfield.TextInputLayout"
+},
+"layout/pref_tracker_item.xml": {
+"checked_icon": "ImageView",
+"logo_container": "com.google.android.material.card.MaterialCardView"
+},
+"layout/pref_widget_imageview.xml": {
+"image_view": "ImageView"
+},
+"layout/preference_slider.xml": {
+"slider": "com.google.android.material.slider.Slider",
+"slider_subtitle": "com.google.android.material.textview.MaterialTextView",
+"slider_title": "com.google.android.material.textview.MaterialTextView",
+"slider_value": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/preference_widget_button_toggle_group.xml": {
+"button_end": "com.google.android.material.button.MaterialButton",
+"button_start": "com.google.android.material.button.MaterialButton",
+"toggle_group": "com.google.android.material.button.MaterialButtonToggleGroup"
+},
+"layout/preference_widget_material_switch.xml": {
+"switchWidget": "com.google.android.material.materialswitch.MaterialSwitch"
+},
+"layout/reader_activity.xml": {
+"app_bar": "FrameLayout",
+"brightness_overlay": "View",
+"chapters_sheet": "include",
+"color_overlay": "eu.kanade.tachiyomi.ui.reader.ReaderColorFilterView",
+"flash_overlay": "View",
+"nav_bar": "View",
+"nav_layout": "FrameLayout",
+"navigation_overlay": "eu.kanade.tachiyomi.ui.reader.ReaderNavigationOverlayView",
+"page_number": "eu.kanade.tachiyomi.ui.reader.PageIndicatorTextView",
+"please_wait": "com.google.android.material.loadingindicator.LoadingIndicator",
+"reader_layout": "androidx.coordinatorlayout.widget.CoordinatorLayout",
+"reader_nav": "include",
+"toolbar": "androidx.appcompat.widget.Toolbar",
+"touch_view": "View",
+"viewer_container": "FrameLayout"
+},
+"layout/reader_chapter_item.xml": {
+"bookmark_button": "FrameLayout",
+"bookmark_image": "ImageView",
+"chapter_subtitle": "TextView",
+"chapter_title": "TextView",
+"progress": "ProgressBar",
+"reader_chapter_layout": "androidx.constraintlayout.widget.ConstraintLayout"
+},
+"layout/reader_chapters_sheet.xml": {
+"buttonGroup": "LinearLayout",
+"chapter_recycler": "eu.kanade.tachiyomi.ui.reader.chapter.ChapterRecyclerView",
+"chapters_bottom_sheet": "eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterSheet",
+"chapters_button": "com.google.android.material.button.MaterialButton",
+"crop_borders_sheet_button": "com.google.android.material.button.MaterialButton",
+"display_options": "com.google.android.material.button.MaterialButton",
+"double_page": "com.google.android.material.button.MaterialButton",
+"pill": "ImageView",
+"reading_mode": "com.google.android.material.button.MaterialButton",
+"rotation_sheet_button": "com.google.android.material.button.MaterialButton",
+"shift_page_button": "com.google.android.material.button.MaterialButton",
+"topbar_layout": "FrameLayout",
+"webview_button": "com.google.android.material.button.MaterialButton"
+},
+"layout/reader_color_filter.xml": {
+"brightness_slider": "com.google.android.material.slider.Slider",
+"color_filter_mode": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"constraint_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"custom_brightness": "com.google.android.material.materialswitch.MaterialSwitch",
+"filter_bottom_sheet": "eu.kanade.tachiyomi.ui.reader.settings.ReaderFilterView",
+"grayscale": "com.google.android.material.materialswitch.MaterialSwitch",
+"inverted_colors": "com.google.android.material.materialswitch.MaterialSwitch",
+"slider_color_filter_alpha": "com.google.android.material.slider.Slider",
+"slider_color_filter_blue": "com.google.android.material.slider.Slider",
+"slider_color_filter_green": "com.google.android.material.slider.Slider",
+"slider_color_filter_red": "com.google.android.material.slider.Slider",
+"spinner_end": "Space",
+"swipe_down": "com.google.android.material.button.MaterialButton",
+"switch_color_filter": "com.google.android.material.materialswitch.MaterialSwitch",
+"txt_brightness_slider_icon": "androidx.appcompat.widget.AppCompatImageView",
+"txt_brightness_slider_value": "TextView",
+"txt_color_filter_alpha_symbol": "TextView",
+"txt_color_filter_alpha_value": "TextView",
+"txt_color_filter_blue_symbol": "TextView",
+"txt_color_filter_blue_value": "TextView",
+"txt_color_filter_green_symbol": "TextView",
+"txt_color_filter_green_value": "TextView",
+"txt_color_filter_red_symbol": "TextView",
+"txt_color_filter_red_value": "TextView"
+},
+"layout/reader_error.xml": {
+"action_open_in_web_view": "eu.kanade.tachiyomi.ui.reader.viewer.ReaderButton",
+"action_retry": "eu.kanade.tachiyomi.ui.reader.viewer.ReaderButton"
+},
+"layout/reader_general_layout.xml": {
+"always_show_chapter_transition": "com.google.android.material.materialswitch.MaterialSwitch",
+"background_color": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"constraint_layout": "LinearLayout",
+"filter_bottom_sheet": "eu.kanade.tachiyomi.ui.reader.settings.ReaderGeneralView",
+"flash_color": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"flash_duration": "com.google.android.material.slider.Slider",
+"flash_duration_text": "com.google.android.material.textview.MaterialTextView",
+"flash_extra_settings": "LinearLayout",
+"flash_interval": "com.google.android.material.slider.Slider",
+"flash_interval_text": "com.google.android.material.textview.MaterialTextView",
+"flash_on_page_change": "com.google.android.material.materialswitch.MaterialSwitch",
+"fullscreen": "com.google.android.material.materialswitch.MaterialSwitch",
+"keepscreen": "com.google.android.material.materialswitch.MaterialSwitch",
+"place_left_button": "com.google.android.material.button.MaterialButton",
+"place_right_button": "com.google.android.material.button.MaterialButton",
+"place_vertical_seekbar_text": "com.google.android.material.textview.MaterialTextView",
+"rotation_mode": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"show_page_number": "com.google.android.material.materialswitch.MaterialSwitch",
+"vertical_seekbar_extra_settings": "LinearLayout",
+"vertical_seekbar_height": "com.google.android.material.slider.Slider",
+"vertical_seekbar_height_text": "com.google.android.material.textview.MaterialTextView",
+"vertical_seekbar_modes": "com.google.android.material.button.MaterialButtonToggleGroup",
+"vertical_seekbar_placement": "com.google.android.material.button.MaterialButtonToggleGroup",
+"viewer_series": "eu.kanade.tachiyomi.widget.MaterialSpinnerView"
+},
+"layout/reader_nav.xml": {
+"end_cell": "FrameLayout",
+"left_chapter": "ImageButton",
+"left_page_text": "TextView",
+"left_progress": "com.google.android.material.progressindicator.CircularProgressIndicator",
+"page_seekbar": "eu.kanade.tachiyomi.ui.reader.ReaderSlider",
+"reader_nav": "eu.kanade.tachiyomi.ui.reader.ReaderNavView",
+"reader_seekbar": "LinearLayout",
+"right_chapter": "ImageButton",
+"right_page_text": "TextView",
+"right_progress": "com.google.android.material.progressindicator.CircularProgressIndicator",
+"start_cell": "FrameLayout",
+"toggle_spread": "ImageButton"
+},
+"layout/reader_paged_layout.xml": {
+"crop_borders": "com.google.android.material.materialswitch.MaterialSwitch",
+"crop_borders_webtoon": "com.google.android.material.materialswitch.MaterialSwitch",
+"extend_past_cutout": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"extend_past_cutout_landscape": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"filter_bottom_sheet": "eu.kanade.tachiyomi.ui.reader.settings.ReaderPagedView",
+"filter_linear_layout": "LinearLayout",
+"invert_double_pages": "com.google.android.material.materialswitch.MaterialSwitch",
+"landscape_zoom": "com.google.android.material.materialswitch.MaterialSwitch",
+"navigate_pan": "com.google.android.material.materialswitch.MaterialSwitch",
+"page_layout": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"page_transitions": "com.google.android.material.materialswitch.MaterialSwitch",
+"pager_invert": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"pager_nav": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"scale_type": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"webtoon_enable_zoom_out": "com.google.android.material.materialswitch.MaterialSwitch",
+"webtoon_invert": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"webtoon_invert_double_pages": "com.google.android.material.materialswitch.MaterialSwitch",
+"webtoon_nav": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"webtoon_page_layout": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"webtoon_page_transitions": "com.google.android.material.materialswitch.MaterialSwitch",
+"webtoon_side_padding": "com.google.android.material.textview.MaterialTextView",
+"webtoon_side_padding_layout": "LinearLayout",
+"webtoon_side_padding_slider": "com.google.android.material.slider.Slider",
+"zoom_start": "eu.kanade.tachiyomi.widget.MaterialSpinnerView"
+},
+"layout/reader_transition_view.xml": {
+"lower_text": "TextView",
+"upper_text": "TextView",
+"warning": "LinearLayout",
+"warning_text": "TextView"
+},
+"layout/recent_chapters_section_item.xml": {
+"last_updated_text": "TextView",
+"section_text": "TextView"
+},
+"layout/recent_manga_item.xml": {
+"body": "com.google.android.material.textview.MaterialTextView",
+"bottom_line": "androidx.constraintlayout.widget.Barrier",
+"button_layout": "LinearLayout",
+"card": "com.google.android.material.card.MaterialCardView",
+"card_layout": "FrameLayout",
+"cover_thumbnail": "ImageView",
+"download_button": "include",
+"end_view": "com.google.android.material.card.MaterialCardView",
+"front_view": "androidx.appcompat.widget.LinearLayoutCompat",
+"main_view": "androidx.constraintlayout.widget.ConstraintLayout",
+"more_chapters_layout": "androidx.appcompat.widget.LinearLayoutCompat",
+"padding": "Space",
+"progress": "ProgressBar",
+"read": "ImageView",
+"recent_card": "com.google.android.material.card.MaterialCardView",
+"recent_manga_layout": "FrameLayout",
+"remove_history": "ImageButton",
+"show_more_chapters": "ImageButton",
+"space": "Space",
+"subtitle": "com.google.android.material.textview.MaterialTextView",
+"title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/recent_sub_chapter_item.xml": {
+"divider": "View",
+"download_button": "include",
+"main_view": "androidx.constraintlayout.widget.ConstraintLayout",
+"sub_card": "com.google.android.material.card.MaterialCardView",
+"subtitle": "com.google.android.material.textview.MaterialTextView",
+"text_layout": "androidx.appcompat.widget.LinearLayoutCompat",
+"title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/recents_controller.xml": {
+"download_bottom_sheet": "include",
+"progress": "com.google.android.material.loadingindicator.LoadingIndicator",
+"recents_empty_view": "eu.kanade.tachiyomi.widget.EmptyView",
+"recents_frame_layout": "FrameLayout",
+"recents_layout": "androidx.coordinatorlayout.widget.CoordinatorLayout",
+"recents_summary": "com.google.android.material.card.MaterialCardView",
+"recents_summary_chapters": "TextView",
+"recents_summary_downloaded": "TextView",
+"recents_summary_subtitle": "TextView",
+"recents_summary_title": "TextView",
+"recents_summary_titles": "TextView",
+"recycler": "androidx.recyclerview.widget.RecyclerView",
+"swipe_refresh": "androidx.swiperefreshlayout.widget.SwipeRefreshLayout"
+},
+"layout/recents_footer_item.xml": {
+"arrow": "ImageView",
+"recent_item": "androidx.constraintlayout.widget.ConstraintLayout",
+"title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/recents_general_view.xml": {
+"outline_on_covers": "com.google.android.material.materialswitch.MaterialSwitch",
+"show_read_in_all": "com.google.android.material.materialswitch.MaterialSwitch",
+"show_recents_download": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"show_remove_history": "com.google.android.material.materialswitch.MaterialSwitch",
+"show_title_first": "com.google.android.material.materialswitch.MaterialSwitch",
+"sort_layout": "LinearLayout",
+"uniform_covers": "com.google.android.material.materialswitch.MaterialSwitch"
+},
+"layout/recents_header_item.xml": {
+"recent_item": "androidx.constraintlayout.widget.ConstraintLayout",
+"title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/recents_history_view.xml": {
+"clear_history": "com.google.android.material.button.MaterialButton",
+"collapse_grouped_chapters": "com.google.android.material.materialswitch.MaterialSwitch",
+"group_chapters": "eu.kanade.tachiyomi.widget.MaterialSpinnerView",
+"sort_layout": "LinearLayout"
+},
+"layout/recents_updates_view.xml": {
+"group_chapters": "com.google.android.material.materialswitch.MaterialSwitch",
+"show_updated_time": "com.google.android.material.materialswitch.MaterialSwitch",
+"sort_fetched_time": "com.google.android.material.materialswitch.MaterialSwitch",
+"sort_layout": "LinearLayout"
+},
+"layout/recycler_with_scroller.xml": {
+"fast_scroller": "eu.kanade.tachiyomi.ui.base.MaterialFastScroll",
+"recycler": "androidx.recyclerview.widget.RecyclerView",
+"recycler_layout": "eu.kanade.tachiyomi.ui.extension.RecyclerWithScrollerView"
+},
+"layout/repo_item.xml": {
+"discord_button": "com.google.android.material.button.MaterialButton",
+"edit_button": "com.google.android.material.button.MaterialButton",
+"edit_progress": "ProgressBar",
+"edit_text": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"open_store_button": "com.google.android.material.button.MaterialButton",
+"title": "TextView"
+},
+"layout/rounded_category_hopper.xml": {
+"category_button": "com.google.android.material.button.MaterialButton",
+"category_hopper_layout": "com.google.android.material.button.MaterialButtonGroup",
+"down_category": "com.google.android.material.button.MaterialButton",
+"up_category": "com.google.android.material.button.MaterialButton"
+},
+"layout/save_search_dialog.xml": {
+"name": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"name_text_layout": "com.google.android.material.textfield.TextInputLayout",
+"show_on_all_btn": "com.google.android.material.button.MaterialButton",
+"show_on_group": "com.google.android.material.button.MaterialButtonToggleGroup",
+"show_on_label": "com.google.android.material.textview.MaterialTextView",
+"show_on_row": "androidx.constraintlayout.widget.ConstraintLayout",
+"show_on_source_btn": "com.google.android.material.button.MaterialButton"
+},
+"layout/saved_searches_header_item.xml": {},
+"layout/search_history_item.xml": {
+"back_view": "com.google.android.material.card.MaterialCardView",
+"fill_button": "com.google.android.material.button.MaterialButton",
+"front_view": "LinearLayout",
+"history_card": "com.google.android.material.card.MaterialCardView",
+"history_icon": "ImageView",
+"left_back_view": "ImageView",
+"right_back_view": "ImageView",
+"save_button": "com.google.android.material.button.MaterialButton",
+"subtitle": "TextView",
+"text_layout": "LinearLayout",
+"title": "TextView"
+},
+"layout/search_history_section_header.xml": {
+"clear_all_button": "com.google.android.material.button.MaterialButton",
+"collapse_chevron": "ImageView",
+"header_title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/search_history_view.xml": {
+"recycler": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/set_categories_sheet.xml": {
+"add_to_categories_button": "com.google.android.material.button.MaterialButton",
+"bottom_divider": "View",
+"button_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"cancel_button": "com.google.android.material.button.MaterialButton",
+"category_recycler_view": "androidx.recyclerview.widget.RecyclerView",
+"divider": "View",
+"new_category_button": "com.google.android.material.button.MaterialButton",
+"source_filter_sheet": "androidx.constraintlayout.widget.ConstraintLayout",
+"title_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"toolbar_title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/settings_search_controller.xml": {
+"progress": "FrameLayout",
+"recycler": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/settings_search_controller_card.xml": {
+"search_result_pref_breadcrumb": "TextView",
+"search_result_pref_summary": "TextView",
+"search_result_pref_title": "TextView",
+"title_wrapper": "LinearLayout"
+},
+"layout/side_nav_header.xml": {
+"side_nav_toggle_btn": "com.google.android.material.button.MaterialButton"
+},
+"layout/sort_text_view.xml": {
+"sort_image_view": "ImageView",
+"text_view": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/source_filter_sheet.xml": {
+"bottom_divider": "View",
+"bottom_space": "Space",
+"card_view": "androidx.cardview.widget.CardView",
+"filters_recycler": "androidx.recyclerview.widget.RecyclerView",
+"reset_btn": "com.google.android.material.button.MaterialButton",
+"save_btn": "com.google.android.material.button.MaterialButton",
+"search_btn": "com.google.android.material.button.MaterialButton",
+"source_filter_sheet": "androidx.constraintlayout.widget.ConstraintLayout",
+"title_layout": "androidx.constraintlayout.widget.ConstraintLayout"
+},
+"layout/source_global_search_controller.xml": {
+"empty_view": "eu.kanade.tachiyomi.widget.EmptyView",
+"recycler": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/source_global_search_controller_card.xml": {
+"no_results": "TextView",
+"progress": "ProgressBar",
+"recycler": "androidx.recyclerview.widget.RecyclerView",
+"source_card": "FrameLayout",
+"subtitle": "TextView",
+"title": "TextView",
+"title_more_icon": "ImageView",
+"title_wrapper": "androidx.constraintlayout.widget.ConstraintLayout"
+},
+"layout/source_global_search_controller_card_item.xml": {
+"duplicate_in_library_button": "com.google.android.material.card.MaterialCardView",
+"favorite_button": "com.google.android.material.card.MaterialCardView",
+"gradient": "View",
+"itemImage": "ImageView",
+"maskable_layout": "com.google.android.material.carousel.MaskableFrameLayout",
+"progress": "ProgressBar",
+"title": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/source_global_search_filter_header.xml": {
+"filter_button_group": "com.google.android.material.button.MaterialButtonGroup",
+"has_results_button": "com.google.android.material.button.MaterialButton",
+"pinned_button": "com.google.android.material.button.MaterialButton"
+},
+"layout/source_global_search_loading_footer.xml": {},
+"layout/source_header_item.xml": {
+"title": "TextView"
+},
+"layout/source_item.xml": {
+"card": "androidx.constraintlayout.widget.ConstraintLayout",
+"close_left": "com.google.android.material.textview.MaterialTextView",
+"close_right": "com.google.android.material.textview.MaterialTextView",
+"end_view": "com.google.android.material.card.MaterialCardView",
+"source_card": "com.google.android.material.card.MaterialCardView",
+"source_divider": "View",
+"source_image": "ImageView",
+"source_latest": "com.google.android.material.button.MaterialButton",
+"source_pin": "com.google.android.material.button.MaterialButton",
+"start_view": "com.google.android.material.card.MaterialCardView",
+"title": "TextView"
+},
+"layout/source_progress_item.xml": {
+"progress_bar": "com.google.android.material.loadingindicator.LoadingIndicator",
+"progress_message": "TextView"
+},
+"layout/stats_controller.xml": {
+"manga_stats_score_bar_chart": "com.github.mikephil.charting.charts.BarChart",
+"manga_stats_score_chart_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"manga_stats_score_layout": "LinearLayout",
+"manga_stats_status_chart_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"manga_stats_status_layout": "LinearLayout",
+"manga_stats_status_pie_chart": "com.github.mikephil.charting.charts.PieChart",
+"manga_stats_status_recycler_view": "androidx.recyclerview.widget.RecyclerView",
+"stats_chapters_downloaded_text": "com.google.android.material.textview.MaterialTextView",
+"stats_chapters_read_text": "com.google.android.material.textview.MaterialTextView",
+"stats_global_update_manga_text": "com.google.android.material.textview.MaterialTextView",
+"stats_manga_local_text": "com.google.android.material.textview.MaterialTextView",
+"stats_manga_mean_score_layout": "LinearLayout",
+"stats_manga_mean_score_text": "com.google.android.material.textview.MaterialTextView",
+"stats_read_duration_layout": "LinearLayout",
+"stats_read_duration_text": "com.google.android.material.textview.MaterialTextView",
+"stats_recent_chapters_text": "com.google.android.material.textview.MaterialTextView",
+"stats_recent_days_text": "com.google.android.material.textview.MaterialTextView",
+"stats_scroll_view": "eu.kanade.tachiyomi.widget.StatefulNestedScrollView",
+"stats_sources_text": "com.google.android.material.textview.MaterialTextView",
+"stats_total_chapters_text": "com.google.android.material.textview.MaterialTextView",
+"stats_total_manga_text": "com.google.android.material.textview.MaterialTextView",
+"stats_total_tags_text": "com.google.android.material.textview.MaterialTextView",
+"stats_tracked_manga_text": "com.google.android.material.textview.MaterialTextView",
+"stats_trackers_text": "com.google.android.material.textview.MaterialTextView",
+"view_detail_layout": "com.google.android.material.button.MaterialButton"
+},
+"layout/stats_details_chart.xml": {
+"chart_linear_layout": "eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsChartLayout",
+"stat_sort": "TextView",
+"stats_bar_chart": "com.github.mikephil.charting.charts.BarChart",
+"stats_chart_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"stats_date_end_arrow": "ImageView",
+"stats_date_layout": "RelativeLayout",
+"stats_date_start_arrow": "ImageView",
+"stats_date_text": "com.google.android.material.textview.MaterialTextView",
+"stats_line_chart": "com.github.mikephil.charting.charts.LineChart",
+"stats_pie_chart": "com.github.mikephil.charting.charts.PieChart",
+"total_duration_stats_text": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/stats_details_controller.xml": {
+"chip_category": "com.google.android.material.chip.Chip",
+"chip_language": "com.google.android.material.chip.Chip",
+"chip_series_type": "com.google.android.material.chip.Chip",
+"chip_source": "com.google.android.material.chip.Chip",
+"chip_stat": "com.google.android.material.chip.Chip",
+"chip_status": "com.google.android.material.chip.Chip",
+"no_chart_data": "eu.kanade.tachiyomi.widget.EmptyView",
+"progress": "ProgressBar",
+"stats_chip_group": "com.google.android.material.chip.ChipGroup",
+"stats_clear_button": "ImageView",
+"stats_clear_button_container": "FrameLayout",
+"stats_details_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"stats_filter_layout": "LinearLayout",
+"stats_horizontal_scroll": "HorizontalScrollView",
+"stats_recycler_view": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/sub_debug_controller.xml": {
+"recycler": "androidx.recyclerview.widget.RecyclerView",
+"sub_debug_frame_layout": "FrameLayout"
+},
+"layout/tabbed_bottom_sheet.xml": {
+"menu": "ImageButton",
+"pager": "eu.kanade.tachiyomi.widget.MeasuredViewPager",
+"tabs": "com.google.android.material.tabs.TabLayout",
+"tabs_constraint": "androidx.constraintlayout.widget.ConstraintLayout",
+"tabs_layout": "LinearLayout"
+},
+"layout/tachi_overflow_layout.xml": {
+"about_item": "eu.kanade.tachiyomi.widget.MenuSheetItemView",
+"divider": "View",
+"help_item": "eu.kanade.tachiyomi.widget.MenuSheetItemView",
+"incognito_mode_item": "eu.kanade.tachiyomi.widget.MenuSheetItemView",
+"overflow_card_view": "com.google.android.material.card.MaterialCardView",
+"overflow_menu_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"scroll_view": "androidx.core.widget.NestedScrollView",
+"settings_item": "eu.kanade.tachiyomi.widget.MenuSheetItemView",
+"stats_item": "eu.kanade.tachiyomi.widget.MenuSheetItemView",
+"touch_outside": "View"
+},
+"layout/theme_item.xml": {
+"checkbox": "ImageView",
+"theme_accented_button": "ImageView",
+"theme_app_bar_text": "ImageView",
+"theme_bottom_bar": "androidx.constraintlayout.widget.ConstraintLayout",
+"theme_card_view": "com.google.android.material.card.MaterialCardView",
+"theme_hero_image": "ImageView",
+"theme_item_1": "ImageView",
+"theme_item_2": "ImageView",
+"theme_item_3": "ImageView",
+"theme_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"theme_name_text": "com.google.android.material.textview.MaterialTextView",
+"theme_primary_text": "ImageView",
+"theme_secondary_text": "ImageView",
+"theme_secondary_text_2": "ImageView",
+"theme_selected": "View",
+"theme_toolbar": "FrameLayout"
+},
+"layout/themes_preference.xml": {
+"dark_theme": "com.google.android.material.textview.MaterialTextView",
+"light_theme": "com.google.android.material.textview.MaterialTextView",
+"theme_recycler": "androidx.recyclerview.widget.RecyclerView",
+"theme_recycler_dark": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/track_chapters_dialog.xml": {
+"chapters_picker": "eu.kanade.tachiyomi.widget.MinMaxNumberPicker"
+},
+"layout/track_item.xml": {
+"add_tracking": "com.google.android.material.button.MaterialButton",
+"add_tracking_private": "com.google.android.material.button.MaterialButton",
+"add_tracking_private_divider": "View",
+"bottom_divider": "View",
+"date_group": "androidx.constraintlayout.widget.Group",
+"divider": "View",
+"logo_container": "FrameLayout",
+"progress": "ProgressBar",
+"score_container": "FrameLayout",
+"status_container": "androidx.constraintlayout.widget.ConstraintLayout",
+"sub_tracking_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"top_tracking_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"track": "com.google.android.material.card.MaterialCardView",
+"track_chapters": "TextView",
+"track_details": "androidx.constraintlayout.widget.ConstraintLayout",
+"track_finish_date": "TextView",
+"track_group": "androidx.constraintlayout.widget.Group",
+"track_logo": "ImageView",
+"track_overflow": "com.google.android.material.button.MaterialButton",
+"track_private_badge": "ImageView",
+"track_score": "TextView",
+"track_start_date": "TextView",
+"track_status": "TextView",
+"track_title": "com.google.android.material.textview.MaterialTextView",
+"vert_divider_2": "View",
+"vert_divider_3": "View"
+},
+"layout/track_score_dialog.xml": {
+"score_picker": "eu.kanade.tachiyomi.widget.MinMaxNumberPicker"
+},
+"layout/track_search_item.xml": {
+"add_privately_button": "com.google.android.material.button.MaterialButton",
+"checkbox": "ImageView",
+"cover_barrier": "androidx.constraintlayout.widget.Barrier",
+"end_view": "View",
+"link_button": "com.google.android.material.button.MaterialButton",
+"track_search_cover": "com.google.android.material.imageview.ShapeableImageView",
+"track_search_start": "TextView",
+"track_search_start_result": "TextView",
+"track_search_status": "TextView",
+"track_search_status_result": "TextView",
+"track_search_summary": "TextView",
+"track_search_title": "TextView",
+"track_search_type": "TextView",
+"track_search_type_result": "TextView"
+},
+"layout/tracking_bottom_sheet.xml": {
+"display_bottom_sheet": "androidx.constraintlayout.widget.ConstraintLayout",
+"divider": "View",
+"guide_button": "ImageButton",
+"search_close_button": "ImageButton",
+"search_empty_view": "eu.kanade.tachiyomi.widget.EmptyView",
+"search_frame_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"search_progress": "ProgressBar",
+"search_toolbar_title": "com.google.android.material.textview.MaterialTextView",
+"text_input_layout": "com.google.android.material.textfield.TextInputLayout",
+"title_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"track_recycler": "androidx.recyclerview.widget.RecyclerView",
+"track_search": "eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText",
+"track_search_constraint_layout": "androidx.constraintlayout.widget.ConstraintLayout",
+"track_search_recycler": "androidx.recyclerview.widget.RecyclerView"
+},
+"layout/tri_state_check_box.xml": {
+"text_view": "com.google.android.material.textview.MaterialTextView",
+"tri_state_box": "ImageView"
+},
+"layout/unread_download_badge.xml": {
+"badge_content": "LinearLayout",
+"badge_view": "eu.kanade.tachiyomi.ui.library.LibraryBadge",
+"download_text": "com.google.android.material.textview.MaterialTextView",
+"lang_image": "com.google.android.material.imageview.ShapeableImageView",
+"unread_text": "com.google.android.material.textview.MaterialTextView"
+},
+"layout/webview_activity.xml": {
+"progressBar": "com.google.android.material.progressindicator.LinearProgressIndicator",
+"swipe_refresh": "androidx.swiperefreshlayout.widget.SwipeRefreshLayout",
+"toolbar": "com.google.android.material.appbar.MaterialToolbar",
+"web_linear_layout": "com.google.android.material.appbar.AppBarLayout",
+"web_view_layout": "LinearLayout",
+"webview": "WebView"
+}
+}

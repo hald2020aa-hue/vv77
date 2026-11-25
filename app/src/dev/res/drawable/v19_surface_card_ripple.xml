@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="@color/v19_cyan_soft">
+    <item android:drawable="@drawable/v19_surface_card" />
+</ripple>

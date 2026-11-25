@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="v4_bg">#05030F</color>
+    <color name="v4_card">#0E0B27</color>
+    <color name="v4_card_raised">#1B1442</color>
+    <color name="v4_card_top">#161036</color>
+    <color name="v4_primary">#A14BFF</color>
+    <color name="v4_primary_dim">#3A1B6E</color>
+    <color name="v4_cyan">#19E6FF</color>
+    <color name="v4_text">#FFFFFF</color>
+    <color name="v4_muted">#B3ABD6</color>
+    <color name="v4_outline">#3B2A78</color>
+    <color name="v4_track">#2B2354</color>
+    <color name="v4_warning">#FF4D6D</color>
+    <color name="v4_success">#2CF0A0</color>
+    <color name="v4_text_dark">#05030F</color>
+</resources>

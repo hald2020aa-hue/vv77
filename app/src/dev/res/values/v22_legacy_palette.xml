@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="v12_neon_bg">#05030F</color>
+    <color name="v13_settings_background">#05030F</color>
+    <color name="v13_settings_blue">#3D7CFF</color>
+    <color name="v13_settings_cyan">#19E6FF</color>
+    <color name="v13_settings_pink">#FF2FD0</color>
+    <color name="v13_settings_purple">#A14BFF</color>
+    <color name="v13_settings_secondary">#B3ABD6</color>
+    <color name="v13_settings_surface">#0E0B27</color>
+</resources>

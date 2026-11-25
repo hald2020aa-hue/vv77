@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- High-contrast MANGA VIRUS neon palette shared by all dev UI screens. -->
+    <color name="v19_bg">#05030F</color>
+    <color name="v19_bg_top">#0C0724</color>
+    <color name="v19_surface">#0E0B27</color>
+    <color name="v19_surface_raised">#161036</color>
+    <color name="v19_surface_alt">#1B1442</color>
+    <color name="v19_text">#FFFFFF</color>
+    <color name="v19_muted">#B3ABD6</color>
+    <color name="v19_cyan">#19E6FF</color>
+    <color name="v19_blue">#3D7CFF</color>
+    <color name="v19_purple">#A14BFF</color>
+    <color name="v19_pink">#FF2FD0</color>
+    <color name="v19_border">#3B2A78</color>
+    <color name="v19_border_soft">#99A14BFF</color>
+    <color name="v19_cyan_soft">#6619E6FF</color>
+    <color name="v19_pink_soft">#88FF2FD0</color>
+    <color name="v19_track">#2B2354</color>
+    <color name="v19_success">#2CF0A0</color>
+    <color name="v19_warning">#FFC247</color>
+</resources>

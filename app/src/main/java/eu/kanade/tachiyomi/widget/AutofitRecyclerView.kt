@@ -1,0 +1,262 @@
+package eu.kanade.tachiyomi.widget
+
+import android.content.Context
+import android.util.AttributeSet
+import androidx.core.content.edit
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.doOnNextLayout
+import androidx.preference.PreferenceManager
+import eu.kanade.tachiyomi.ui.enhanced.NeonGridMode
+import eu.kanade.tachiyomi.ui.enhanced.neonColumnCount
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.library.LibraryItem
+import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.pxToDp
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.pow
+import kotlin.math.roundToInt
+
+class AutofitRecyclerView
+    @JvmOverloads
+    constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+    ) : androidx.recyclerview.widget.RecyclerView(context, attrs) {
+        var manager: LayoutManager = GridLayoutManagerAccurateOffset(context, 1)
+
+        var lastMeasuredWidth = 0
+        private var pendingSpanUpdate = false
+        private var v5ModeColumns = 0
+
+        var columnWidth = -1f
+            set(value) {
+                field = value
+                if (width > 0) {
+                    setSpan(true)
+                }
+            }
+
+        var spanCount = 0
+            set(value) {
+                field = value
+                if (value > 0) {
+                    managerSpanCount = value
+                }
+            }
+
+        val itemWidth: Int
+            get() {
+                return if (width == 0) {
+                    measuredWidth / getTempSpan()
+                } else {
+                    width / managerSpanCount
+                }
+            }
+
+        init {
+            layoutManager = manager
+        }
+
+        var managerSpanCount: Int
+            get() {
+                return (manager as? GridLayoutManager)?.spanCount ?: (manager as StaggeredGridLayoutManager).spanCount
+            }
+            set(value) {
+                (manager as? GridLayoutManager)?.spanCount = value
+                (manager as? StaggeredGridLayoutManager)?.spanCount = value
+            }
+
+        private fun getTempSpan(): Int {
+            if (v5ModeColumns > 0) {
+                val widthDp = (if (measuredWidth > 0) measuredWidth else resources.displayMetrics.widthPixels) / resources.displayMetrics.density
+                return neonColumnCount(v5ModeColumns, widthDp)
+            }
+            if (columnWidth > 0) {
+                val dpWidth = (measuredWidth.toFloat().pxToDp / 100f).roundToInt()
+                return max(1, (dpWidth / columnWidth).roundToInt())
+            }
+            return 3
+        }
+
+        override fun onMeasure(
+            widthSpec: Int,
+            heightSpec: Int,
+        ) {
+            super.onMeasure(widthSpec, heightSpec)
+            setSpan()
+            if (width == 0) {
+                spanCount = getTempSpan()
+            }
+        }
+
+        override fun onLayout(
+            changed: Boolean,
+            l: Int,
+            t: Int,
+            r: Int,
+            b: Int,
+        ) {
+            super.onLayout(changed, l, t, r, b)
+            if (pendingSpanUpdate && width > 0) {
+                if (width == lastMeasuredWidth) {
+                    pendingSpanUpdate = false
+                    setSpan(force = true)
+                } else {
+                    // Still animating, come back for another look once it has moved again
+                    post { requestLayout() }
+                }
+            }
+            setSpan()
+            lastMeasuredWidth = width
+        }
+
+        fun useStaggered(preferences: PreferencesHelper) {
+            useStaggered(
+                preferences.useStaggeredGrid().get() &&
+                    !preferences.uniformGrid().get() &&
+                    preferences.libraryLayout().get() != LibraryItem.LAYOUT_LIST,
+            )
+        }
+
+        private fun useStaggered(use: Boolean) {
+            if (use && manager !is StaggeredGridLayoutManagerAccurateOffset) {
+                manager =
+                    StaggeredGridLayoutManagerAccurateOffset(
+                        context,
+                        null,
+                        1,
+                        StaggeredGridLayoutManager.VERTICAL,
+                    )
+                setNewManager()
+            } else if (!use && manager !is GridLayoutManagerAccurateOffset) {
+                manager = GridLayoutManagerAccurateOffset(context, 1)
+                setNewManager()
+            }
+        }
+
+        private fun setNewManager() {
+            val firstPos = findFirstVisibleItemPosition().takeIf { it != NO_POSITION }
+            layoutManager = manager
+            // A new manager starts at one column, and setSpan() skips a count it already stores
+            if (spanCount > 0) {
+                managerSpanCount = spanCount
+            }
+            if (firstPos != null) {
+                val insetsTop = rootWindowInsetsCompat?.getInsets(systemBars())?.top ?: 0
+                doOnNextLayout {
+                    scrollToPositionWithOffset(firstPos, -paddingTop + 56.dpToPx + insetsTop)
+                }
+            }
+        }
+
+        fun scrollToPositionWithOffset(
+            position: Int,
+            offset: Int,
+        ) {
+            layoutManager ?: return
+            return (layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(position, offset)
+                ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset).scrollToPositionWithOffset(position, offset)
+        }
+
+        fun findFirstVisibleItemPosition(): Int {
+            layoutManager ?: return 0
+            return (layoutManager as? LinearLayoutManager)?.findFirstVisibleItemPosition()
+                ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset).findFirstVisibleItemPosition()
+        }
+
+        fun findFirstCompletelyVisibleItemPosition(): Int {
+            layoutManager ?: return 0
+            return (layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()
+                ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset).findFirstCompletelyVisibleItemPosition()
+        }
+
+        fun setGridSize(preferences: PreferencesHelper) {
+            // Migrate to float for grid size
+            if (preferences.gridSize().isNotSet()) {
+                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                val oldGridSize = prefs.getInt("grid_size", -1)
+                if (oldGridSize != -1) {
+                    preferences.gridSize().set(
+                        when (oldGridSize) {
+                            4 -> 3f
+                            3 -> 1.5f
+                            2 -> 1f
+                            1 -> 0f
+                            0 -> -.5f
+                            else -> .5f
+                        },
+                    )
+                    prefs.edit {
+                        remove("grid_size")
+                    }
+                }
+            }
+
+            v5ModeColumns = if (resources.getBoolean(R.bool.v4_neon_mode)) {
+                NeonGridMode.getColumns(context)
+            } else {
+                0
+            }
+            val size = 1.5f.pow(preferences.gridSize().get())
+            val trueSize = MULTIPLE * ((size * 100 / MULTIPLE).roundToInt()) / 100f
+            // Prevent unreadably narrow poster cards on phones, while the adaptive grid
+            // still expands to more columns on Fold/tablet. Standard retains user defaults.
+            columnWidth = if (v5ModeColumns > 0) {
+                // The existing grid uses 100dp-sized coordinate units.
+                val screenWidthDp = resources.displayMetrics.widthPixels / resources.displayMetrics.density
+                max(0.55f, (screenWidthDp / v5ModeColumns) / 100f)
+            } else if (resources.getBoolean(R.bool.v4_neon_mode)) {
+                max(trueSize, 1.4f)
+            } else {
+                trueSize
+            }
+        }
+
+        /**
+         * Recounts the columns once the width settles, for callers that resize the grid without
+         * tripping the width check in [setSpan].
+         */
+        fun requestSpanUpdate() {
+            pendingSpanUpdate = true
+            requestLayout()
+        }
+
+        private fun setSpan(force: Boolean = false) {
+            if ((
+                    spanCount == 0 ||
+                        force ||
+                        // Ignore small width changes, callers should use requestSpanUpdate()
+                        (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)
+                ) &&
+                columnWidth > 0
+            ) {
+                val dpWidth = (width.pxToDp / 100f).roundToInt()
+                val count = if (v5ModeColumns > 0) {
+                    neonColumnCount(v5ModeColumns, width.pxToDp.toFloat())
+                } else {
+                    max(1, (dpWidth / columnWidth).roundToInt())
+                }
+                // Keep the first visible cover anchored when a Fold is opened or resized.
+                // A column count change alone must not jump the user to another manga.
+                if (count != spanCount) {
+                    val first = if (spanCount > 0 && !isComputingLayout) findFirstVisibleItemPosition() else NO_POSITION
+                    val top = if (first != NO_POSITION) findViewHolderForAdapterPosition(first)?.itemView?.top else null
+                    spanCount = count
+                    if (top != null && first != NO_POSITION) {
+                        doOnNextLayout { scrollToPositionWithOffset(first, top - paddingTop) }
+                    }
+                }
+            }
+        }
+
+        companion object {
+            private const val MULTIPLE_PERCENT = 0.25f
+            const val MULTIPLE = MULTIPLE_PERCENT * 100
+        }
+    }

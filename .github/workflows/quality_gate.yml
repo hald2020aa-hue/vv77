@@ -1,0 +1,172 @@
+name: Quality gate (independent fork)
+
+on:
+  # Build every uploaded development branch automatically; PR and manual runs remain available.
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  android-debug-and-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+      - name: Configure JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Configure Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Restore persistent V19-compatible signing key when configured
+        shell: bash
+        env:
+          JH_UPDATE_KEYSTORE_BASE64: ${{ secrets.JH_UPDATE_KEYSTORE_BASE64 }}
+          JH_UPDATE_STORE_PASSWORD: ${{ secrets.JH_UPDATE_STORE_PASSWORD }}
+          JH_UPDATE_KEY_ALIAS: ${{ secrets.JH_UPDATE_KEY_ALIAS }}
+          JH_UPDATE_KEY_PASSWORD: ${{ secrets.JH_UPDATE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${JH_UPDATE_KEYSTORE_BASE64:-}" || -z "${JH_UPDATE_STORE_PASSWORD:-}" || -z "${JH_UPDATE_KEY_ALIAS:-}" || -z "${JH_UPDATE_KEY_PASSWORD:-}" ]]; then
+            echo "::warning::Using temporary CI debug signing for isolated development APK."
+            exit 0
+          fi
+          KEYSTORE="$RUNNER_TEMP/jh-update-keystore.jks"
+          printf '%s' "$JH_UPDATE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE"
+          test -s "$KEYSTORE"
+          {
+            printf 'JH_UPDATE_STORE_FILE=%s\n' "$KEYSTORE"
+            printf 'JH_UPDATE_STORE_PASSWORD=%s\n' "$JH_UPDATE_STORE_PASSWORD"
+            printf 'JH_UPDATE_KEY_ALIAS=%s\n' "$JH_UPDATE_KEY_ALIAS"
+            printf 'JH_UPDATE_KEY_PASSWORD=%s\n' "$JH_UPDATE_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+      - name: Check XML resources and reading activity SQL
+        run: python3 qa/static_integration_checks.py
+      - name: Verify enhanced UI resources and screen wiring
+        run: python3 qa/enhanced/validate_ui.py
+      - name: Validate J2K Enhanced visual resources and bindings
+        run: python3 qa/neon/validate_neon.py
+      - name: Validate V6 translation and reader prefetch integration
+        run: python3 qa/v6/validate_v6.py
+      - name: Validate V7 bubble overlay, safe download reordering and adaptive library
+        run: python3 qa/v7/validate_v7.py
+      - name: Validate V8 Arabic in-page OCR overlay and four-language wiring
+        run: python3 qa/v8/validate_v8.py
+      - name: Validate V12 OCR recovery and actual detail-screen neon overrides
+        run: python3 qa/v12/validate_translation_recovery.py
+      - name: Validate V13 unified neon settings without changing preference behavior
+        run: python3 qa/v13/validate_settings_neon.py
+      - name: Validate V15 library search/action row clearance
+        run: python3 qa/v15/validate_library_header_clearance.py
+      - name: Validate V16 crash hardening
+        run: python3 qa/v16/validate_crash_hardening.py
+      - name: Validate V18 unified neon UI across all sources and reading screens
+        run: python3 qa/v18/validate_unified_neon.py
+      - name: Validate V22 resources (ids preserved, references resolve)
+        run: python3 qa/v22/check_resources.py . qa/v22/baseline_ids.json
+      - name: Run unit tests and compile debug APKs
+        run: ./gradlew -Pjh.arm64Only=true --no-daemon testDevDebugUnitTest verifySingleArm64DevApk --stacktrace
+      - name: Verify single APK integrity and debug signature
+        run: |
+          set -euo pipefail
+          APK="app/build/outputs/apk/dev/debug/app-dev-arm64-v8a-debug.apk"
+          test -s "$APK"
+          unzip -tqq "$APK"
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          test -d "$SDK/build-tools"
+          BUILD_TOOLS="$(find "$SDK/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
+          if [[ -n "${JH_UPDATE_STORE_FILE:-}" ]]; then
+            echo "Persistent V19-compatible signing certificate verified."
+          else
+            echo "Temporary CI debug certificate verified."
+          fi
+          sha256sum "$APK"
+      - name: Upload development APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-dev-arm64-v8a-debug.apk
+          path: app/build/outputs/apk/dev/debug/app-dev-arm64-v8a-debug.apk
+          if-no-files-found: error
+
+
+  # The base job above already compiles, verifies, and uploads the ARM64 APK.
+  universal-debug:
+    name: Build and verify universal dev APK
+    needs: android-debug-and-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+      - name: Configure JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Configure Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Restore persistent V19-compatible signing key when configured
+        shell: bash
+        env:
+          JH_UPDATE_KEYSTORE_BASE64: ${{ secrets.JH_UPDATE_KEYSTORE_BASE64 }}
+          JH_UPDATE_STORE_PASSWORD: ${{ secrets.JH_UPDATE_STORE_PASSWORD }}
+          JH_UPDATE_KEY_ALIAS: ${{ secrets.JH_UPDATE_KEY_ALIAS }}
+          JH_UPDATE_KEY_PASSWORD: ${{ secrets.JH_UPDATE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${JH_UPDATE_KEYSTORE_BASE64:-}" || -z "${JH_UPDATE_STORE_PASSWORD:-}" || -z "${JH_UPDATE_KEY_ALIAS:-}" || -z "${JH_UPDATE_KEY_PASSWORD:-}" ]]; then
+            echo "::warning::Using temporary CI debug signing for isolated development APK."
+            exit 0
+          fi
+          KEYSTORE="$RUNNER_TEMP/jh-update-keystore.jks"
+          printf '%s' "$JH_UPDATE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE"
+          test -s "$KEYSTORE"
+          {
+            printf 'JH_UPDATE_STORE_FILE=%s\n' "$KEYSTORE"
+            printf 'JH_UPDATE_STORE_PASSWORD=%s\n' "$JH_UPDATE_STORE_PASSWORD"
+            printf 'JH_UPDATE_KEY_ALIAS=%s\n' "$JH_UPDATE_KEY_ALIAS"
+            printf 'JH_UPDATE_KEY_PASSWORD=%s\n' "$JH_UPDATE_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+      - name: Build universal Android APK
+        run: ./gradlew -Pjh.arm64Only=false --no-daemon assembleDevDebug --stacktrace
+      - name: Verify universal APK, architecture coverage and signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUTPUT_DIR="app/build/outputs/apk/dev/debug"
+          APK="$OUTPUT_DIR/app-dev-universal-debug.apk"
+          if [[ ! -s "$APK" ]]; then
+            echo "Universal APK missing. Actual outputs:" >&2
+            find "$OUTPUT_DIR" -maxdepth 1 -name '*.apk' -print >&2
+            exit 1
+          fi
+          unzip -tqq "$APK"
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          test -d "$SDK/build-tools"
+          BUILD_TOOLS="$(find "$SDK/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
+          "$BUILD_TOOLS/aapt" dump badging "$APK" | grep -m1 '^package:'
+          # The native libraries differ by dependency. Verify all ABI packages are included
+          # in the universal output metadata, not by requiring every library in every ABI.
+          test "$(stat -c %s "$APK")" -gt 1048576
+          sha256sum "$APK"
+          if [[ -n "${JH_UPDATE_STORE_FILE:-}" ]]; then
+            echo 'Universal APK checked with persistent signing.'
+          else
+            echo 'Universal APK checked with temporary debug signing.'
+          fi
+      - name: Upload universal dev APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-dev-universal-debug.apk
+          path: app/build/outputs/apk/dev/debug/app-dev-universal-debug.apk
+          if-no-files-found: error
