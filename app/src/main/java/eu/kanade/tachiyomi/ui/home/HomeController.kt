@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -48,7 +49,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -242,8 +242,8 @@ private fun HomeDashboard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(vertical = 3.dp),
                 ) {
-                    items(genres) { genre ->
-                        HomeGenreChip(genre, genres.indexOf(genre))
+                    itemsIndexed(genres) { index, genre ->
+                        HomeGenreChip(genre, index)
                     }
                 }
             }
@@ -270,7 +270,7 @@ private fun HomeDashboard(
         } else {
             item {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(vertical = 3.dp)) {
-                    items(recent, key = { it.id ?: it.url.hashCode().toLong() }) { manga ->
+                    items(recent, key = { "recent:${it.id ?: "${it.source}:${it.url}"}" }) { manga ->
                         HomePosterCard(manga, onClick = { onOpenManga(manga) })
                     }
                 }
@@ -285,7 +285,7 @@ private fun HomeDashboard(
         } else {
             item {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(vertical = 3.dp)) {
-                    items(library.take(12), key = { it.id ?: it.url.hashCode().toLong() }) { manga ->
+                    items(library.take(12), key = { "library:${it.id ?: "${it.source}:${it.url}"}" }) { manga ->
                         HomePosterCard(manga, onClick = { onOpenManga(manga) })
                     }
                 }
@@ -372,7 +372,7 @@ private fun HomeAction(label: String, value: String?, accent: Color, modifier: M
 private fun HomeFeaturedCard(manga: Manga, isContinueReading: Boolean, onClick: () -> Unit) {
     val context = LocalContext.current
     // The hero artwork is decorative; the title/author/cover are the real manga record.
-    androidx.compose.runtime.CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+    androidx.compose.runtime.CompositionLocalProvider(LocalLayoutDirection provides LocalLayoutDirection.current) {
         Surface(
             modifier = Modifier.fillMaxWidth().height(206.dp).clickable(onClick = onClick),
             shape = RoundedCornerShape(22.dp),
@@ -439,7 +439,7 @@ private fun HomeEmptyCard(loading: Boolean, onBrowse: () -> Unit) {
         border = BorderStroke(1.4.dp, homeNeonBorder),
     ) {
         Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("MANGA VIRUS", color = homeCyan, fontWeight = FontWeight.Black, fontSize = 20.sp)
+            Text(LocalContext.current.getString(R.string.app_name), color = homeCyan, fontWeight = FontWeight.Black, fontSize = 20.sp)
             Text(
                 if (loading) LocalContext.current.getString(R.string.loading) else LocalContext.current.getString(R.string.home_empty_library),
                 color = homeText,

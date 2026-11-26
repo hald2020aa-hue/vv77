@@ -203,7 +203,8 @@ class LibraryCategoryAdapter(
     }
 
     private fun getFirstChar(string: String): String {
-        val chars = string.codePoints().toArray().firstOrNull() ?: return ""
+        if (string.isEmpty()) return ""
+        val chars = string.codePointAt(0)
         val char = Character.toChars(chars)
         return String(char).uppercase(Locale.US)
     }

@@ -25,6 +25,16 @@ if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
 val arm64Only = providers.gradleProperty("jh.arm64Only").map { it.toBoolean() }.getOrElse(false)
 val supportedAbis = if (arm64Only) setOf("arm64-v8a") else setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
+// A design is chosen explicitly in the isolated CI checkout; default dev identity is unchanged.
+val design = providers.gradleProperty("jh.design").getOrElse("neon")
+val designSuffixes = mapOf("neon" to "", "cinema" to ".cinema", "ink" to ".ink", "fluid" to ".fluid", "reactor" to ".reactor")
+require(design in designSuffixes) { "Unknown Manga Virus design: $design" }
+if (design != "neon") {
+    require(rootProject.file(".design-active").takeIf { it.isFile }?.readText()?.trim() == design) {
+        "Run python3 scripts/apply_design.py $design in an isolated checkout before building"
+    }
+}
+
 // A user-owned, persistent signing key is REQUIRED for in-place updates across CI runs.
 // Never store private keys, passwords, or a development signing key in Git.
 val updateStorePath = providers.environmentVariable("JH_UPDATE_STORE_FILE").orNull
@@ -52,6 +62,7 @@ android {
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
         buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
+        buildConfigField("String", "DESIGN_EDITION", "\"$design\"")
         buildConfigField("boolean", "BETA", "false")
 
         externalNativeBuild {
@@ -122,7 +133,7 @@ android {
         create("dev") {
             // Preserves the exact V8 debug app package:
             // eu.kanade.tachiyomi.enhanced.debugJ2K (do not change this identity).
-            applicationIdSuffix = ".enhanced"
+            applicationIdSuffix = ".enhanced" + designSuffixes.getValue(design)
             // Incremented for V22 so Android accepts the dev update over V21.
             versionCode = AndroidVersions.versionCode + 4
             versionNameSuffix = "-enhanced-v22-dev"

@@ -82,6 +82,12 @@ jobs:
           python3 qa/storage/check_refresh_branding.py
           python3 qa/storage/check_deletion.py
           python3 qa/storage/check_navigation.py
+      - name: Check library SQL literal compatibility and results
+        run: python3 qa/core/check_library_sql.py
+      - name: Check cover binding and shared design compatibility
+        run: |
+          python3 qa/core/check_cover_binding.py
+          python3 qa/core/check_final_designs.py
       - name: Run unit tests and compile debug APKs
         run: ./gradlew -Pjh.arm64Only=true --no-daemon testDevDebugUnitTest verifySingleArm64DevApk --stacktrace
       - name: Verify single APK integrity and debug signature
@@ -94,6 +100,11 @@ jobs:
           test -d "$SDK/build-tools"
           BUILD_TOOLS="$(find "$SDK/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
           "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
+          if [[ "$GITHUB_REF" == "refs/heads/design/final-five" ]]; then
+            "$BUILD_TOOLS/aapt" dump badging "$APK" > "$RUNNER_TEMP/neon-badging.txt"
+            grep -F "package: name='eu.kanade.tachiyomi.enhanced.debugJ2K'" "$RUNNER_TEMP/neon-badging.txt"
+            grep -F "application-label:'فيروس مانجا'" "$RUNNER_TEMP/neon-badging.txt"
+          fi
           if [[ -n "${JH_UPDATE_STORE_FILE:-}" ]]; then
             echo "Persistent V19-compatible signing certificate verified."
           else
@@ -103,13 +114,14 @@ jobs:
       - name: Upload development APKs
         uses: actions/upload-artifact@v4
         with:
-          name: app-dev-arm64-v8a-debug.apk
+          name: ${{ github.ref == 'refs/heads/design/final-five' && 'Manga-Virus-Neon-Reference-ARM64' || 'app-dev-arm64-v8a-debug.apk' }}
           path: app/build/outputs/apk/dev/debug/app-dev-arm64-v8a-debug.apk
           if-no-files-found: error
 
 
   # The base job above already compiles, verifies, and uploads the ARM64 APK.
   universal-debug:
+    if: github.ref != 'refs/heads/design/final-five'
     name: Build and verify universal dev APK
     needs: android-debug-and-tests
     runs-on: ubuntu-24.04
@@ -179,4 +191,82 @@ jobs:
         with:
           name: app-dev-universal-debug.apk
           path: app/build/outputs/apk/dev/debug/app-dev-universal-debug.apk
+          if-no-files-found: error
+
+
+  alternative-designs:
+    if: github.ref == 'refs/heads/design/final-five'
+    needs: android-debug-and-tests
+    name: ARM64 ${{ matrix.edition.name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        edition:
+          - { id: cinema, name: Cinema-Nova }
+          - { id: ink, name: Ink-Atelier }
+          - { id: fluid, name: Fluid-Bloom }
+          - { id: reactor, name: Reactor-X }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Restore persistent V19-compatible signing key when configured
+        shell: bash
+        env:
+          JH_UPDATE_KEYSTORE_BASE64: ${{ secrets.JH_UPDATE_KEYSTORE_BASE64 }}
+          JH_UPDATE_STORE_PASSWORD: ${{ secrets.JH_UPDATE_STORE_PASSWORD }}
+          JH_UPDATE_KEY_ALIAS: ${{ secrets.JH_UPDATE_KEY_ALIAS }}
+          JH_UPDATE_KEY_PASSWORD: ${{ secrets.JH_UPDATE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${JH_UPDATE_KEYSTORE_BASE64:-}" || -z "${JH_UPDATE_STORE_PASSWORD:-}" || -z "${JH_UPDATE_KEY_ALIAS:-}" || -z "${JH_UPDATE_KEY_PASSWORD:-}" ]]; then
+            echo "::warning::Using temporary CI debug signing for isolated development APK."
+            exit 0
+          fi
+          KEYSTORE="$RUNNER_TEMP/jh-update-keystore.jks"
+          printf '%s' "$JH_UPDATE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE"
+          test -s "$KEYSTORE"
+          {
+            printf 'JH_UPDATE_STORE_FILE=%s\n' "$KEYSTORE"
+            printf 'JH_UPDATE_STORE_PASSWORD=%s\n' "$JH_UPDATE_STORE_PASSWORD"
+            printf 'JH_UPDATE_KEY_ALIAS=%s\n' "$JH_UPDATE_KEY_ALIAS"
+            printf 'JH_UPDATE_KEY_PASSWORD=%s\n' "$JH_UPDATE_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+      - name: Apply independent design and verify resources
+        env:
+          DESIGN: ${{ matrix.edition.id }}
+        run: |
+          python3 scripts/apply_design.py "$DESIGN"
+          python3 qa/v22/check_resources.py . qa/v22/baseline_ids.json
+          python3 qa/v22/check_runtime_risks.py .
+      - name: Compile and run unit tests
+        env:
+          DESIGN: ${{ matrix.edition.id }}
+        run: ./gradlew -Pjh.arm64Only=true -Pjh.design="$DESIGN" --no-daemon testDevDebugUnitTest verifySingleArm64DevApk --stacktrace
+      - name: Verify distinct package and APK signature
+        env:
+          DESIGN: ${{ matrix.edition.id }}
+        run: |
+          set -euo pipefail
+          APK=app/build/outputs/apk/dev/debug/app-dev-arm64-v8a-debug.apk
+          test -s "$APK"
+          unzip -tqq "$APK"
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          BUILD_TOOLS="$(find "$SDK/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
+          "$BUILD_TOOLS/aapt" dump badging "$APK" > "$RUNNER_TEMP/badging.txt"
+          grep -F "package: name='eu.kanade.tachiyomi.enhanced.$DESIGN.debugJ2K'" "$RUNNER_TEMP/badging.txt"
+          grep -F "application-label:'فيروس مانجا'" "$RUNNER_TEMP/badging.txt"
+          mkdir -p dist
+          cp "$APK" "dist/Manga-Virus-$DESIGN-arm64.apk"
+          (cd dist && sha256sum *.apk > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Manga-Virus-${{ matrix.edition.name }}-ARM64
+          path: dist/
           if-no-files-found: error

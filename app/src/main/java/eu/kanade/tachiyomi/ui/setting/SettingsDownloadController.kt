@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.setting
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
@@ -235,12 +234,7 @@ class SettingsDownloadController : SettingsController() {
         }
 
         private fun getExternalDirs(): List<File> {
-            val defaultDir =
-                Environment.getExternalStorageDirectory().absolutePath +
-                    File.separator + activity.resources?.getString(R.string.app_name) +
-                    File.separator + "downloads"
-
-            return mutableListOf(File(defaultDir)) +
+            return mutableListOf(preferences.defaultDownloadsFolder) +
                 ContextCompat.getExternalFilesDirs(activity, "").filterNotNull()
         }
     }

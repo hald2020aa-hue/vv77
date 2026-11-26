@@ -22,6 +22,8 @@ class CoilSetup(
     context: Context,
 ) {
     init {
+        // Query once; fall back to conservative cache sizing on an unavailable service.
+        val lowRamDevice = context.getSystemService<ActivityManager>()?.isLowRamDevice ?: true
         val imageLoader =
             ImageLoader
                 .Builder(context)
@@ -43,11 +45,11 @@ class CoilSetup(
                     // Avoid reserving 40% of the heap for covers on large libraries.
                     memoryCache {
                         MemoryCache.Builder(context)
-                            .maxSizePercent(if (context.getSystemService<ActivityManager>()!!.isLowRamDevice) 0.15 else 0.25)
+                            .maxSizePercent(if (lowRamDevice) 0.15 else 0.25)
                             .build()
                     }
                     crossfade(true)
-                    allowRgb565(context.getSystemService<ActivityManager>()!!.isLowRamDevice)
+                    allowRgb565(lowRamDevice)
                     // Android 8.0/8.1 crash when a hardware bitmap is drawn to the software
                     // https://github.com/coil-kt/coil/issues/159
                     allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)

@@ -59,6 +59,9 @@ class HttpPageLoader(
 
     private fun offerPage(page: ReaderPage, priority: Int): PriorityPage? = synchronized(queue) {
         if (page.status != Page.State.QUEUE) return@synchronized null
+        if (priority == 0 && focusedPage >= 0 &&
+            outsideReadAheadWindow(page.index, focusedPage, chapter.pages?.size ?: 0, preloadSize)
+        ) return@synchronized null
         val old = queuedByPage[page]
         if (old != null && old.priority >= priority) return@synchronized null
         if (old != null) queue.remove(old)
@@ -83,10 +86,16 @@ class HttpPageLoader(
             flow {
                 while (true) {
                     val request = runInterruptible { queue.take() }
-                    synchronized(queue) {
-                        if (queuedByPage[request.page] === request) queuedByPage.remove(request.page)
+                    val isCurrent = synchronized(queue) {
+                        if (queuedByPage[request.page] !== request) {
+                            false
+                        } else {
+                            queuedByPage.remove(request.page)
+                            request.priority != 0 || focusedPage < 0 ||
+                                !outsideReadAheadWindow(request.page.index, focusedPage, chapter.pages?.size ?: 0, preloadSize)
+                        }
                     }
-                    emit(request.page)
+                    if (isCurrent) emit(request.page)
                 }
             }.filter { it.status == Page.State.QUEUE }
                 .collect {

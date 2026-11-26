@@ -229,7 +229,7 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                             }
                             if (newChapters.isNotEmpty()) {
                                 item { Text(stringResource(R.string.new_chapters), style = MaterialTheme.typography.titleMedium) }
-                                items(newChapters) { chapter ->
+                                items(newChapters, key = { "new:${it.id ?: it.url}" }) { chapter ->
                                     Card(modifier = Modifier.fillMaxWidth()) {
                                         Column(Modifier.padding(12.dp)) {
                                             Text(chapter.name, style = MaterialTheme.typography.titleMedium)
@@ -239,7 +239,7 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                                 }
                             }
                             item { Text(stringResource(R.string.storage_inventory_chapters), style = MaterialTheme.typography.titleMedium) }
-                            items(selected.chapters.sortedByDescending { it.chapter.source_order }) { entry ->
+                            items(selected.chapters.sortedByDescending { it.chapter.source_order }, key = { "download:${it.chapter.id ?: it.chapter.url}" }) { entry ->
                                 Card(modifier = Modifier.fillMaxWidth()) {
                                     Column(Modifier.padding(12.dp)) {
                                         Text(entry.chapter.name)
@@ -296,7 +296,7 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                             } else emptyList()
                             if (groupMode && selectedCategory == null) {
                                 item { Text(stringResource(R.string.storage_inventory_category_note), style = MaterialTheme.typography.bodySmall) }
-                                items(groups) { (id, name) ->
+                                items(groups, key = { it.first }) { (id, name) ->
                                     val works = typed.filter { work ->
                                         if (id == Int.MIN_VALUE) work.categories.none { it.id != null } else work.categories.any { it.id == id }
                                     }
@@ -350,7 +350,7 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                                     }
                                 }
                             }
-                            items(visible) { work ->
+                            items(visible, key = { "work:${it.manga.id ?: "${it.manga.source}:${it.manga.url}"}" }) { work ->
                                 val workId = work.manga.id
                                 val canSelect = !work.manga.isLocal() && workId != null
                                 Card(modifier = Modifier.fillMaxWidth().combinedClickable(

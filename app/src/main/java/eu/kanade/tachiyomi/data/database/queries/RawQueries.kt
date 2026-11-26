@@ -31,7 +31,7 @@ val libraryQuery =
         ) AS CC
         ON ${Manga.COL_ID} = CC.${Chapter.COL_MANGA_ID}
         LEFT JOIN (
-            SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, "N/A"), " [.] ") AS unread
+            SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A'), ' [.] ') AS unread
             FROM ${Chapter.TABLE}
             JOIN ${Manga.TABLE} FS ON FS.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
             WHERE ${Chapter.COL_READ} = 0 AND FS.${Manga.COL_FILTERED_SCANLATORS} IS NOT NULL
@@ -46,7 +46,7 @@ val libraryQuery =
         ) AS RC
         ON ${Manga.COL_ID} = RC.${Chapter.COL_MANGA_ID}
         LEFT JOIN (
-            SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, "N/A"), " [.] ") AS hasread
+            SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A'), ' [.] ') AS hasread
             FROM ${Chapter.TABLE}
             JOIN ${Manga.TABLE} FS ON FS.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
             WHERE ${Chapter.COL_READ} = 1 AND FS.${Manga.COL_FILTERED_SCANLATORS} IS NOT NULL

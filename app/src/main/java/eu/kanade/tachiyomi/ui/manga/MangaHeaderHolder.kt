@@ -304,13 +304,20 @@ class MangaHeaderHolder(
         }
     }
 
+    private val summaryWhitespace = Regex("\\s+", setOf(RegexOption.MULTILINE))
+    private val plainMarkwon by lazy { createMarkwon(false) }
+    private val imageMarkwon by lazy { createMarkwon(true) }
+
     private fun markwon(): Markwon =
+        if (adapter.preferences.renderDescriptionImages().get()) imageMarkwon else plainMarkwon
+
+    private fun createMarkwon(withImages: Boolean): Markwon =
         Markwon
             .builder(itemView.context)
             .usePlugin(LinkifyPlugin.create())
             .usePlugin(SoftBreakAddsNewLinePlugin.create())
             .apply {
-                if (adapter.preferences.renderDescriptionImages().get()) {
+                if (withImages) {
                     usePlugin(CoilImagesPlugin.create(itemView.context))
                 }
             }.build()
@@ -326,7 +333,7 @@ class MangaHeaderHolder(
                     desc.isNullOrBlank() -> itemView.context.getString(R.string.no_description)
                     binding.mangaSummary.maxLines != Int.MAX_VALUE ->
                         desc
-                            .replace(Regex("\\s+", setOf(RegexOption.MULTILINE)), " ")
+                            .replace(summaryWhitespace, " ")
                             .trim()
                     else -> markwon().toMarkdown(desc.trim())
                 }

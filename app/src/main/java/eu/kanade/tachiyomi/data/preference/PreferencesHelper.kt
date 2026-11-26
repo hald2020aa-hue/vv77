@@ -84,23 +84,16 @@ class PreferencesHelper(
     private val prefs = TypeSafeSharedPreferences(PreferenceManager.getDefaultSharedPreferences(context))
     private val flowPrefs = FlowSharedPreferences(prefs)
 
-    private val defaultDownloadsDir =
-        Uri.fromFile(
-            File(
-                Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                    context.getString(R.string.app_name),
-                "downloads",
-            ),
-        )
-
-    private val defaultBackupDir =
-        Uri.fromFile(
-            File(
-                Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                    context.getString(R.string.app_name),
-                "backup",
-            ),
-        )
+    // Alternative APKs have separate databases and must not delete each other's files.
+    // The original Neon package retains its previous default path exactly.
+    private val defaultStorageRoot = File(
+        Environment.getExternalStorageDirectory(),
+        if (BuildConfig.DESIGN_EDITION == "neon") context.getString(R.string.app_name)
+        else "MangaVirus-${BuildConfig.DESIGN_EDITION}",
+    )
+    internal val defaultDownloadsFolder = File(defaultStorageRoot, "downloads")
+    private val defaultDownloadsDir = Uri.fromFile(defaultDownloadsFolder)
+    private val defaultBackupDir = Uri.fromFile(File(defaultStorageRoot, "backup"))
 
     fun getInt(
         key: String,
