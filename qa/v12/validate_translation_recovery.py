@@ -36,8 +36,9 @@ assert 'lastAutoTranslationLanguage' not in reader
 assert 'v12_neon_details_header' in holder and 'v12_neon_details_header' in controller
 assert 'resources.getBoolean(R.bool.v4_neon_mode)' in controller
 assert 'getBoolean(R.bool.v4_neon_mode)' in holder
-for s in ('startReadingButton.background =','R.drawable.v12_neon_read_button'):
-    assert s in holder
+# Crash fix: the shared-element button must keep Material's background (see docs/AUDIT.md section 3).
+assert 'startReadingButton.background =' not in holder
+assert 'NeonGradientButton' in holder and 'applyNeonGradient()' in holder
 for s in ('v12_neon_read_button.xml', 'v12_neon_details_header.xml'):
     ET.parse(root/'app/src/main/res/drawable'/s)
 ET.parse(root/'app/src/main/res/values/v12_neon_runtime_colors.xml')

@@ -33,8 +33,8 @@
 1. **تسرّب منطق النيون إلى `main`:** 16 ملف Kotlin في `main` يقرأ `R.bool.v4_neon_mode` ويتفرّع (أكثرها `MangaHeaderHolder` 7 مواضع، `ReaderActivity` 5). هذا يعني أن الواجهة ليست معزولة تمامًا عن النواة، وإضافة 4 هويات أخرى بالأسلوب نفسه (فروع `if` في `main`) ستجعل الشيفرة غير قابلة للصيانة.
 2. **أسلوب التخصيص الحالي هو "Resource overlay":** تخطيطات `src/dev/res/layout` تُغطّي ملفات `main` بالاسم نفسه. شرطه أن تبقى كل `android:id` في الأصل بالنوع نفسه، لأن Kotlin في `main` يستعمل ViewBinding المُولَّد من التخطيط المدموج. فاحص `qa/v22/check_resources.py` يفرض ذلك.
 3. **المتغيرات المؤهَّلة تتجاوز overlay:** `main/res/layout-sw600dp-land/manga_header_item.xml` (وغيره من `layout-land`, `layout-w720dp`, `layout-h600dp`) يتقدّم على `dev/res/layout` بنفس الاسم على الأجهزة الكبيرة، فتظهر واجهة `main` الأصلية. أي هوية جديدة يجب أن تُغطّي هذه المتغيرات أو تقبل الرجوع للأصل فيها.
-3. **ألوان Monet:** على Android 12+ تتغلب `colors_monet.xml` في `main/res/values-*-v31|v34` على ألوان flavor العادية، فتظهر الأسطح رمادية. الإصلاح (مطبّق في `dev`): تعريف الملفات نفسها في `src/<flavor>/res/values-*-v31|v34`.
-4. **سلسلة التحقق في CI قديمة:** `quality_gate.yml` كان يشغّل 7 مدققات تتوقع واجهة الإصدارات السابقة (قياسات V21 وأسماء)، فتوقف قبل Gradle. استُبدلت بـ `qa/v22/check_resources.py` و`check_runtime_risks.py`. والـ workflow لا يُشغَّل إلا على `main` و`feature/**`؛ أضيف `fix/**` و`design/**`.
+4. **ألوان Monet:** على Android 12+ تتغلب `colors_monet.xml` في `main/res/values-*-v31|v34` على ألوان flavor العادية، فتظهر الأسطح رمادية. الإصلاح (مطبّق في `dev`): تعريف الملفات نفسها في `src/<flavor>/res/values-*-v31|v34`.
+5. **سلسلة التحقق في CI قديمة:** `quality_gate.yml` كان يشغّل 7 مدققات تتوقع واجهة الإصدارات السابقة (قياسات V21 وأسماء)، فتوقف قبل Gradle. استُبدلت بـ `qa/v22/check_resources.py` و`check_runtime_risks.py`. والـ workflow لا يُشغَّل إلا على `main` و`feature/**`؛ أضيف `fix/**` و`design/**`.
 
 ## 3. تحليل الانهيار (SM-F936U1، Android 16)
 
