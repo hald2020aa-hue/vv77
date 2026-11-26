@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -53,7 +55,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-/** Initial read-only storage screen. Deletion and source refresh are intentionally not exposed yet. */
+/** Storage inventory and explicit classification. Deletion and source refresh are not exposed yet. */
 class StorageController : BaseController<HomeControllerBinding>() {
     private val storage by lazy { Injekt.get<DownloadManager>().storageManager }
     private val reload = MutableStateFlow(0L)
@@ -62,6 +64,9 @@ class StorageController : BaseController<HomeControllerBinding>() {
     private var failed by mutableStateOf(false)
     private var selectedType by mutableStateOf<StorageSeriesType?>(null)
     private var selectedMangaId by mutableStateOf<Long?>(null)
+    private var classifyMangaId by mutableStateOf<Long?>(null)
+    private var savingType by mutableStateOf(false)
+    private var typeSaveFailed by mutableStateOf(false)
     private var topInset by mutableStateOf(0.dp)
     private var bottomInset by mutableStateOf(0.dp)
     private var insetsListener: ViewTreeObserver.OnGlobalLayoutListener? = null
@@ -76,6 +81,42 @@ class StorageController : BaseController<HomeControllerBinding>() {
                 val context = LocalContext.current
                 val data = snapshot
                 val selected = data?.works?.firstOrNull { it.manga.id == selectedMangaId }
+                val classifyWork = classifyMangaId?.let { id -> data?.works?.firstOrNull { it.manga.id == id } }
+                if (classifyWork != null) {
+                    AlertDialog(
+                        onDismissRequest = { if (!savingType) classifyMangaId = null },
+                        title = { Text(stringResource(R.string.storage_inventory_classify)) },
+                        text = {
+                            Column {
+                                Text(classifyWork.manga.title)
+                                val options = listOf(null, StorageSeriesType.MANGA, StorageSeriesType.MANHWA,
+                                    StorageSeriesType.MANHUA, StorageSeriesType.UNCLASSIFIED)
+                                options.forEach { type ->
+                                    val label = when (type) {
+                                        null -> R.string.storage_inventory_automatic
+                                        StorageSeriesType.MANGA -> R.string.manga
+                                        StorageSeriesType.MANHWA -> R.string.manhwa
+                                        StorageSeriesType.MANHUA -> R.string.manhua
+                                        StorageSeriesType.UNCLASSIFIED -> R.string.storage_inventory_unclassified
+                                    }
+                                    TextButton(enabled = !savingType, onClick = {
+                                        classifyWork.manga.id?.let { saveType(it, type) }
+                                    }) {
+                                        Text((if (classifyWork.manga.storageManualType == type?.name) "✓ " else "") + stringResource(label))
+                                    }
+                                }
+                                if (savingType) Text(stringResource(R.string.loading))
+                                if (typeSaveFailed) Text(stringResource(R.string.storage_inventory_classify_error), color = MaterialTheme.colorScheme.error)
+                            }
+                        },
+                        confirmButton = {},
+                        dismissButton = {
+                            TextButton(enabled = !savingType, onClick = { classifyMangaId = null }) {
+                                Text(stringResource(android.R.string.cancel))
+                            }
+                        },
+                    )
+                }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = topInset + 12.dp, bottom = bottomInset + 16.dp),
@@ -148,6 +189,10 @@ class StorageController : BaseController<HomeControllerBinding>() {
                                                 StorageSeriesType.MANHUA -> R.string.manhua
                                                 StorageSeriesType.UNCLASSIFIED -> R.string.storage_inventory_unclassified
                                             }))
+                                            TextButton(enabled = !loading && !savingType, onClick = {
+                                                typeSaveFailed = false
+                                                classifyMangaId = work.manga.id
+                                            }) { Text(stringResource(R.string.storage_inventory_classify)) }
                                             Button(onClick = { selectedMangaId = work.manga.id }) { Text(stringResource(R.string.storage_inventory_chapters)) }
                                             val next = work.chapters.sortedByDescending { it.chapter.source_order }.firstOrNull { !it.chapter.read }
                                             if (next != null) Button(enabled = !loading, onClick = {
@@ -181,6 +226,27 @@ class StorageController : BaseController<HomeControllerBinding>() {
                         snapshot = null
                     }.collect { snapshot = it }
                 loading = false
+            }
+        }
+    }
+
+    private fun saveType(id: Long, type: StorageSeriesType?) {
+        if (savingType) return
+        savingType = true
+        typeSaveFailed = false
+        viewScope.launch {
+            try {
+                flow { storage.setManualType(id, type); emit(Unit) }
+                    .catch { error ->
+                        Timber.e(error, "Storage classification failed")
+                        typeSaveFailed = true
+                    }.collect {
+                        classifyMangaId = null
+                        selectedType = null
+                        reload.update { it + 1 }
+                    }
+            } finally {
+                savingType = false
             }
         }
     }

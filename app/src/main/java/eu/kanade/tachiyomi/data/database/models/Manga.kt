@@ -36,6 +36,9 @@ interface Manga : SManga {
 
     var filtered_scanlators: String?
 
+    // Written only by the explicit storage classification operation.
+    var storageManualType: String?
+
     fun isBlank() = id == Long.MIN_VALUE
 
     fun isHidden() = status == -1

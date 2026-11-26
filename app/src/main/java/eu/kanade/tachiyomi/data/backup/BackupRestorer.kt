@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
+import eu.kanade.tachiyomi.data.download.StorageSeriesType
 import eu.kanade.tachiyomi.data.backup.models.BackupPreference
 import eu.kanade.tachiyomi.data.backup.models.BackupSource
 import eu.kanade.tachiyomi.data.backup.models.BackupSourcePreferences
@@ -218,6 +219,11 @@ class BackupRestorer(
                     filteredScanlators,
                     customManga,
                 )
+            }
+            // An older backup has no value; a local explicit choice always wins.
+            val restoredType = StorageSeriesType.fromManual(backupManga.storageManualType)
+            if (restoredType != null) {
+                manga.id?.let { db.setStorageManualType(it, restoredType, onlyIfUnset = true) }
             }
         } catch (e: Exception) {
             val sourceName = sourceMapping[manga.source] ?: manga.source.toString()

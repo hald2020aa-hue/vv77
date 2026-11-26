@@ -31,7 +31,7 @@ data class StorageSnapshot(val works: List<StoredManga>) {
     val chapterCount: Int get() = works.sumOf { it.chapters.size }
 }
 
-/** Read-only inventory of matched, completed downloads. No network or database writes. */
+/** Inventory of matched, completed downloads; only explicit classification writes metadata. */
 class StorageManager internal constructor(
     private val provider: DownloadProvider,
     private val cache: DownloadCache,
@@ -51,6 +51,13 @@ class StorageManager internal constructor(
             val result = scan()
             if (changes.value == revision) saved = revision to result
             result
+        }
+    }
+
+    suspend fun setManualType(id: Long, type: StorageSeriesType?) = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            check(db.setStorageManualType(id, type) == 1) { "Manga no longer exists" }
+            saved = null
         }
     }
 
@@ -82,7 +89,7 @@ class StorageManager internal constructor(
             if (chapters.isNotEmpty()) {
                 works += StoredManga(
                     manga, chapters, db.getCategoriesForManga(manga).executeAsBlocking(),
-                    StorageSeriesType.fromTags(manga.originalGenre?.split(",")),
+                    StorageSeriesType.resolve(manga.storageManualType, manga.originalGenre?.split(",")),
                 )
             }
         }

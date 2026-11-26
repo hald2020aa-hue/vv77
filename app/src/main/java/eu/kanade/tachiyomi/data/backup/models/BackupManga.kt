@@ -53,6 +53,7 @@ data class BackupManga(
     // skipping 803 due to using duplicate value in previous builds
     @ProtoNumber(804) var customDescription: String? = null,
     @ProtoNumber(805) var customGenre: List<String>? = null,
+    @ProtoNumber(806) var storageManualType: String? = null,
 ) {
     fun getMangaImpl(): MangaImpl =
         MangaImpl().apply {
@@ -131,6 +132,7 @@ data class BackupManga(
                 updateStrategy = manga.update_strategy,
                 excludedScanlators = ChapterUtil.getScanlators(manga.filtered_scanlators),
                 memo = memoAdapter.encode(manga.memo),
+                storageManualType = manga.storageManualType,
             ).also { backupManga ->
                 customMangaManager?.getManga(manga)?.let {
                     backupManga.customTitle = it.title

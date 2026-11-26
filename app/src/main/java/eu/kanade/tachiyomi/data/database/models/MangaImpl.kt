@@ -87,6 +87,8 @@ open class MangaImpl : Manga {
 
     override var filtered_scanlators: String? = null
 
+    override var storageManualType: String? = null
+
     lateinit var ogTitle: String
         private set
     var ogAuthor: String? = null

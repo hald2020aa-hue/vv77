@@ -9,4 +9,7 @@
     <string name="storage_inventory_empty">No matching downloaded chapters.</string>
     <string name="storage_inventory_unclassified">Unclassified</string>
     <string name="storage_inventory_chapters">Downloaded chapters</string>
+    <string name="storage_inventory_classify">Set type</string>
+    <string name="storage_inventory_automatic">Automatic (source tags)</string>
+    <string name="storage_inventory_classify_error">Could not save classification. Try again.</string>
 </resources>

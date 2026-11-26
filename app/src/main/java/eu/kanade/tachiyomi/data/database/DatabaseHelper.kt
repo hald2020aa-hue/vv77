@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.data.database
 
+import android.content.ContentValues
 import android.content.Context
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.pushtorefresh.storio.sqlite.impl.DefaultStorIOSQLite
+import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.mappers.CategoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.ChapterTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.HistoryTypeMapping
@@ -24,6 +26,8 @@ import eu.kanade.tachiyomi.data.database.queries.MangaCategoryQueries
 import eu.kanade.tachiyomi.data.database.queries.MangaQueries
 import eu.kanade.tachiyomi.data.database.queries.SearchMetadataQueries
 import eu.kanade.tachiyomi.data.database.queries.TrackQueries
+import eu.kanade.tachiyomi.data.database.tables.MangaTable
+import eu.kanade.tachiyomi.data.download.StorageSeriesType
 import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 
 /**
@@ -61,6 +65,19 @@ open class DatabaseHelper(
     inline fun inTransaction(block: () -> Unit) = db.inTransaction(block)
 
     inline fun <T> inTransactionReturn(block: () -> T): T = db.inTransactionReturn(block)
+
+    /** The general manga resolver deliberately never writes this column. */
+    fun setStorageManualType(id: Long, type: StorageSeriesType?, onlyIfUnset: Boolean = false): Int =
+        inTransactionReturn {
+            val where = "${MangaTable.COL_ID} = ?" +
+                if (onlyIfUnset) " AND ${MangaTable.COL_STORAGE_MANUAL_TYPE} IS NULL" else ""
+            val query = UpdateQuery.builder().table(MangaTable.TABLE).where(where).whereArgs(id).build()
+            val values = ContentValues(1).apply {
+                if (type == null) putNull(MangaTable.COL_STORAGE_MANUAL_TYPE)
+                else put(MangaTable.COL_STORAGE_MANUAL_TYPE, type.name)
+            }
+            lowLevel().update(query, values)
+        }
 
     fun lowLevel() = db.lowLevel()
 }

@@ -19,7 +19,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         /**
          * Version of the database.
          */
-        const val DATABASE_VERSION = 20
+        const val DATABASE_VERSION = 21
     }
 
     override fun onOpen(db: SupportSQLiteDatabase) {
@@ -147,6 +147,9 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             db.execSQL(MangaTable.createSourceIndexQuery)
             // Redundant with the UNIQUE constraint on history_chapter_id
             db.execSQL(HistoryTable.dropChapterIdIndexQuery)
+        }
+        if (oldVersion < 21) {
+            db.execSQL(MangaTable.addStorageManualType)
         }
     }
 

@@ -5,6 +5,14 @@ import org.junit.Test
 
 class StorageSeriesTypeTest {
     @Test
+    fun manualTypeWins() {
+        assertEquals(StorageSeriesType.MANHWA, StorageSeriesType.resolve("MANHWA", listOf("manga")))
+        assertEquals(StorageSeriesType.UNCLASSIFIED, StorageSeriesType.resolve("UNCLASSIFIED", listOf("manhua")))
+        assertEquals(StorageSeriesType.MANHUA, StorageSeriesType.resolve(null, listOf("manhua")))
+        assertEquals(StorageSeriesType.MANGA, StorageSeriesType.resolve("unknown", listOf("manga")))
+    }
+
+    @Test
     fun exactTagsOnly() {
         assertEquals(StorageSeriesType.MANGA, StorageSeriesType.fromTags(listOf("action", " MANGA ")))
         assertEquals(StorageSeriesType.MANHWA, StorageSeriesType.fromTags(listOf("Manhwa", "MANHWA")))

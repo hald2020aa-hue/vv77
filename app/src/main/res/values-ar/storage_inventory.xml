@@ -9,4 +9,7 @@
     <string name="storage_inventory_empty">لا توجد فصول منزلة مطابقة.</string>
     <string name="storage_inventory_unclassified">غير مصنف</string>
     <string name="storage_inventory_chapters">الفصول المنزلة</string>
+    <string name="storage_inventory_classify">تحديد النوع</string>
+    <string name="storage_inventory_automatic">تلقائي (وسوم المصدر)</string>
+    <string name="storage_inventory_classify_error">تعذر حفظ التصنيف. حاول مجددًا.</string>
 </resources>

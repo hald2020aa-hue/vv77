@@ -57,6 +57,8 @@ object MangaTable {
 
     const val COL_MEMO = "memo"
 
+    const val COL_STORAGE_MANUAL_TYPE = "storage_manual_type"
+
     val createTableQuery: String
         get() =
             """CREATE TABLE $TABLE(
@@ -79,7 +81,8 @@ object MangaTable {
             $COL_DATE_ADDED LONG,
             $COL_FILTERED_SCANLATORS TEXT,
             $COL_UPDATE_STRATEGY INTEGER NOT NULL DEFAULT 0,
-            $COL_MEMO TEXT NOT NULL DEFAULT '{}'
+            $COL_MEMO TEXT NOT NULL DEFAULT '{}',
+            $COL_STORAGE_MANUAL_TYPE TEXT
 
             )"""
 
@@ -105,6 +108,9 @@ object MangaTable {
 
     val addUpdateStrategy: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_UPDATE_STRATEGY INTEGER NOT NULL DEFAULT 0"
+
+    val addStorageManualType: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_STORAGE_MANUAL_TYPE TEXT"
 
     val addMemo: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_MEMO TEXT NOT NULL DEFAULT '{}'"

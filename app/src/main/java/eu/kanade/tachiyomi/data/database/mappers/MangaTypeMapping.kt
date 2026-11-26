@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MEMO
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SOURCE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_STATUS
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_STORAGE_MANUAL_TYPE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_THUMBNAIL_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_TITLE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_UPDATE_STRATEGY
@@ -110,6 +111,9 @@ interface BaseMangaGetResolver {
                 updateStrategyAdapter::decode,
             )
         memo = cursor.getString(cursor.getColumnIndex(COL_MEMO)).orEmpty().let(memoAdapter::decode)
+        storageManualType = cursor.getColumnIndex(
+            COL_STORAGE_MANUAL_TYPE,
+        ).takeIf { it >= 0 }?.let { cursor.getString(it) }
     }
 }
 
