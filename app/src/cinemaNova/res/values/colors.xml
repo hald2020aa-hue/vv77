@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cinema Nova palette: warm black, marquee gold, crimson, teal. Same palette in day and night (cinema is a dark-room identity). -->
+    <color name="primaryTachiyomi">#F2B544</color>
+    <color name="primaryContainerTachiyomi">#4A3410</color>
+    <color name="secondaryContainerTachiyomi">#3A1A1C</color>
+    <color name="primaryInverseTachiyomi">#8C5E00</color>
+    <color name="splashBackground">#0C0A09</color>
+    <color name="enhanced_icon_background">#0C0A09</color>
+    <color name="manga_virus_icon_background">#0C0A09</color>
+    <color name="background">#0C0A09</color>
+    <color name="colorOnBackground">#F5EFE6</color>
+    <color name="colorOnSurface">#F5EFE6</color>
+    <color name="onPrimaryTachiyomi">#1A1100</color>
+    <color name="tachiyomi_surfaceContainerLowest">#080706</color>
+    <color name="tachiyomi_surfaceContainerLow">#131110</color>
+    <color name="tachiyomi_surfaceContainer">#1A1715</color>
+    <color name="tachiyomi_surfaceContainerHigh">#231F1C</color>
+    <color name="tachiyomi_surfaceContainerHighest">#2E2926</color>
+</resources>

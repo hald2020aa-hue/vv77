@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dynamic (Monet) colours pinned to the Cinema Nova palette so wallpaper colours never grey the surfaces. -->
+    <color name="monet_primary">#F2B544</color>
+    <color name="monet_primary_container">#4A3410</color>
+    <color name="monet_on_primary">#1A1100</color>
+    <color name="monet_primary_inverse">#8C5E00</color>
+    <color name="monet_surface_container">#1A1715</color>
+    <color name="monet_secondary">#E5484D</color>
+    <color name="monet_tertiary">#2FB5A6</color>
+    <color name="monet_secondary_container">#3A1A1C</color>
+    <color name="monet_on_secondary_container">#FFD9DA</color>
+    <color name="monet_on_tertiary">#00201C</color>
+    <color name="monet_surface">#0C0A09</color>
+    <color name="monet_background">#0C0A09</color>
+    <color name="monet_on_background">#F5EFE6</color>
+    <color name="monet_action_bar_tint">#F5EFE6</color>
+    <color name="monet_surface_container_lowest">#080706</color>
+    <color name="monet_surface_container_low">#131110</color>
+    <color name="monet_surface_container_high">#231F1C</color>
+    <color name="monet_surface_container_highest">#2E2926</color>
+</resources>

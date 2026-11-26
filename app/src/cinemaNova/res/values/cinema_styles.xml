@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cinema Nova: tight, poster-like corners (film frames are nearly square). -->
+    <style name="ShapeAppearance.Cinema.Small" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">4dp</item>
+    </style>
+    <style name="ShapeAppearance.Cinema.Medium" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">6dp</item>
+    </style>
+    <style name="ShapeAppearance.Cinema.Large" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">10dp</item>
+    </style>
+
+    <!-- Titles use the platform condensed bold face (credit-roll feel). Body text keeps the default face. -->
+    <style name="TextAppearance.Cinema.Headline.Large" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.Cinema.Headline.Medium" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.Cinema.Headline.Small" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.Cinema.Title.Large" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.Cinema.Title.Medium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.Cinema.Title.Small" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>
