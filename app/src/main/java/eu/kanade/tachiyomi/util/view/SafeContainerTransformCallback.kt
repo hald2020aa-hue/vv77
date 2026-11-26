@@ -15,7 +15,7 @@ import com.google.android.material.transition.platform.MaterialContainerTransfor
  * Falling back to "no snapshot" only skips the morph animation for that one view.
  */
 open class SafeContainerTransformCallback : MaterialContainerTransformSharedElementCallback() {
-    override fun onCreateSnapshotView(context: Context?, snapshot: Parcelable?): View? =
+    override fun onCreateSnapshotView(context: Context, snapshot: Parcelable?): View? =
         try {
             super.onCreateSnapshotView(context, snapshot)
         } catch (_: IllegalStateException) {
