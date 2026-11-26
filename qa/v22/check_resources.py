@@ -147,6 +147,20 @@ def main():
     errors += ["XML parse: " + e for e in xml_errors]
     errors += ["Duplicate resource: " + d for d in dups]
 
+    # attributes that aapt2 rejects ("attribute ... not found") but XML parsing and reference checks accept
+    invalid_attrs = (("android:style=", "use style=, not android:style="),
+                     ("itemActiveIndicatorEnabled", "not an attribute of this Material version"))
+    for flavor in ("main", FLAVOR):
+        base = res_dirs(root, flavor)
+        for dpath, _dirs, files in os.walk(base):
+            for fn in files:
+                if fn.endswith(".xml"):
+                    fp = os.path.join(dpath, fn)
+                    text = open(fp, encoding="utf-8", errors="replace").read()
+                    for needle, why in invalid_attrs:
+                        if needle in text:
+                            errors.append("%s: %s (%s)" % (os.path.relpath(fp, root), needle, why))
+
     # 3 + 4: references and in-layout id references
     for flavor in ("main", FLAVOR):
         base = res_dirs(root, flavor)

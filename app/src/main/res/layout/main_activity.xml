@@ -279,8 +279,7 @@
         app:menu="@menu/bottom_navigation"
         android:background="@drawable/enhanced_bottom_nav_background"
         android:elevation="8dp"
-        app:labelVisibilityMode="labeled"
-        app:itemActiveIndicatorEnabled="true" />
+        app:labelVisibilityMode="labeled" />
 
     <View
         android:id="@+id/action_mode_status_bar"
