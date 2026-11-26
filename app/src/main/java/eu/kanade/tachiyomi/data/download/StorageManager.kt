@@ -15,15 +15,17 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
 
-data class StoredChapter(val chapter: Chapter, val bytes: Long)
+data class StoredChapter(val chapter: Chapter, val bytes: Long, val modifiedAt: Long)
 
 data class StoredManga(
     val manga: Manga,
     val chapters: List<StoredChapter>,
     val categories: List<Category>,
     val type: StorageSeriesType,
+    val lastReadAt: Long,
 ) {
     val bytes: Long get() = chapters.sumOf { it.bytes }
+    val oldestFileAt: Long? get() = chapters.map { it.modifiedAt }.filter { it > 0L }.minOrNull()
 }
 
 data class StorageSnapshot(val works: List<StoredManga>) {
@@ -84,12 +86,13 @@ class StorageManager internal constructor(
                     sequenceOf(it.lowercase(), "${it.lowercase()}.cbz")
                 }.mapNotNull { byName[it]?.singleOrNull() }.firstOrNull() ?: continue
                 if (!seenChapterDirs.add(file.uri)) continue
-                chapters += StoredChapter(chapter, sizeOf(file))
+                chapters += StoredChapter(chapter, sizeOf(file), file.lastModified())
             }
             if (chapters.isNotEmpty()) {
                 works += StoredManga(
                     manga, chapters, db.getCategoriesForManga(manga).executeAsBlocking(),
                     StorageSeriesType.resolve(manga.storageManualType, manga.originalGenre?.split(",")),
+                    manga.id?.let { db.getHistoryByMangaId(it).executeAsBlocking().maxOfOrNull { history -> history.last_read } } ?: 0L,
                 )
             }
         }

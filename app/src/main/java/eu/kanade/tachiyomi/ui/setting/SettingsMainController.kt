@@ -11,6 +11,7 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.home.StorageController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.more.AboutController
 import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
@@ -65,6 +66,12 @@ class SettingsMainController :
                 iconTint = tintColor
                 titleRes = R.string.downloads
                 onClick { navigateTo(SettingsDownloadController()) }
+            }
+            preference {
+                iconRes = R.drawable.ic_file_download_24dp
+                iconTint = tintColor
+                titleRes = R.string.storage_inventory_settings
+                onClick { navigateTo(StorageController()) }
             }
             preference {
                 iconRes = R.drawable.ic_file_download_24dp

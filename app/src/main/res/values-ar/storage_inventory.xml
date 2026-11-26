@@ -12,4 +12,13 @@
     <string name="storage_inventory_classify">تحديد النوع</string>
     <string name="storage_inventory_automatic">تلقائي (وسوم المصدر)</string>
     <string name="storage_inventory_classify_error">تعذر حفظ التصنيف. حاول مجددًا.</string>
+    <string name="storage_inventory_by_work">الأعمال</string>
+    <string name="storage_inventory_by_category">الفئات</string>
+    <string name="storage_inventory_sort_size">الأكبر حجمًا</string>
+    <string name="storage_inventory_sort_read">آخر قراءة</string>
+    <string name="storage_inventory_sort_file">أقدم ملف (تقريبي)</string>
+    <string name="storage_inventory_no_category">دون فئة مخصصة</string>
+    <string name="storage_inventory_category_note">العمل الموجود في عدة فئات يُحسب في كل فئة، وفي الإجمالي يُحسب مرة واحدة.</string>
+    <string name="storage_inventory_open_category">عرض الفئة</string>
+    <string name="storage_inventory_settings">حجم المانجا والمانهوا</string>
 </resources>

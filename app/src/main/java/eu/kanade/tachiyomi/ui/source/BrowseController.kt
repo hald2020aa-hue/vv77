@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.source
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Build
 import android.os.Parcelable
 import android.view.LayoutInflater
@@ -11,6 +12,7 @@ import android.view.MenuItem
 import android.view.RoundedCorner
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.activity.BackEventCompat
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
@@ -128,6 +130,7 @@ class BrowseController :
         private set
 
     var headerHeight = 0
+    private var sourceViewportListener: ViewTreeObserver.OnPreDrawListener? = null
 
     var showingExtensions = false
 
@@ -161,10 +164,19 @@ class BrowseController :
         adapter = SourceAdapter(this)
         // Create binding.sourceRecycler and set adapter.
         binding.sourceRecycler.layoutManager = if (view.resources.getBoolean(R.bool.v4_neon_mode)) {
-            val sourcesGrid = GridLayoutManager(view.context, 2)
+            val sourcesGrid = GridLayoutManager(view.context, 1)
             sourcesGrid.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                override fun getSpanSize(position: Int): Int =
-                    if (adapter?.getItem(position) is LangItem) 2 else 1
+                override fun getSpanSize(position: Int): Int {
+                    val current = adapter ?: return 1
+                    val item = current.getItem(position)
+                    if (item is LangItem) return sourcesGrid.spanCount
+                    if (item is SourceItem && sourcesGrid.spanCount > 1) {
+                        val firstInSection = position == 0 || current.getItem(position - 1) is LangItem
+                        val lastInSection = position == current.itemCount - 1 || current.getItem(position + 1) is LangItem
+                        if (firstInSection && lastInSection) return sourcesGrid.spanCount
+                    }
+                    return 1
+                }
             }
             sourcesGrid
         } else {
@@ -199,6 +211,9 @@ class BrowseController :
                 setBottomPadding()
             },
         )
+        if (view.resources.getBoolean(R.bool.v4_neon_mode)) {
+            installSourceViewport(view)
+        }
         if (!isReturning) {
             activityBinding?.appBar?.lockYPos = true
         }
@@ -513,6 +528,40 @@ class BrowseController :
         )*/
     }
 
+    /** Keep source cards and language headers outside the actual (animated) search bar. */
+    private fun installSourceViewport(root: View) {
+        val recycler = binding.sourceRecycler
+        val bar = activityBinding?.appBar ?: return
+        val barLocation = IntArray(2)
+        val listLocation = IntArray(2)
+        val listener = ViewTreeObserver.OnPreDrawListener {
+            if (isControllerVisible && recycler.width > 0 && bar.height > 0) {
+                bar.getLocationInWindow(barLocation)
+                recycler.getLocationInWindow(listLocation)
+                val gap = 8.dpToPx
+                val visibleBottom = barLocation[1] + bar.height - listLocation[1]
+                val expandedBottom = visibleBottom - bar.translationY.toInt()
+                val desiredTop = (expandedBottom + gap).coerceAtLeast(0)
+                val grid = recycler.layoutManager as? GridLayoutManager
+                val spans = if (recycler.width >= 600.dpToPx) 2 else 1
+                if (grid != null && grid.spanCount != spans) grid.spanCount = spans
+                // Padding reserves the expanded header; clipping follows its visible edge as it scrolls.
+                if (recycler.paddingTop != desiredTop) {
+                    recycler.updatePaddingRelative(top = desiredTop)
+                    headerHeight = desiredTop
+                    searchHistory.updatePadding()
+                }
+                val clipTop = (if (visibleBottom > 0) visibleBottom + gap else 0)
+                    .coerceIn(0, recycler.height)
+                val viewport = Rect(0, clipTop, recycler.width, recycler.height)
+                if (recycler.clipBounds != viewport) recycler.clipBounds = viewport
+            }
+            true
+        }
+        sourceViewportListener = listener
+        root.viewTreeObserver.addOnPreDrawListener(listener)
+    }
+
     private fun setBottomPadding() {
         val bottomBar = activityBinding?.bottomNav
         val pad = bottomBar?.translationY?.minus(bottomBar.height) ?: 0f
@@ -607,6 +656,8 @@ class BrowseController :
     }
 
     override fun onDestroyView(view: View) {
+        sourceViewportListener?.let { if (view.viewTreeObserver.isAlive) view.viewTreeObserver.removeOnPreDrawListener(it) }
+        sourceViewportListener = null
         adapter = null
         searchHistory.onDestroyView()
         binding.bottomSheet.root.onDestroy()

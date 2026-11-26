@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.home
 
+import android.app.Activity
 import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +22,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -62,6 +64,9 @@ class StorageController : BaseController<HomeControllerBinding>() {
     private var snapshot by mutableStateOf<StorageSnapshot?>(null)
     private var loading by mutableStateOf(true)
     private var failed by mutableStateOf(false)
+    private var groupMode by mutableStateOf(false)
+    private var selectedCategory by mutableStateOf<Int?>(null)
+    private var sortMode by mutableStateOf(0)
     private var selectedType by mutableStateOf<StorageSeriesType?>(null)
     private var selectedMangaId by mutableStateOf<Long?>(null)
     private var classifyMangaId by mutableStateOf<Long?>(null)
@@ -159,7 +164,7 @@ class StorageController : BaseController<HomeControllerBinding>() {
                                     items(options) { option ->
                                         FilterChip(
                                             selected = selectedType == option,
-                                            onClick = { selectedType = option },
+                                            onClick = { selectedType = option; selectedCategory = null },
                                             label = { Text(stringResource(when (option) {
                                                 StorageSeriesType.MANGA -> R.string.manga
                                                 StorageSeriesType.MANHWA -> R.string.manhwa
@@ -170,8 +175,68 @@ class StorageController : BaseController<HomeControllerBinding>() {
                                     }
                                 }
                             }
-                            val visible = data.works.filter { selectedType == null || it.type == selectedType }
-                            if (visible.isEmpty()) item { Text(stringResource(R.string.storage_inventory_empty)) }
+                            item {
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    FilterChip(selected = !groupMode, onClick = {
+                                        groupMode = false; selectedCategory = null
+                                    }, label = { Text(stringResource(R.string.storage_inventory_by_work)) })
+                                    FilterChip(selected = groupMode, onClick = {
+                                        groupMode = true; selectedCategory = null
+                                    }, label = { Text(stringResource(R.string.storage_inventory_by_category)) })
+                                }
+                                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    val sorts = listOf(R.string.storage_inventory_sort_size, R.string.storage_inventory_sort_read, R.string.storage_inventory_sort_file)
+                                    items(sorts.indices.toList()) { mode ->
+                                        FilterChip(selected = sortMode == mode, onClick = { sortMode = mode }, label = { Text(stringResource(sorts[mode])) })
+                                    }
+                                }
+                            }
+                            val typed = data.works.filter { selectedType == null || it.type == selectedType }
+                            val categories = typed.flatMap { work ->
+                                work.categories.mapNotNull { category -> category.id?.let { it to category.name } }
+                            }.distinctBy { it.first }.sortedBy { it.second }
+                            // Works with no explicit category go in a separate group. Multi-category works
+                            // appear in each category; the global total is always counted only once.
+                            val groups = categories + if (typed.any { it.categories.none { c -> c.id != null } }) {
+                                listOf(Int.MIN_VALUE to context.getString(R.string.storage_inventory_no_category))
+                            } else emptyList()
+                            if (groupMode && selectedCategory == null) {
+                                item { Text(stringResource(R.string.storage_inventory_category_note), style = MaterialTheme.typography.bodySmall) }
+                                items(groups) { (id, name) ->
+                                    val works = typed.filter { work ->
+                                        if (id == Int.MIN_VALUE) work.categories.none { it.id != null } else work.categories.any { it.id == id }
+                                    }
+                                    val bytes = works.sumOf { it.bytes }
+                                    val ratio = if (data.bytes > 0L) (bytes.toDouble() / data.bytes).toFloat().coerceIn(0f, 1f) else 0f
+                                    Card(modifier = Modifier.fillMaxWidth()) {
+                                        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Text(name, style = MaterialTheme.typography.titleMedium)
+                                            Text(stringResource(R.string.storage_inventory_summary, works.size, works.sumOf { it.chapters.size }, Formatter.formatFileSize(context, bytes)))
+                                            LinearProgressIndicator(progress = { ratio }, modifier = Modifier.fillMaxWidth())
+                                            Text("${(ratio * 100).toInt()}%")
+                                            TextButton(onClick = { selectedCategory = id }) { Text(stringResource(R.string.storage_inventory_open_category)) }
+                                        }
+                                    }
+                                }
+                                if (groups.isEmpty()) item { Text(stringResource(R.string.storage_inventory_empty)) }
+                            }
+                            if (groupMode && selectedCategory != null) item {
+                                TextButton(onClick = { selectedCategory = null }) { Text(stringResource(R.string.storage_inventory_by_category)) }
+                                Text(groups.firstOrNull { it.first == selectedCategory }?.second.orEmpty(), style = MaterialTheme.typography.titleLarge)
+                            }
+                            val filtered = typed.filter { work ->
+                                !groupMode || when (val category = selectedCategory) {
+                                    null -> false
+                                    Int.MIN_VALUE -> work.categories.none { it.id != null }
+                                    else -> work.categories.any { it.id == category }
+                                }
+                            }
+                            val visible = when (sortMode) {
+                                1 -> filtered.sortedByDescending { it.lastReadAt }
+                                2 -> filtered.sortedBy { it.oldestFileAt ?: Long.MAX_VALUE }
+                                else -> filtered.sortedByDescending { it.bytes }
+                            }
+                            if (visible.isEmpty() && (!groupMode || selectedCategory != null)) item { Text(stringResource(R.string.storage_inventory_empty)) }
                             items(visible) { work ->
                                 Card(modifier = Modifier.fillMaxWidth()) {
                                     Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -183,6 +248,8 @@ class StorageController : BaseController<HomeControllerBinding>() {
                                         Column(Modifier.weight(1f)) {
                                             Text(work.manga.title, style = MaterialTheme.typography.titleMedium)
                                             Text(stringResource(R.string.storage_inventory_work, work.chapters.size, Formatter.formatFileSize(context, work.bytes)))
+                                            val fraction = if (data.bytes > 0L) (work.bytes.toDouble() / data.bytes).toFloat().coerceIn(0f, 1f) else 0f
+                                            LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
                                             Text(stringResource(when (work.type) {
                                                 StorageSeriesType.MANGA -> R.string.manga
                                                 StorageSeriesType.MANHWA -> R.string.manhwa
@@ -224,7 +291,10 @@ class StorageController : BaseController<HomeControllerBinding>() {
                         Timber.e(error, "Storage inventory failed")
                         failed = true
                         snapshot = null
-                    }.collect { snapshot = it }
+                    }.collect {
+                        snapshot = it
+                        if (it.works.none { work -> work.manga.id == selectedMangaId }) selectedMangaId = null
+                    }
                 loading = false
             }
         }
@@ -249,6 +319,25 @@ class StorageController : BaseController<HomeControllerBinding>() {
                 savingType = false
             }
         }
+    }
+
+    override fun canStillGoBack(): Boolean = selectedMangaId != null || selectedCategory != null
+
+    override fun handleBack(): Boolean {
+        if (selectedMangaId != null) {
+            selectedMangaId = null
+            return true
+        }
+        if (selectedCategory != null) {
+            selectedCategory = null
+            return true
+        }
+        return super.handleBack()
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        reload.update { it + 1 }
     }
 
     override fun onDestroyView(view: View) {

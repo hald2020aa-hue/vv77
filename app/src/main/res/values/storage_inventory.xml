@@ -12,4 +12,13 @@
     <string name="storage_inventory_classify">Set type</string>
     <string name="storage_inventory_automatic">Automatic (source tags)</string>
     <string name="storage_inventory_classify_error">Could not save classification. Try again.</string>
+    <string name="storage_inventory_by_work">Works</string>
+    <string name="storage_inventory_by_category">Categories</string>
+    <string name="storage_inventory_sort_size">Largest</string>
+    <string name="storage_inventory_sort_read">Last read</string>
+    <string name="storage_inventory_sort_file">Oldest file (approx.)</string>
+    <string name="storage_inventory_no_category">No explicit category</string>
+    <string name="storage_inventory_category_note">An item in multiple categories counts in each category; the overall total counts it once.</string>
+    <string name="storage_inventory_open_category">Open category</string>
+    <string name="storage_inventory_settings">Manga and manhwa storage size</string>
 </resources>

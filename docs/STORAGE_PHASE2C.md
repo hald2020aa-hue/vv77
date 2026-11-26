@@ -1,0 +1,12 @@
+# Storage phase 2C — browse spacing and storage analytics
+
+Base verified against GitHub `feature/storage-phase2` at `bad6754694a4c480ec655838e27f14b612ed4a3d`: every modified existing file matched its remote Git blob SHA before editing.
+
+## Changes
+- Neon Browse: reserve the measured expanded app-bar bottom plus 8dp, instead of relying only on its estimated height. Clip recycler drawing to the actual visible app-bar edge plus the gap during scroll; remove the pre-draw listener on view destruction. Use one column below 600dp and two above; a singleton group uses the full row. Language headers still span the full grid. No source filtering, extraction, or network changes.
+- Storage: group matched completed downloads by explicit library category, including a separate no-explicit-category group. Multi-category works are included in each relevant category; the global total is not double-counted. A bar indicates the group's share of global matched storage. Sort by size, latest read (history table), or oldest chapter file modification time (approximation, not a stored download date). Show per-work share. Provide entry from Settings > Manga and manhwa storage size, and refresh inventory after returning to the app. No database schema changes.
+- Retain existing manual classification and storage entry on Home. A sixth bottom navigation item is deferred because the existing Material BottomNavigationView has five items in dev; adding one without changing the component can cause inflation failure. No existing navigation item is removed.
+- Safe deletion and automatic source refresh are intentionally deferred. Existing deleteChapters uses asynchronous global work, cancels without joining and may recursively delete a parent directory; it must be audited and hardened before exposing storage bulk deletion. No destructive functionality is included in this patch.
+
+## Verification
+- Existing SQL migration fixture, static integration checks (10/10), resource checker (0 errors, 0 warnings), git diff whitespace and patch applicability tested locally. Android SDK/Gradle build and emulator/device tests not available in this environment. No claims of successful APK build or visual verification. Test initial layout and scrolling in Browse on folded/unfolded SM-F936U1, search expanded/collapsed, font scaling, Arabic RTL, category totals, last-read sort, and return from reader. Compare with current APK before installing.
