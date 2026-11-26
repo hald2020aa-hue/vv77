@@ -26,4 +26,17 @@
     <string name="storage_chapters_update_error">تعذر تحديث الفصول. تنزيلاتك الحالية ما زالت متاحة.</string>
     <string name="storage_chapters_new_count">الفصول الجديدة: %1$d</string>
     <string name="storage_chapters_new_badge">جديد</string>
+    <string name="storage_delete_title">حذف التنزيلات</string>
+    <string name="storage_delete_read">الفصول المقروءة فقط</string>
+    <string name="storage_delete_all">جميع الفصول المنزّلة المعروفة</string>
+    <string name="storage_delete_estimate">%1$d فصل · المساحة المتوقع تحريرها %2$s</string>
+    <string name="storage_delete_warning">سيتم حذف ملفات الفصول المحددة فقط. المكتبة والمفضلة والسجل وحالة القراءة تبقى كما هي. ستُلغى تنزيلات الأعمال المحددة، وقد تتوقف التنزيلات الأخرى مؤقتًا. لن تُحذف الملفات غير المكتملة.</string>
+    <string name="storage_delete_confirm">تأكيد الحذف</string>
+    <string name="storage_delete_running">جارٍ حذف الملفات المؤكدة…</string>
+    <string name="storage_delete_error">تعذّر إتمام الحذف أو تغيرت الملفات. حدّث التخزين وتحقق من التنزيلات قبل المحاولة مجددًا.</string>
+    <string name="storage_delete_result">تم حذف %1$d · تعذّر حذف %2$d</string>
+    <string name="storage_delete_category">حذف تنزيلات الفئة</string>
+    <string name="storage_delete_selected">الأعمال المحددة: %1$d</string>
+    <string name="storage_delete_select_all">تحديد كل الظاهر</string>
+    <string name="storage_delete_select_work">تحديد العمل</string>
 </resources>

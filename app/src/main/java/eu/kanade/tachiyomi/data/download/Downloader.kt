@@ -114,7 +114,11 @@ class Downloader(
     /**
      * Job deciding what to download and running it.
      */
+    @Volatile
     private var downloaderJob: Job? = null
+    private val retiringJobs = mutableListOf<Job>()
+    private var storageDeletionActive = false
+    private var deferredStart = false
 
     /** Individual chapter pauses persist independently from the existing download queue store. */
     private val pausedPrefs = context.getSharedPreferences("v5_paused_download_chapters", Context.MODE_PRIVATE)
@@ -172,12 +176,10 @@ class Downloader(
     @Volatile
     var isPaused: Boolean = false
 
-    init {
-        launchNow {
-            val chapters = async { store.restore() }
-            queue.addAll(chapters.await())
-            DownloadJob.callListeners()
-        }
+    private val restoreJob = launchNow {
+        val chapters = async { store.restore() }
+        queue.addAll(chapters.await())
+        DownloadJob.callListeners()
     }
 
     /**
@@ -186,7 +188,12 @@ class Downloader(
      *
      * @return true if the downloader is started, false otherwise.
      */
+    @Synchronized
     fun start(): Boolean {
+        if (storageDeletionActive) {
+            deferredStart = true
+            return false
+        }
         if (isRunning || queue.isEmpty()) {
             return false
         }
@@ -346,7 +353,7 @@ class Downloader(
     }
 
     private fun CoroutineScope.launchDownloadJob(download: Download) =
-        launchIO {
+        launch(Dispatchers.IO) {
             try {
                 downloadChapter(download)
                 // NonCancellable as a chapter that finished has to leave the queue even if a pause
@@ -365,9 +372,61 @@ class Downloader(
     /**
      * Stops the job that decides what to download, cancelling anything in flight.
      */
+    @Synchronized
     private fun cancelDownloaderJob() {
-        downloaderJob?.cancel()
+        retiringJobs.removeAll { it.isCompleted }
+        downloaderJob?.let { job ->
+            retiringJobs.add(job)
+            job.cancel()
+        }
         downloaderJob = null
+    }
+
+    @Synchronized
+    private fun beginStorageDeletion(): Boolean {
+        check(!storageDeletionActive) { "Storage deletion already running" }
+        storageDeletionActive = true
+        deferredStart = false
+        return isRunning
+    }
+
+    @Synchronized
+    private fun pendingWorkerJobs(): List<Job> = retiringJobs.toList()
+
+    @Synchronized
+    private fun finishStorageDeletion(wasRunning: Boolean): Boolean {
+        retiringJobs.removeAll { it.isCompleted }
+        storageDeletionActive = false
+        val restart = wasRunning || deferredStart
+        deferredStart = false
+        return restart
+    }
+
+    /** Keep the scheduler stopped until all cancelled child workers have exited and deletion ends. */
+    internal suspend fun <T> withStorageDeletion(block: suspend () -> T): T =
+        withContext(Dispatchers.Main) {
+            restoreJob.join()
+            check(!restoreJob.isCancelled) { "Download queue unavailable" }
+            val wasRunning = beginStorageDeletion()
+            try {
+                pause()
+                pendingWorkerJobs().forEach { it.join() }
+                block()
+            } finally {
+                if (finishStorageDeletion(wasRunning) && queue.isNotEmpty()) {
+                    DownloadJob.start(context)
+                }
+            }
+        }
+
+    /** Only called under the storage deletion gate, on Main, after workers have joined. */
+    internal fun cancelStorageWorkDownloads(workIds: Set<Long>) {
+        check(storageDeletionActive)
+        queue.filter { it.manga.id in workIds }.forEach { download ->
+            download.chapter.id?.let(::forgetPausedChapter)
+            queue.remove(download)
+        }
+        queue.updateListeners()
     }
 
     /**

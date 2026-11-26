@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.ImageView
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,6 +42,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.StorageDeleteRequest
+import eu.kanade.tachiyomi.data.download.StorageDeleteResult
 import eu.kanade.tachiyomi.data.download.StorageSeriesType
 import eu.kanade.tachiyomi.data.download.StorageSnapshot
 import eu.kanade.tachiyomi.data.image.coil.loadManga
@@ -62,7 +67,8 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-/** Storage inventory, explicit classification and additive chapter refresh. */
+/** Storage inventory, classification, additive refresh and confirmed file-only deletion. */
+@OptIn(ExperimentalFoundationApi::class)
 class StorageController : BaseController<HomeControllerBinding>() {
     private val storage by lazy { Injekt.get<DownloadManager>().storageManager }
     private val reload = MutableStateFlow(0L)
@@ -74,6 +80,12 @@ class StorageController : BaseController<HomeControllerBinding>() {
     private var sortMode by mutableStateOf(0)
     private var selectedType by mutableStateOf<StorageSeriesType?>(null)
     private var selectedMangaId by mutableStateOf<Long?>(null)
+    private var selectedWorkIds by mutableStateOf<Set<Long>>(emptySet())
+    private var deleteRequests by mutableStateOf<Pair<StorageDeleteRequest, StorageDeleteRequest>?>(null)
+    private var deleteReadOnly by mutableStateOf(true)
+    private var deleting by mutableStateOf(false)
+    private var deletionFailed by mutableStateOf(false)
+    private var deletionResult by mutableStateOf<StorageDeleteResult?>(null)
     private var refreshState by mutableStateOf(RefreshState.IDLE)
     private var newChapters by mutableStateOf<List<Chapter>>(emptyList())
     private var refreshJob: Job? = null
@@ -131,6 +143,34 @@ class StorageController : BaseController<HomeControllerBinding>() {
                         },
                     )
                 }
+                deleteRequests?.let { (all, read) ->
+                    val request = if (deleteReadOnly) read else all
+                    AlertDialog(
+                        onDismissRequest = { if (!deleting) deleteRequests = null },
+                        title = { Text(stringResource(R.string.storage_delete_title)) },
+                        text = {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                FilterChip(selected = deleteReadOnly, enabled = !deleting,
+                                    onClick = { deleteReadOnly = true }, label = { Text(stringResource(R.string.storage_delete_read)) })
+                                FilterChip(selected = !deleteReadOnly, enabled = !deleting,
+                                    onClick = { deleteReadOnly = false }, label = { Text(stringResource(R.string.storage_delete_all)) })
+                                Text(stringResource(R.string.storage_delete_estimate, request.targets.size, Formatter.formatFileSize(context, request.bytes)))
+                                Text(stringResource(R.string.storage_delete_warning))
+                                if (deleting) CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(enabled = !deleting && request.targets.isNotEmpty(), onClick = { executeDeletion(request) }) {
+                                Text(stringResource(R.string.storage_delete_confirm), color = MaterialTheme.colorScheme.error)
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(enabled = !deleting, onClick = { deleteRequests = null }) {
+                                Text(stringResource(android.R.string.cancel))
+                            }
+                        },
+                    )
+                }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = topInset + 12.dp, bottom = bottomInset + 16.dp),
@@ -138,11 +178,17 @@ class StorageController : BaseController<HomeControllerBinding>() {
                 ) {
                     item {
                         Text(stringResource(R.string.storage_inventory_title), style = MaterialTheme.typography.headlineSmall)
-                        Button(onClick = { reload.update { it + 1 } }, enabled = !loading) {
+                        Button(onClick = { reload.update { it + 1 } }, enabled = !loading && !deleting) {
                             Text(stringResource(R.string.storage_inventory_refresh))
                         }
                         if (loading) Text(stringResource(R.string.loading))
                         if (failed) Text(stringResource(R.string.storage_inventory_error), color = MaterialTheme.colorScheme.error)
+                        if (deleting) Text(stringResource(R.string.storage_delete_running))
+                        if (deletionFailed) Text(stringResource(R.string.storage_delete_error), color = MaterialTheme.colorScheme.error)
+                        deletionResult?.let { result ->
+                            Text(stringResource(R.string.storage_delete_result, result.deletedCount, result.failedCount),
+                                color = if (result.failedCount > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
+                        }
                     }
                     if (data != null && !failed) {
                         item {
@@ -153,6 +199,10 @@ class StorageController : BaseController<HomeControllerBinding>() {
                             item {
                                 Button(onClick = { closeWork() }) { Text(stringResource(R.string.all)) }
                                 Text(selected.manga.title, style = MaterialTheme.typography.titleLarge)
+                                if (!selected.manga.isLocal()) TextButton(enabled = !loading && !deleting && refreshState != RefreshState.LOADING,
+                                    onClick = { selected.manga.id?.let { prepareDeletion(setOf(it)) } }) {
+                                    Text(stringResource(R.string.storage_delete_title))
+                                }
                                 when (refreshState) {
                                     RefreshState.LOADING -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                         CircularProgressIndicator(modifier = Modifier.size(20.dp))
@@ -201,7 +251,7 @@ class StorageController : BaseController<HomeControllerBinding>() {
                                     items(options) { option ->
                                         FilterChip(
                                             selected = selectedType == option,
-                                            onClick = { selectedType = option; selectedCategory = null },
+                                            onClick = { selectedType = option; selectedCategory = null; selectedWorkIds = emptySet() },
                                             label = { Text(stringResource(when (option) {
                                                 StorageSeriesType.MANGA -> R.string.manga
                                                 StorageSeriesType.MANHWA -> R.string.manhwa
@@ -215,10 +265,10 @@ class StorageController : BaseController<HomeControllerBinding>() {
                             item {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     FilterChip(selected = !groupMode, onClick = {
-                                        groupMode = false; selectedCategory = null
+                                        groupMode = false; selectedCategory = null; selectedWorkIds = emptySet()
                                     }, label = { Text(stringResource(R.string.storage_inventory_by_work)) })
                                     FilterChip(selected = groupMode, onClick = {
-                                        groupMode = true; selectedCategory = null
+                                        groupMode = true; selectedCategory = null; selectedWorkIds = emptySet()
                                     }, label = { Text(stringResource(R.string.storage_inventory_by_category)) })
                                 }
                                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -251,14 +301,18 @@ class StorageController : BaseController<HomeControllerBinding>() {
                                             Text(stringResource(R.string.storage_inventory_summary, works.size, works.sumOf { it.chapters.size }, Formatter.formatFileSize(context, bytes)))
                                             LinearProgressIndicator(progress = { ratio }, modifier = Modifier.fillMaxWidth())
                                             Text("${(ratio * 100).toInt()}%")
-                                            TextButton(onClick = { selectedCategory = id }) { Text(stringResource(R.string.storage_inventory_open_category)) }
+                                            TextButton(onClick = { selectedCategory = id; selectedWorkIds = emptySet() }) { Text(stringResource(R.string.storage_inventory_open_category)) }
+                                            val deletable = works.filterNot { it.manga.isLocal() }.mapNotNull { it.manga.id }.toSet()
+                                            TextButton(enabled = !loading && !deleting && deletable.isNotEmpty(), onClick = { prepareDeletion(deletable) }) {
+                                                Text(stringResource(R.string.storage_delete_category))
+                                            }
                                         }
                                     }
                                 }
                                 if (groups.isEmpty()) item { Text(stringResource(R.string.storage_inventory_empty)) }
                             }
                             if (groupMode && selectedCategory != null) item {
-                                TextButton(onClick = { selectedCategory = null }) { Text(stringResource(R.string.storage_inventory_by_category)) }
+                                TextButton(onClick = { selectedCategory = null; selectedWorkIds = emptySet() }) { Text(stringResource(R.string.storage_inventory_by_category)) }
                                 Text(groups.firstOrNull { it.first == selectedCategory }?.second.orEmpty(), style = MaterialTheme.typography.titleLarge)
                             }
                             val filtered = typed.filter { work ->
@@ -274,8 +328,29 @@ class StorageController : BaseController<HomeControllerBinding>() {
                                 else -> filtered.sortedByDescending { it.bytes }
                             }
                             if (visible.isEmpty() && (!groupMode || selectedCategory != null)) item { Text(stringResource(R.string.storage_inventory_empty)) }
+                            if (visible.isNotEmpty()) item {
+                                val ids = visible.filterNot { it.manga.isLocal() }.mapNotNull { it.manga.id }.toSet()
+                                if (selectedWorkIds.isNotEmpty()) Text(stringResource(R.string.storage_delete_selected, selectedWorkIds.size))
+                                LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    item {
+                                        TextButton(enabled = !loading && !deleting && ids.isNotEmpty(), onClick = { selectedWorkIds = ids }) {
+                                            Text(stringResource(R.string.storage_delete_select_all))
+                                        }
+                                    }
+                                    if (selectedWorkIds.isNotEmpty()) {
+                                        item { TextButton(enabled = !deleting, onClick = { selectedWorkIds = emptySet() }) { Text(stringResource(android.R.string.cancel)) } }
+                                        item { TextButton(enabled = !loading && !deleting, onClick = { prepareDeletion(selectedWorkIds) }) { Text(stringResource(R.string.storage_delete_title)) } }
+                                    }
+                                }
+                            }
                             items(visible) { work ->
-                                Card(modifier = Modifier.fillMaxWidth()) {
+                                val workId = work.manga.id
+                                val canSelect = !work.manga.isLocal() && workId != null
+                                Card(modifier = Modifier.fillMaxWidth().combinedClickable(
+                                    enabled = !loading && !deleting,
+                                    onClick = { if (selectedWorkIds.isNotEmpty() && canSelect && workId != null) toggleSelection(workId) else openWork(workId) },
+                                    onLongClick = { if (canSelect && workId != null) toggleSelection(workId) },
+                                )) {
                                     Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                                         AndroidView(
                                             factory = { ImageView(it).apply { scaleType = ImageView.ScaleType.CENTER_CROP } },
@@ -283,6 +358,11 @@ class StorageController : BaseController<HomeControllerBinding>() {
                                             modifier = Modifier.size(width = 72.dp, height = 104.dp),
                                         )
                                         Column(Modifier.weight(1f)) {
+                                            if (canSelect && workId != null) Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Checkbox(checked = workId in selectedWorkIds, enabled = !loading && !deleting,
+                                                    onCheckedChange = { toggleSelection(workId) })
+                                                Text(stringResource(R.string.storage_delete_select_work))
+                                            }
                                             Text(work.manga.title, style = MaterialTheme.typography.titleMedium)
                                             Text(stringResource(R.string.storage_inventory_work, work.chapters.size, Formatter.formatFileSize(context, work.bytes)))
                                             val fraction = if (data.bytes > 0L) (work.bytes.toDouble() / data.bytes).toFloat().coerceIn(0f, 1f) else 0f
@@ -330,6 +410,7 @@ class StorageController : BaseController<HomeControllerBinding>() {
                         snapshot = null
                     }.collect {
                         snapshot = it
+                        selectedWorkIds = selectedWorkIds.intersect(it.works.mapNotNull { work -> work.manga.id }.toSet())
                         if (selectedMangaId != null && it.works.none { work -> work.manga.id == selectedMangaId }) closeWork()
                     }
                 loading = false
@@ -337,8 +418,46 @@ class StorageController : BaseController<HomeControllerBinding>() {
         }
     }
 
+    private fun toggleSelection(id: Long) {
+        if (deleting) return
+        selectedWorkIds = if (id in selectedWorkIds) selectedWorkIds - id else selectedWorkIds + id
+    }
+
+    private fun prepareDeletion(ids: Set<Long>) {
+        if (loading || deleting || ids.isEmpty()) return
+        val data = snapshot ?: return
+        val all = data.deletionRequest(ids, readOnly = false)
+        if (all.targets.isEmpty()) return
+        deleteReadOnly = true
+        deletionFailed = false
+        deletionResult = null
+        deleteRequests = all to data.deletionRequest(ids, readOnly = true)
+    }
+
+    private fun executeDeletion(request: StorageDeleteRequest) {
+        if (deleting || request.targets.isEmpty()) return
+        deleting = true
+        deletionFailed = false
+        deletionResult = null
+        viewScope.launch {
+            try {
+                flow { emit(storage.deleteDownloads(request)) }
+                    .catch { error ->
+                        Timber.e(error, "Storage deletion rejected or failed")
+                        deletionFailed = true
+                    }.collect { result -> deletionResult = result }
+            } finally {
+                deleting = false
+                deleteRequests = null
+                selectedWorkIds = emptySet()
+                reload.update { it + 1 }
+            }
+        }
+    }
+
     private fun openWork(id: Long?) {
-        if (id == null) return
+        if (id == null || deleting) return
+        selectedWorkIds = emptySet()
         closeWork()
         selectedMangaId = id
         refreshWork()
@@ -400,9 +519,14 @@ class StorageController : BaseController<HomeControllerBinding>() {
         }
     }
 
-    override fun canStillGoBack(): Boolean = selectedMangaId != null || selectedCategory != null
+    override fun canStillGoBack(): Boolean = deleting || selectedWorkIds.isNotEmpty() || selectedMangaId != null || selectedCategory != null
 
     override fun handleBack(): Boolean {
+        if (deleting) return true
+        if (selectedWorkIds.isNotEmpty()) {
+            selectedWorkIds = emptySet()
+            return true
+        }
         if (selectedMangaId != null) {
             closeWork()
             return true

@@ -44,8 +44,8 @@ class DownloadManager(
      */
     private val cache = DownloadCache(context, provider, sourceManager)
 
-    /** One read-only storage inventory, sharing this manager's provider and cache. */
-    val storageManager: StorageManager by lazy { StorageManager(provider, cache, sourceManager) }
+    /** One storage inventory sharing this manager's provider, cache and downloader. */
+    val storageManager: StorageManager by lazy { StorageManager(provider, cache, sourceManager, downloader) }
 
     /**
      * Downloader whose only task is to download chapters.

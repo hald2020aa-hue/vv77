@@ -26,4 +26,17 @@
     <string name="storage_chapters_update_error">Could not update chapters. Your existing downloads are still available.</string>
     <string name="storage_chapters_new_count">New chapters found: %1$d</string>
     <string name="storage_chapters_new_badge">New</string>
+    <string name="storage_delete_title">Delete downloads</string>
+    <string name="storage_delete_read">Read chapters only</string>
+    <string name="storage_delete_all">All matched downloaded chapters</string>
+    <string name="storage_delete_estimate">%1$d chapters · approximately %2$s to free</string>
+    <string name="storage_delete_warning">Only the matched chapter files will be deleted. Library, favorites, reading history and read status are kept. Pending downloads of the selected works will be cancelled; unrelated downloads may pause briefly. Unfinished files are not removed.</string>
+    <string name="storage_delete_confirm">Confirm deletion</string>
+    <string name="storage_delete_running">Deleting confirmed files…</string>
+    <string name="storage_delete_error">Deletion was refused or interrupted. Refresh storage and check downloads before trying again.</string>
+    <string name="storage_delete_result">Deleted: %1$d · Failed: %2$d</string>
+    <string name="storage_delete_category">Delete category downloads</string>
+    <string name="storage_delete_selected">Selected works: %1$d</string>
+    <string name="storage_delete_select_all">Select all visible</string>
+    <string name="storage_delete_select_work">Select work</string>
 </resources>

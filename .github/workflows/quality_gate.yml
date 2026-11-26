@@ -76,6 +76,11 @@ jobs:
         run: python3 qa/v22/check_resources.py . qa/v22/baseline_ids.json
       - name: Check crash patterns (MaterialButton shared elements)
         run: python3 qa/v22/check_runtime_risks.py .
+      - name: Check storage migration, branding, refresh and deletion safeguards
+        run: |
+          python3 qa/storage/check_migration21.py
+          python3 qa/storage/check_refresh_branding.py
+          python3 qa/storage/check_deletion.py
       - name: Run unit tests and compile debug APKs
         run: ./gradlew -Pjh.arm64Only=true --no-daemon testDevDebugUnitTest verifySingleArm64DevApk --stacktrace
       - name: Verify single APK integrity and debug signature

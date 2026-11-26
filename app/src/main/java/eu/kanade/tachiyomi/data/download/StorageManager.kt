@@ -9,8 +9,10 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.isLocal
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
@@ -18,7 +20,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
 
-data class StoredChapter(val chapter: Chapter, val bytes: Long, val modifiedAt: Long)
+data class StoredChapter(val chapter: Chapter, val bytes: Long, val modifiedAt: Long, val fileUri: String)
+
+data class StorageDeleteResult(val deletedCount: Int, val failedCount: Int)
 
 data class StoredManga(
     val manga: Manga,
@@ -34,13 +38,26 @@ data class StoredManga(
 data class StorageSnapshot(val works: List<StoredManga>) {
     val bytes: Long get() = works.sumOf { it.bytes }
     val chapterCount: Int get() = works.sumOf { it.chapters.size }
+
+    fun deletionRequest(workIds: Set<Long>, readOnly: Boolean): StorageDeleteRequest {
+        val candidates = works.filter { !it.manga.isLocal() && it.manga.id in workIds }.flatMap { work ->
+            val mangaId = checkNotNull(work.manga.id)
+            work.chapters.mapNotNull { entry ->
+                entry.chapter.id?.let {
+                    StorageDeleteCandidate(StorageDeleteTarget(mangaId, it, entry.bytes, entry.modifiedAt, entry.fileUri), entry.chapter.read)
+                }
+            }
+        }
+        return StorageDeletionPolicy.request(workIds, readOnly, candidates)
+    }
 }
 
-/** Inventory of matched, completed downloads; only explicit classification writes metadata. */
+/** Inventory and explicit deletion of matched, completed downloads. Classification alone writes manga metadata. */
 class StorageManager internal constructor(
     private val provider: DownloadProvider,
     private val cache: DownloadCache,
     private val sourceManager: SourceManager,
+    private val downloader: Downloader,
 ) {
     private val db by injectLazy<DatabaseHelper>()
     private val mutex = Mutex()
@@ -57,9 +74,11 @@ class StorageManager internal constructor(
             val source = checkNotNull(sourceManager.get(manga.source))
             val update = source.getMangaUpdate(manga, emptyList(), fetchDetails = false, fetchChapters = true)
             currentCoroutineContext().ensureActive()
-            val (added, _) = syncChaptersWithSource(db, update.chapters, manga, source, preserveExisting = true)
-            mutex.withLock { saved = null }
-            added
+            mutex.withLock {
+                val (added, _) = syncChaptersWithSource(db, update.chapters, manga, source, preserveExisting = true)
+                saved = null
+                added
+            }
         } finally {
             activeRefreshes.remove(id)
         }
@@ -82,6 +101,114 @@ class StorageManager internal constructor(
             check(db.setStorageManualType(id, type) == 1) { "Manga no longer exists" }
             saved = null
         }
+    }
+
+    /** A confirmation is bound to exact files. Recheck every target before cancelling the queue. */
+    suspend fun deleteDownloads(request: StorageDeleteRequest): StorageDeleteResult =
+        withContext(NonCancellable + Dispatchers.IO) {
+            require(request.targets.isNotEmpty())
+            require(request.targets.map { it.uri }.distinct().size == request.targets.size)
+            downloader.withStorageDeletion {
+                mutex.withLock {
+                    val files = withContext(Dispatchers.IO) {
+                        val allManga = db.getMangas().executeAsBlocking()
+                        request.targets.groupBy { it.mangaId }.flatMap { (id, targets) ->
+                            check(id in request.workIds && id !in activeRefreshes)
+                            val manga = checkNotNull(db.getManga(id).executeAsBlocking())
+                            check(!manga.isLocal())
+                            val source = checkNotNull(sourceManager.get(manga.source))
+                            val sourceDir = checkNotNull(provider.findSourceDir(source))
+                            val dir = checkNotNull(provider.findMangaDir(manga, source))
+                            if (sourceDir.uri.scheme == "file") validateDirectChild(sourceDir, checkNotNull(sourceDir.parentFile))
+                            validateDirectChild(dir, sourceDir)
+                            // Sanitized titles can collide, including across sources with identical folder names.
+                            check(allManga.count { other ->
+                                val otherSource = sourceManager.get(other.source)
+                                otherSource != null && provider.getMangaDirName(other).equals(provider.getMangaDirName(manga), true) &&
+                                    provider.getSourceDirName(otherSource).equals(provider.getSourceDirName(source), true)
+                            } == 1) { "Ambiguous manga download directory" }
+                            val chapters = db.getChapters(manga).executeAsBlocking()
+                            val children = checkNotNull(dir.listFiles())
+                            targets.map { target ->
+                                val chapter = chapters.single { it.id == target.chapterId }
+                                check(!request.readOnly || chapter.read) { "Read status changed" }
+                                val matches = children.filter { child -> matchesChapter(child, chapter) }
+                                val file = matches.single()
+                                validateTree(file, dir)
+                                check(file.uri.toString() == target.uri && file.lastModified() == target.modifiedAt && sizeOf(file) == target.bytes) {
+                                    "Download changed since confirmation"
+                                }
+                                check(chapters.count { matchesChapter(file, it) } == 1) { "Ambiguous chapter download" }
+                                ValidatedStorageFile(manga, chapter, dir, file, target)
+                            }
+                        }
+                    }
+                    // Cancel only the selected works; all other queue entries survive the pause.
+                    downloader.cancelStorageWorkDownloads(request.workIds)
+                    withContext(Dispatchers.IO) {
+                        var deleted = 0
+                        var failed = 0
+                        try {
+                            for ((manga, chapter, dir, file, target) in files) {
+                                val latest = db.getChapter(target.chapterId).executeAsBlocking()
+                                if (latest == null || latest.manga_id != target.mangaId ||
+                                    request.readOnly && !latest.read || !file.exists() || !matchesChapter(file, latest)
+                                ) {
+                                    failed++
+                                    continue
+                                }
+                                validateTree(file, dir)
+                                if (file.lastModified() != target.modifiedAt || sizeOf(file) != target.bytes) {
+                                    failed++
+                                    continue
+                                }
+                                // Never delete the parent manga/source folder or temporary downloads.
+                                if (file.delete() && !file.exists()) {
+                                    cache.removeChapters(listOf(chapter), manga)
+                                    deleted++
+                                } else {
+                                    failed++
+                                }
+                            }
+                            StorageDeleteResult(deleted, failed)
+                        } finally {
+                            saved = null
+                            cache.forceRenewCache()
+                        }
+                    }
+                }
+            }
+        }
+
+    private data class ValidatedStorageFile(
+        val manga: Manga,
+        val chapter: Chapter,
+        val parent: UniFile,
+        val file: UniFile,
+        val target: StorageDeleteTarget,
+    )
+
+    private fun matchesChapter(file: UniFile, chapter: Chapter): Boolean {
+        val name = file.name ?: return false
+        if (name.endsWith(Downloader.TMP_DIR_SUFFIX, ignoreCase = true)) return false
+        return provider.getValidChapterDirNames(chapter).any { candidate ->
+            (file.isDirectory && name.equals(candidate, true)) ||
+                (file.isFile && name.equals("$candidate.cbz", true))
+        }
+    }
+
+    /** Reject symlinks and paths that are not a direct child of the configured directory. */
+    private fun validateDirectChild(file: UniFile, parent: UniFile) {
+        if (file.uri.scheme == "file") {
+            val child = File(checkNotNull(file.uri.path))
+            val expectedParent = File(checkNotNull(parent.uri.path)).canonicalFile
+            check(child.canonicalFile == File(expectedParent, child.name)) { "Unsafe download path" }
+        }
+    }
+
+    private fun validateTree(file: UniFile, parent: UniFile) {
+        validateDirectChild(file, parent)
+        if (file.isDirectory) checkNotNull(file.listFiles()).forEach { validateTree(it, file) }
     }
 
     private suspend fun scan(): StorageSnapshot {
@@ -107,7 +234,7 @@ class StorageManager internal constructor(
                     sequenceOf(it.lowercase(), "${it.lowercase()}.cbz")
                 }.mapNotNull { byName[it]?.singleOrNull() }.firstOrNull() ?: continue
                 if (!seenChapterDirs.add(file.uri)) continue
-                chapters += StoredChapter(chapter, sizeOf(file), file.lastModified())
+                chapters += StoredChapter(chapter, sizeOf(file), file.lastModified(), file.uri.toString())
             }
             if (chapters.isNotEmpty()) {
                 works += StoredManga(
