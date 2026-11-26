@@ -4,7 +4,8 @@
 1. A MaterialButton (or <Button>, which Material themes inflate as MaterialButton) with
    android:background in XML. Material throws IllegalStateException from getShapeAppearanceModel()
    when such a view is a shared element ("overwritten background"). Use app:backgroundTint instead.
-2. Shared-element callbacks must be SafeContainerTransformCallback, never the raw Material one.
+2. Kotlin must never call setBackground()/background= on a view that is a shared element for the reader
+   transition (startReadingButton, playButton). NeonGradientButton paints its gradient without it.
 3. Kotlin in `main` may only touch dev-only views through findViewById(...)?. (never binding fields).
 Usage: check_runtime_risks.py <project_root>
 """
@@ -32,14 +33,16 @@ for flavor in ("main", "dev"):
                     errors.append("%s: %s has android:background (MaterialButton overwritten-background crash)" % (fp, tag))
 
 kt_root = os.path.join(root, "app", "src", "main", "java")
+BAD = re.compile(r"\b(startReadingButton|playButton)\s*\.\s*(background\s*=|setBackground\w*\()")
 for dp, _, fs in os.walk(kt_root):
     for f in fs:
         if not f.endswith(".kt"):
             continue
         fp = os.path.join(dp, f)
         text = open(fp, encoding="utf-8").read()
-        if f != "SafeContainerTransformCallback.kt" and re.search(r"(?<![A-Za-z])MaterialContainerTransformSharedElementCallback\(\)", text):
-            errors.append("%s: raw MaterialContainerTransformSharedElementCallback (use SafeContainerTransformCallback)" % fp)
+        for m in BAD.finditer(text):
+            line = text.count("\n", 0, m.start()) + 1
+            errors.append("%s:%d: background replaced on shared-element button %s" % (fp, line, m.group(1)))
 
 for e in errors:
     print("ERROR ", e)

@@ -6,6 +6,8 @@ on:
     branches:
       - main
       - 'feature/**'
+      - 'fix/**'
+      - 'design/**'
   workflow_dispatch:
   pull_request:
 
@@ -72,7 +74,7 @@ jobs:
         run: python3 qa/v18/validate_unified_neon.py
       - name: Validate V22 resources (ids preserved, references resolve)
         run: python3 qa/v22/check_resources.py . qa/v22/baseline_ids.json
-      - name: Check crash patterns (shared-element / MaterialButton)
+      - name: Check crash patterns (MaterialButton shared elements)
         run: python3 qa/v22/check_runtime_risks.py .
       - name: Run unit tests and compile debug APKs
         run: ./gradlew -Pjh.arm64Only=true --no-daemon testDevDebugUnitTest verifySingleArm64DevApk --stacktrace
