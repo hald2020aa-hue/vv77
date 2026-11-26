@@ -647,9 +647,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         setBottomNavButtons(preferences.pageLayout().get())
         (binding.toolbar.background as? LayerDrawable)?.let { layerDrawable ->
             val isDoublePage = splitItem?.isVisible ?: false
-            // Shout out to Google for not fixing setVisible https://issuetracker.google.com/issues/127538945
-            layerDrawable.findDrawableByLayerId(R.id.layer_full_width).alpha = if (!isDoublePage) 255 else 0
-            layerDrawable.findDrawableByLayerId(R.id.layer_one_item).alpha = if (isDoublePage) 255 else 0
+            // The standard reader uses these ripple layers; themed toolbars may omit them.
+            // Preserve the themed background and only adjust layers that actually exist.
+            layerDrawable.findDrawableByLayerId(R.id.layer_full_width)?.alpha = if (!isDoublePage) 255 else 0
+            layerDrawable.findDrawableByLayerId(R.id.layer_one_item)?.alpha = if (isDoublePage) 255 else 0
         }
         return super.onPrepareOptionsMenu(menu)
     }
