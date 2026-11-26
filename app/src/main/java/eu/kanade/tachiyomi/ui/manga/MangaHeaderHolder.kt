@@ -54,7 +54,6 @@ import eu.kanade.tachiyomi.util.system.hueShiftedTo
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.backgroundColor
-import eu.kanade.tachiyomi.widget.NeonGradientButton
 import io.noties.markwon.Markwon
 import io.noties.markwon.SoftBreakAddsNewLinePlugin
 import io.noties.markwon.image.coil.CoilImagesPlugin
@@ -775,12 +774,7 @@ class MangaHeaderHolder(
                 // Real gradient panel, not a solid palette tint. The button keeps Material's own
                 // background (never setBackground) so it stays a valid shared element for the
                 // reader transition; NeonGradientButton paints the gradient itself.
-                val neonButton = startReadingButton as? NeonGradientButton
-                if (neonButton != null) {
-                    neonButton.applyNeonGradient()
-                } else {
-                    startReadingButton.backgroundTintList = ColorStateList(states, colors)
-                }
+                startReadingButton.applyNeonGradient()
             } else {
                 startReadingButton.backgroundTintList = ColorStateList(states, colors)
             }
