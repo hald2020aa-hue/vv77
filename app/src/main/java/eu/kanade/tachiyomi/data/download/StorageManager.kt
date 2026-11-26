@@ -7,6 +7,9 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.isLocal
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -43,6 +46,24 @@ class StorageManager internal constructor(
     private val mutex = Mutex()
     private var saved: Pair<Long, StorageSnapshot>? = null
     val changes = cache.storageRevision
+    private val activeRefreshes = ConcurrentHashMap.newKeySet<Long>()
+
+    /** Only called from storage. Existing chapter metadata and download paths are kept intact. */
+    suspend fun refreshChapters(id: Long): List<Chapter> = withContext(Dispatchers.IO) {
+        check(activeRefreshes.add(id)) { "Storage chapter refresh already running" }
+        try {
+            val manga = checkNotNull(db.getManga(id).executeAsBlocking())
+            if (manga.isLocal()) return@withContext emptyList()
+            val source = checkNotNull(sourceManager.get(manga.source))
+            val update = source.getMangaUpdate(manga, emptyList(), fetchDetails = false, fetchChapters = true)
+            currentCoroutineContext().ensureActive()
+            val (added, _) = syncChaptersWithSource(db, update.chapters, manga, source, preserveExisting = true)
+            mutex.withLock { saved = null }
+            added
+        } finally {
+            activeRefreshes.remove(id)
+        }
+    }
 
     /** Refresh on demand to include external filesystem changes and fresh DB metadata. */
     suspend fun snapshot(force: Boolean = false): StorageSnapshot = withContext(Dispatchers.IO) {

@@ -22,6 +22,7 @@ import java.util.TreeSet
  * @param rawSourceChapters a list of chapters from the source.
  * @param manga the manga of the chapters.
  * @param source the source of the chapters.
+ * @param preserveExisting only append chapters; do not delete or rewrite known chapters.
  * @return a pair of new insertions and deletions.
  */
 @Suppress("DEPRECATION")
@@ -30,6 +31,21 @@ fun syncChaptersWithSource(
     rawSourceChapters: List<SChapter>,
     manga: Manga,
     source: Source,
+    preserveExisting: Boolean = false,
+): Pair<List<Chapter>, List<Chapter>> = synchronized(chapterSyncLocks[(manga.id.hashCode() and Int.MAX_VALUE) % chapterSyncLocks.size]) {
+    syncChaptersLocked(db, rawSourceChapters, manga, source, preserveExisting)
+}
+
+// Serialize database synchronization for a work across existing callers without holding a network request.
+private val chapterSyncLocks = Array(64) { Any() }
+
+@Suppress("DEPRECATION")
+private fun syncChaptersLocked(
+    db: DatabaseHelper,
+    rawSourceChapters: List<SChapter>,
+    manga: Manga,
+    source: Source,
+    preserveExisting: Boolean,
 ): Pair<List<Chapter>, List<Chapter>> {
     if (rawSourceChapters.isEmpty()) {
         throw Exception("No chapters found")
@@ -73,7 +89,7 @@ fun syncChaptersWithSource(
         // Add the chapter if not in db already, or update if the metadata changed.
         if (dbChapter == null) {
             toAdd.add(sourceChapter)
-        } else {
+        } else if (!preserveExisting) {
             // this forces metadata update for the main viewable things in the chapter list
             if (source is HttpSource) {
                 source.prepareNewChapter(sourceChapter, manga)
@@ -114,7 +130,7 @@ fun syncChaptersWithSource(
 
     // Chapters from the db not in the source.
     val toDelete =
-        dbChapters.filterNot { dbChapter ->
+        if (preserveExisting) emptyList() else dbChapters.filterNot { dbChapter ->
             sourceChapters.any { sourceChapter ->
                 dbChapter.url == sourceChapter.url
             }
@@ -122,6 +138,7 @@ fun syncChaptersWithSource(
 
     // Return if there's nothing to add, delete or change, avoid unnecessary db transactions.
     if (toAdd.isEmpty() && toDelete.isEmpty() && toChange.isEmpty()) {
+        if (preserveExisting) return Pair(emptyList(), emptyList())
         val newestDate = dbChapters.maxOfOrNull { it.date_upload } ?: 0L
         if (newestDate != 0L && newestDate != manga.last_update) {
             manga.last_update = newestDate
@@ -180,7 +197,9 @@ fun syncChaptersWithSource(
         }
 
         // Fix order in source.
-        db.fixChaptersSourceOrder(sourceChapters).executeAsBlocking()
+        if (!preserveExisting) {
+            db.fixChaptersSourceOrder(sourceChapters).executeAsBlocking()
+        }
 
         // Set this manga as updated since chapters were changed
         val newestChapterDate =
@@ -197,6 +216,7 @@ fun syncChaptersWithSource(
         }
         db.updateLastUpdated(manga).executeAsBlocking()
     }
+    if (preserveExisting) return Pair(toAdd.toList(), emptyList())
     val reAddedSet = readded.toSet()
     return Pair(
         toAdd

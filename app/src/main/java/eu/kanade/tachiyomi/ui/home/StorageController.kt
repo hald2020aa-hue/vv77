@@ -23,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.StorageSeriesType
 import eu.kanade.tachiyomi.data.download.StorageSnapshot
@@ -45,6 +47,9 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.enhanced.EnhancedReadingTheme
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.system.isOnline
+import eu.kanade.tachiyomi.util.isLocal
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -57,7 +62,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-/** Storage inventory and explicit classification. Deletion and source refresh are not exposed yet. */
+/** Storage inventory, explicit classification and additive chapter refresh. */
 class StorageController : BaseController<HomeControllerBinding>() {
     private val storage by lazy { Injekt.get<DownloadManager>().storageManager }
     private val reload = MutableStateFlow(0L)
@@ -69,6 +74,10 @@ class StorageController : BaseController<HomeControllerBinding>() {
     private var sortMode by mutableStateOf(0)
     private var selectedType by mutableStateOf<StorageSeriesType?>(null)
     private var selectedMangaId by mutableStateOf<Long?>(null)
+    private var refreshState by mutableStateOf(RefreshState.IDLE)
+    private var newChapters by mutableStateOf<List<Chapter>>(emptyList())
+    private var refreshJob: Job? = null
+    private enum class RefreshState { IDLE, LOADING, OFFLINE, LOCAL, SUCCESS, ERROR }
     private var classifyMangaId by mutableStateOf<Long?>(null)
     private var savingType by mutableStateOf(false)
     private var typeSaveFailed by mutableStateOf(false)
@@ -142,9 +151,37 @@ class StorageController : BaseController<HomeControllerBinding>() {
                         }
                         if (selected != null) {
                             item {
-                                Button(onClick = { selectedMangaId = null }) { Text(stringResource(R.string.all)) }
+                                Button(onClick = { closeWork() }) { Text(stringResource(R.string.all)) }
                                 Text(selected.manga.title, style = MaterialTheme.typography.titleLarge)
+                                when (refreshState) {
+                                    RefreshState.LOADING -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                        Text(stringResource(R.string.storage_chapters_updating))
+                                    }
+                                    RefreshState.OFFLINE -> {
+                                        Text(stringResource(R.string.storage_chapters_offline))
+                                        TextButton(onClick = { refreshWork() }) { Text(stringResource(R.string.retry)) }
+                                    }
+                                    RefreshState.ERROR -> {
+                                        Text(stringResource(R.string.storage_chapters_update_error), color = MaterialTheme.colorScheme.error)
+                                        TextButton(onClick = { refreshWork() }) { Text(stringResource(R.string.retry)) }
+                                    }
+                                    RefreshState.SUCCESS -> Text(stringResource(R.string.storage_chapters_new_count, newChapters.size))
+                                    RefreshState.LOCAL, RefreshState.IDLE -> Unit
+                                }
                             }
+                            if (newChapters.isNotEmpty()) {
+                                item { Text(stringResource(R.string.new_chapters), style = MaterialTheme.typography.titleMedium) }
+                                items(newChapters) { chapter ->
+                                    Card(modifier = Modifier.fillMaxWidth()) {
+                                        Column(Modifier.padding(12.dp)) {
+                                            Text(chapter.name, style = MaterialTheme.typography.titleMedium)
+                                            Text(stringResource(R.string.storage_chapters_new_badge), color = MaterialTheme.colorScheme.primary)
+                                        }
+                                    }
+                                }
+                            }
+                            item { Text(stringResource(R.string.storage_inventory_chapters), style = MaterialTheme.typography.titleMedium) }
                             items(selected.chapters.sortedByDescending { it.chapter.source_order }) { entry ->
                                 Card(modifier = Modifier.fillMaxWidth()) {
                                     Column(Modifier.padding(12.dp)) {
@@ -260,7 +297,7 @@ class StorageController : BaseController<HomeControllerBinding>() {
                                                 typeSaveFailed = false
                                                 classifyMangaId = work.manga.id
                                             }) { Text(stringResource(R.string.storage_inventory_classify)) }
-                                            Button(onClick = { selectedMangaId = work.manga.id }) { Text(stringResource(R.string.storage_inventory_chapters)) }
+                                            Button(onClick = { openWork(work.manga.id) }) { Text(stringResource(R.string.storage_inventory_chapters)) }
                                             val next = work.chapters.sortedByDescending { it.chapter.source_order }.firstOrNull { !it.chapter.read }
                                             if (next != null) Button(enabled = !loading, onClick = {
                                                 context.startActivity(ReaderActivity.newIntent(context, work.manga, next.chapter))
@@ -293,10 +330,52 @@ class StorageController : BaseController<HomeControllerBinding>() {
                         snapshot = null
                     }.collect {
                         snapshot = it
-                        if (it.works.none { work -> work.manga.id == selectedMangaId }) selectedMangaId = null
+                        if (selectedMangaId != null && it.works.none { work -> work.manga.id == selectedMangaId }) closeWork()
                     }
                 loading = false
             }
+        }
+    }
+
+    private fun openWork(id: Long?) {
+        if (id == null) return
+        closeWork()
+        selectedMangaId = id
+        refreshWork()
+    }
+
+    private fun closeWork() {
+        refreshJob?.cancel()
+        refreshJob = null
+        selectedMangaId = null
+        refreshState = RefreshState.IDLE
+        newChapters = emptyList()
+    }
+
+    private fun refreshWork() {
+        val id = selectedMangaId ?: return
+        if (refreshJob?.isActive == true) return
+        val work = snapshot?.works?.firstOrNull { it.manga.id == id } ?: return
+        if (work.manga.isLocal()) {
+            refreshState = RefreshState.LOCAL
+            return
+        }
+        if (view?.context?.isOnline() != true) {
+            refreshState = RefreshState.OFFLINE
+            return
+        }
+        refreshState = RefreshState.LOADING
+        refreshJob = viewScope.launch {
+            flow { emit(storage.refreshChapters(id)) }
+                .catch { error ->
+                    Timber.e(error, "Storage chapter update failed")
+                    if (selectedMangaId == id) refreshState = RefreshState.ERROR
+                }.collect { chapters ->
+                    if (selectedMangaId == id) {
+                        newChapters = (newChapters + chapters).distinctBy { it.url }
+                        refreshState = RefreshState.SUCCESS
+                    }
+                }
         }
     }
 
@@ -325,7 +404,7 @@ class StorageController : BaseController<HomeControllerBinding>() {
 
     override fun handleBack(): Boolean {
         if (selectedMangaId != null) {
-            selectedMangaId = null
+            closeWork()
             return true
         }
         if (selectedCategory != null) {
@@ -341,6 +420,7 @@ class StorageController : BaseController<HomeControllerBinding>() {
     }
 
     override fun onDestroyView(view: View) {
+        closeWork()
         insetsListener?.let { if (view.viewTreeObserver.isAlive) view.viewTreeObserver.removeOnGlobalLayoutListener(it) }
         insetsListener = null
         super.onDestroyView(view)

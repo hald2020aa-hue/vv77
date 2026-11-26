@@ -21,4 +21,9 @@
     <string name="storage_inventory_category_note">العمل الموجود في عدة فئات يُحسب في كل فئة، وفي الإجمالي يُحسب مرة واحدة.</string>
     <string name="storage_inventory_open_category">عرض الفئة</string>
     <string name="storage_inventory_settings">حجم المانجا والمانهوا</string>
+    <string name="storage_chapters_updating">جارٍ البحث عن فصول جديدة…</string>
+    <string name="storage_chapters_offline">غير متصل — الفصول المنزلة متاحة.</string>
+    <string name="storage_chapters_update_error">تعذر تحديث الفصول. تنزيلاتك الحالية ما زالت متاحة.</string>
+    <string name="storage_chapters_new_count">الفصول الجديدة: %1$d</string>
+    <string name="storage_chapters_new_badge">جديد</string>
 </resources>

@@ -21,4 +21,9 @@
     <string name="storage_inventory_category_note">An item in multiple categories counts in each category; the overall total counts it once.</string>
     <string name="storage_inventory_open_category">Open category</string>
     <string name="storage_inventory_settings">Manga and manhwa storage size</string>
+    <string name="storage_chapters_updating">Checking for new chapters…</string>
+    <string name="storage_chapters_offline">Offline — downloaded chapters remain available.</string>
+    <string name="storage_chapters_update_error">Could not update chapters. Your existing downloads are still available.</string>
+    <string name="storage_chapters_new_count">New chapters found: %1$d</string>
+    <string name="storage_chapters_new_badge">New</string>
 </resources>
