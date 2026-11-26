@@ -80,7 +80,6 @@ import com.google.android.material.slider.Slider
 import com.google.android.material.slider.SliderOrientation
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.platform.MaterialContainerTransform
-import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -140,6 +139,7 @@ import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
+import eu.kanade.tachiyomi.util.view.SafeContainerTransformCallback
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
@@ -325,7 +325,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 contentView.transitionName = intent.extras?.getString(TRANSITION_NAME)
                 visibleChapterRange = intent.extras?.getLongArray(VISIBLE_CHAPTERS) ?: longArrayOf()
                 didTransitionFromChapter = contentView.transitionName.contains("details chapter")
-                setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
+                setEnterSharedElementCallback(SafeContainerTransformCallback())
                 window.sharedElementEnterTransition = buildContainerTransform(true)
                 window.sharedElementReturnTransition = buildContainerTransform(false)
                 // Postpone custom transition until manga ready

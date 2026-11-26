@@ -14,6 +14,8 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.InsetDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -73,7 +75,6 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.navigationrail.NavigationRailView
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import com.google.common.primitives.Floats.max
 import com.google.common.primitives.Ints.max
 import eu.kanade.tachiyomi.BuildConfig
@@ -133,6 +134,7 @@ import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.SafeContainerTransformCallback
 import eu.kanade.tachiyomi.util.view.BackHandlerControllerInterface
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.blurBehindWindow
@@ -273,7 +275,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         // Set up shared element transition and disable overlay so views don't show above system bars
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
         setExitSharedElementCallback(
-            object : MaterialContainerTransformSharedElementCallback() {
+            object : SafeContainerTransformCallback() {
                 override fun onMapSharedElements(
                     names: MutableList<String>,
                     sharedElements: MutableMap<String, View>,
@@ -517,9 +519,23 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             binding.navBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 height = insets.getInsetsIgnoringVisibility(tappableElement()).bottom
             }
-            binding.bottomNav?.updatePadding(
-                bottom = systemInsets.bottom,
-            )
+            binding.bottomNav?.let { bottomBar ->
+                if (resources.getBoolean(R.bool.v4_neon_mode)) {
+                    // V22 floating bar: keep the pill above the system bar while nav.height still
+                    // covers everything the controllers have to pad for.
+                    val original =
+                        (bottomBar.getTag(R.id.v22_nav_bg) as? Drawable)
+                            ?: bottomBar.background?.also { bottomBar.setTag(R.id.v22_nav_bg, it) }
+                    if (original != null) {
+                        val side = 12.dpToPx
+                        bottomBar.background =
+                            InsetDrawable(original, side, 0, side, systemInsets.bottom)
+                    }
+                    bottomBar.updatePadding(bottom = systemInsets.bottom + 8.dpToPx)
+                } else {
+                    bottomBar.updatePadding(bottom = systemInsets.bottom)
+                }
+            }
             binding.sideNav?.updatePadding(
                 left = 0,
                 right = 0,

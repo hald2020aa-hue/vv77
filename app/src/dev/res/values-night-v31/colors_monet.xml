@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- V22: dynamic (Monet) palette pinned to the MANGA VIRUS neon palette so system wallpaper colors never turn surfaces gray. -->
+    <color name="monet_primary">#B26BFF</color>
+    <color name="monet_primary_container">#3A1B6E</color>
+    <color name="monet_on_primary">#FFFFFF</color>
+    <color name="monet_primary_inverse">#D9B8FF</color>
+    <color name="monet_surface_container">#100B2E</color>
+    <color name="monet_secondary">#19E6FF</color>
+    <color name="monet_secondary_container">#1E1A4B</color>
+    <color name="monet_on_secondary_container">#E6E0FF</color>
+    <color name="monet_tertiary">#FF2FD0</color>
+    <color name="monet_on_tertiary">#FFFFFF</color>
+    <color name="monet_surface">#05030F</color>
+    <color name="monet_background">#05030F</color>
+    <color name="monet_on_background">#F3F6FF</color>
+    <color name="monet_action_bar_tint">#E6E0FF</color>
+    <color name="monet_surface_container_lowest">#07041A</color>
+    <color name="monet_surface_container_low">#0B0822</color>
+    <color name="monet_surface_container_high">#171040</color>
+    <color name="monet_surface_container_highest">#20185A</color>
+</resources>

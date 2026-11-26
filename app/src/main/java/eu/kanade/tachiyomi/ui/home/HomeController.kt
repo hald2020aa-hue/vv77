@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.ImageView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -49,6 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -86,6 +88,9 @@ class HomeController : BaseController<HomeControllerBinding>(), RootSearchInterf
     private var sourceCount by mutableIntStateOf(0)
     private var genreTags by mutableStateOf<List<String>>(emptyList())
     private var loading by mutableStateOf(true)
+    private var topInsetDp by mutableStateOf(0.dp)
+    private var bottomInsetDp by mutableStateOf(0.dp)
+    private var insetsListener: ViewTreeObserver.OnGlobalLayoutListener? = null
 
     private val db: DatabaseHelper by lazy { Injekt.get() }
     private val sourceManager: SourceManager by lazy { Injekt.get() }
@@ -108,6 +113,8 @@ class HomeController : BaseController<HomeControllerBinding>(), RootSearchInterf
                     sourceCount = sourceCount,
                     genres = genreTags,
                     loading = loading,
+                    topInset = topInsetDp,
+                    bottomInset = bottomInsetDp,
                     onOpenManga = ::openManga,
                     onOpenLibrary = { navigateTo(R.id.nav_library) },
                     onOpenRecents = { navigateTo(R.id.nav_recents) },
@@ -118,6 +125,16 @@ class HomeController : BaseController<HomeControllerBinding>(), RootSearchInterf
                 )
             }
         }
+        // The Compose list is not driven by scrollViewWith(), so pad it below the app bar and above
+        // the floating bottom bar by hand and keep the values current when either one resizes.
+        val density = view.resources.displayMetrics.density
+        val updateInsets = {
+            topInsetDp = ((activityBinding?.appBar?.height ?: 0) / density).dp
+            bottomInsetDp = ((activityBinding?.bottomNav?.height ?: 0) / density).dp
+        }
+        updateInsets()
+        insetsListener = ViewTreeObserver.OnGlobalLayoutListener { updateInsets() }
+        view.viewTreeObserver.addOnGlobalLayoutListener(insetsListener)
         viewScope.launch {
             try {
                 val data = withContext(Dispatchers.IO) {
@@ -144,6 +161,25 @@ class HomeController : BaseController<HomeControllerBinding>(), RootSearchInterf
                 loading = false
             }
         }
+    }
+
+    override fun onAttach(view: View) {
+        super.onAttach(view)
+        // Home has no list that drives the app bar, so reset whatever state the previous tab left behind.
+        activityBinding?.appBar?.apply {
+            setToolbarModeBy(this@HomeController)
+            hideBigView(true)
+            y = 0f
+            lockYPos = true
+        }
+    }
+
+    override fun onDestroyView(view: View) {
+        insetsListener?.let { listener ->
+            if (view.viewTreeObserver.isAlive) view.viewTreeObserver.removeOnGlobalLayoutListener(listener)
+        }
+        insetsListener = null
+        super.onDestroyView(view)
     }
 
     private fun openManga(manga: Manga) {
@@ -176,6 +212,8 @@ private fun HomeDashboard(
     sourceCount: Int,
     genres: List<String>,
     loading: Boolean,
+    topInset: Dp,
+    bottomInset: Dp,
     onOpenManga: (Manga) -> Unit,
     onOpenLibrary: () -> Unit,
     onOpenRecents: () -> Unit,
@@ -186,7 +224,7 @@ private fun HomeDashboard(
     val featured = recent.firstOrNull() ?: library.firstOrNull()
     LazyColumn(
         modifier = Modifier.fillMaxSize().background(homeBackground),
-        contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 26.dp),
+        contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = topInset + 10.dp, bottom = bottomInset + 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item {

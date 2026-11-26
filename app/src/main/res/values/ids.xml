@@ -8,4 +8,5 @@
     <item name="v22_header_search" type="id"/>
     <item name="v22_header_bell" type="id"/>
     <item name="v22_header_avatar" type="id"/>
+    <item name="v22_nav_bg" type="id"/>
 </resources>

@@ -32,11 +32,11 @@ internal class NeonSettingsStyler(
     private val mainMenu: Boolean,
 ) {
     private val density = list.resources.displayMetrics.density
-    private val cyan = Color.rgb(49, 228, 255)
-    private val blue = Color.rgb(77, 128, 255)
-    private val purple = Color.rgb(169, 77, 255)
-    private val pink = Color.rgb(255, 50, 203)
-    private val secondary = Color.rgb(185, 178, 208)
+    private val cyan = Color.rgb(25, 230, 255)
+    private val blue = Color.rgb(61, 124, 255)
+    private val purple = Color.rgb(161, 75, 255)
+    private val pink = Color.rgb(255, 47, 208)
+    private val secondary = Color.rgb(179, 171, 214)
 
     private val spacing = object : RecyclerView.ItemDecoration() {
         override fun getItemOffsets(
@@ -64,7 +64,7 @@ internal class NeonSettingsStyler(
 
     init {
         list.background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(
-            Color.rgb(16, 11, 37), Color.rgb(5, 5, 13), Color.rgb(23, 10, 36),
+            Color.rgb(11, 8, 34), Color.rgb(5, 3, 15), Color.rgb(14, 7, 34),
         ))
         list.clipToPadding = false
         list.addItemDecoration(spacing)
@@ -93,7 +93,7 @@ internal class NeonSettingsStyler(
         view.background = if (category || !preference.isSelectable || !preference.isEnabled) {
             background
         } else {
-            RippleDrawable(ColorStateList.valueOf(Color.argb(96, 49, 228, 255)), background, null)
+            RippleDrawable(ColorStateList.valueOf(Color.argb(96, 25, 230, 255)), background, null)
         }
         if (!category) view.minimumHeight = maxOf(view.minimumHeight, dp(56))
 
@@ -128,7 +128,7 @@ internal class NeonSettingsStyler(
         private val category: Boolean,
     ) : Drawable() {
         private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.rgb(15, 17, 34)
+            color = Color.rgb(14, 11, 39)
         }
         private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
