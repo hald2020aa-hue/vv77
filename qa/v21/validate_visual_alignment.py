@@ -46,7 +46,7 @@ for pattern, label in [
     ('db.getFavoriteMangas()', 'home uses the existing library database'),
     ('db.getRecentMangaLimit', 'home uses the real reading history'),
     ('sourceManager.getCatalogueSources()', 'home counts installed catalogue sources'),
-    ('loadManga(manga)', 'home renders real manga covers'),
+    ('bindCover(manga)', 'home renders real manga covers'),
     ('it.getGenres().orEmpty()', 'home genre chips are derived from actual manga metadata'),
     ('HomeGenreChip(genre', 'home renders the data-derived genre chips'),
     ('MangaDetailsController(manga)', 'home opens the original manga details controller'),
@@ -56,7 +56,7 @@ for forbidden in ['Solo Leveling', 'Fake title', 'mockManga', 'Sample manga']:
     test(forbidden not in home, f'home does not inject sample manga data ({forbidden})')
 
 downloads = read(screens['downloads'])
-for pattern in ['Download.State.DOWNLOADING', 'Download.State.QUEUE', 'onPause', 'onResume', 'onDelete', 'onPrioritize', 'loadManga(row.download.manga)']:
+for pattern in ['Download.State.DOWNLOADING', 'Download.State.QUEUE', 'onPause', 'onResume', 'onDelete', 'onPrioritize', 'bindCover(row.download.manga)']:
     test(pattern in downloads, f'download queue keeps live behavior: {pattern}')
 
 browse_controller = read('app/src/main/java/eu/kanade/tachiyomi/ui/source/BrowseController.kt')

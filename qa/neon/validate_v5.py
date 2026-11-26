@@ -51,7 +51,7 @@ for pattern, label in [
     ('"قائمة التنزيل"', 'Arabic download title'),
 ]:
     test(pattern in panel, label)
-test('ImageView' in panel and 'loadManga(row.download.manga)' in panel, 'download rows use the real manga cover loader')
+test('ImageView' in panel and 'bindCover(row.download.manga)' in panel, 'download rows use the real manga cover loader')
 test('Solo Leveling' not in panel and 'Sample manga' not in panel, 'download UI contains no placeholder manga titles')
 test('24.6 MB' not in panel and '3.2 MB/s' not in panel, 'no placeholder size or speed in production UI')
 

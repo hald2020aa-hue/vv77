@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.download
 
-import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -69,7 +68,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.image.coil.loadManga
+import eu.kanade.tachiyomi.data.image.coil.MangaCoverImageView
 import eu.kanade.tachiyomi.ui.enhanced.estimatedTransferSeconds
 import eu.kanade.tachiyomi.ui.enhanced.neonChapterPaletteIndex
 import java.util.Locale
@@ -458,13 +457,10 @@ private fun NeonChapterDownloadRow(
     ) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 9.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
             AndroidView(
-                factory = { context ->
-                    ImageView(context).apply {
-                        scaleType = ImageView.ScaleType.CENTER_CROP
-                        loadManga(row.download.manga)
-                    }
-                },
-                update = { it.loadManga(row.download.manga) },
+                factory = { MangaCoverImageView(it) },
+                onReset = null,
+                onRelease = { it.releaseCover() },
+                update = { it.bindCover(row.download.manga) },
                 modifier = Modifier.size(width = 44.dp, height = 58.dp).clip(RoundedCornerShape(10.dp)),
             )
             Spacer(Modifier.width(8.dp))

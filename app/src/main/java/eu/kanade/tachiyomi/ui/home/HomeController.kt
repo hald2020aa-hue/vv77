@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewTreeObserver
-import android.widget.ImageView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -58,7 +57,7 @@ import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.image.coil.loadManga
+import eu.kanade.tachiyomi.data.image.coil.MangaCoverImageView
 import eu.kanade.tachiyomi.databinding.HomeControllerBinding
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
@@ -499,14 +498,10 @@ private fun HomePosterCard(manga: Manga, onClick: () -> Unit) {
 @Composable
 private fun MangaCover(manga: Manga, modifier: Modifier = Modifier) {
     AndroidView(
-        factory = { context ->
-            ImageView(context).apply {
-                scaleType = ImageView.ScaleType.CENTER_CROP
-                contentDescription = manga.title
-                loadManga(manga)
-            }
-        },
-        update = { it.loadManga(manga) },
+        factory = { MangaCoverImageView(it) },
+        onReset = null,
+        onRelease = { it.releaseCover() },
+        update = { it.bindCover(manga) },
         modifier = modifier.clip(RoundedCornerShape(14.dp)).background(homePanelRaised),
     )
 }

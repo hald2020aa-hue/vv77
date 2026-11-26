@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.download.center
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ImageView
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -67,7 +66,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.image.coil.loadManga
+import eu.kanade.tachiyomi.data.image.coil.MangaCoverImageView
 import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.ui.download.NeonDownloadPanel
 import eu.kanade.tachiyomi.ui.download.NeonDownloadRow
@@ -502,19 +501,14 @@ private fun DownloadCenterItem(
                 // Use the application's extension-aware manga cover loader, not a raw HTTP URL.
                 AndroidView(
                     factory = { context ->
-                        ImageView(context).apply {
-                            scaleType = ImageView.ScaleType.CENTER_CROP
+                        MangaCoverImageView(context).apply {
                             setBackgroundColor(android.graphics.Color.rgb(24, 37, 60))
                         }
                     },
                     modifier = Modifier.size(width = 74.dp, height = 100.dp).clip(RoundedCornerShape(12.dp)),
-                    update = { view ->
-                        if (view.tag != entry.cover.id || view.contentDescription != entry.title) {
-                            view.tag = entry.cover.id
-                            view.contentDescription = entry.title
-                            view.loadManga(entry.cover)
-                        }
-                    },
+                    onReset = null,
+                    onRelease = { it.releaseCover() },
+                    update = { it.bindCover(entry.cover, entry.title) },
                 )
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     Text(

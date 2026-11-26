@@ -72,7 +72,11 @@ dl=ROOT/'app/src/main/java/eu/kanade/tachiyomi/ui/download/center/DownloadCenter
 for x in (mgrid,mlist):check('knownChapterProgress' in x.read_text() and 'readingProgress' in x.read_text(),x.name+' uses real read progress')
 check('v4ChapterProgress' in chapter.read_text() and 'chapter.read' in chapter.read_text(), 'details use real chapter flags')
 check('adaptiveReaderBarWidth' in reader.read_text(), 'foldable reader layout uses adaptive sizing')
-check('view.loadManga(entry.cover)' in dl.read_text(), 'download center uses authenticated image loader')
+cover_view = ROOT/'app/src/main/java/eu/kanade/tachiyomi/data/image/coil/MangaCoverImageView.kt'
+check('it.bindCover(entry.cover, entry.title)' in dl.read_text() and 'MangaCoverImageView(context)' in dl.read_text() and 'loadManga(manga)' in cover_view.read_text(), 'download center uses authenticated image loader')
+# Keep the new regression gate in this existing CI step; do not replace or disable old checks.
+import runpy
+runpy.run_path(str(ROOT/'qa/core/check_cover_binding.py'), run_name='__main__')
 check('confirmRemove' in dl.read_text(), 'download action requires confirmation')
 check('sortDownloadRows' in dl.read_text() and 'DropdownMenuItem' in dl.read_text(), 'download queue has functional sorting actions')
 check('Channel.CONFLATED' in dl.read_text() and 'receiveAsFlow' in dl.read_text(), 'download events coalesce before UI rendering')

@@ -5,7 +5,6 @@ import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewTreeObserver
-import android.widget.ImageView
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -48,7 +47,7 @@ import eu.kanade.tachiyomi.data.download.StorageDeleteRequest
 import eu.kanade.tachiyomi.data.download.StorageDeleteResult
 import eu.kanade.tachiyomi.data.download.StorageSeriesType
 import eu.kanade.tachiyomi.data.download.StorageSnapshot
-import eu.kanade.tachiyomi.data.image.coil.loadManga
+import eu.kanade.tachiyomi.data.image.coil.MangaCoverImageView
 import eu.kanade.tachiyomi.databinding.HomeControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.enhanced.EnhancedReadingTheme
@@ -361,8 +360,10 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                                 )) {
                                     Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                                         AndroidView(
-                                            factory = { ImageView(it).apply { scaleType = ImageView.ScaleType.CENTER_CROP } },
-                                            update = { it.contentDescription = work.manga.title; it.loadManga(work.manga) },
+                                            factory = { MangaCoverImageView(it) },
+                                            onReset = null,
+                                            onRelease = { it.releaseCover() },
+                                            update = { it.bindCover(work.manga) },
                                             modifier = Modifier.size(width = 72.dp, height = 104.dp),
                                         )
                                         Column(Modifier.weight(1f)) {

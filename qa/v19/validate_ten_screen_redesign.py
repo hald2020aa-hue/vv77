@@ -92,7 +92,7 @@ check("android:text=\"" not in (DEV / "layout/source_header_item.xml").read_text
 # The download panel is a visual projection of the real queue and uses real manga covers.
 download_panel = (ROOT / "app/src/main/java/eu/kanade/tachiyomi/ui/download/NeonDownloadPanel.kt").read_text()
 for token in ("visibleRows", "Download.State.DOWNLOADING", "Download.State.QUEUE", "Download.State.DOWNLOADED",
-              "val completedCount = rows.count", "في الانتظار", "متعثر", "loadManga(row.download.manga)",
+              "val completedCount = rows.count", "في الانتظار", "متعثر", "bindCover(row.download.manga)",
               "onPause", "onResume", "onDelete", "onPrioritize"):
     check(token in download_panel, f"download panel retains live queue wiring: {token}")
 check("Solo Leveling" not in download_panel and "Sample manga" not in download_panel,
