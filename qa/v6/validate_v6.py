@@ -13,11 +13,11 @@ def read(p): return (root / p).read_text(encoding='utf-8')
 for path in [
     'app/src/main/res/menu/reader.xml',
     'app/src/main/res/values/strings.xml',
-    'app/src/dev/res/values-ar/strings.xml',
+    'app/src/neonReference/res/values-ar/strings.xml',
 ]:
     ET.fromstring(read(path))
     check('parse '+path, True)
-strings = read('app/src/dev/res/values-ar/strings.xml')
+strings = read('app/src/neonReference/res/values-ar/strings.xml')
 for needle in ['v6_translate_chapter', 'v6_translation_page', 'v6_translation_stop']:
     check('Arabic '+needle, f'name="{needle}"' in strings)
 menu = read('app/src/main/res/menu/reader.xml')
@@ -38,5 +38,5 @@ check('one-time migration', 'v6_preload_7_initialized' in read('app/src/main/jav
 gradle = read('app/build.gradle.kts')
 for lib in ['text-recognition:', 'text-recognition-japanese:', 'text-recognition-korean:', 'text-recognition-chinese:', 'translate:17.0.3']:
     check('Android dependency '+lib, lib in gradle)
-check('only one APK quality gate preserved', 'verifySingleArm64DevApk' in read('.github/workflows/quality_gate.yml'))
+check('only one APK quality gate preserved', 'verifySingleArm64NeonReferenceApk' in read('.github/workflows/quality_gate.yml'))
 print(f'V6 STATIC PRECHECK: {len(checks)}/{len(checks)} PASS (NOT Android compile)')

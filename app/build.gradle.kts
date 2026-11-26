@@ -119,13 +119,13 @@ android {
         create("standard") {
             buildConfigField("Boolean", "INCLUDE_UPDATER", "true")
         }
-        create("dev") {
+        create("neonReference") {
             // Preserves the exact V8 debug app package:
             // eu.kanade.tachiyomi.enhanced.debugJ2K (do not change this identity).
             applicationIdSuffix = ".enhanced"
-            // Incremented for V22 so Android accepts the dev update over V21.
+            // Neon Reference keeps the historical ".enhanced" id so the installed app updates in place.
             versionCode = AndroidVersions.versionCode + 4
-            versionNameSuffix = "-enhanced-v22-dev"
+            versionNameSuffix = "-enhanced-v22-neon-reference"
         }
     }
 
@@ -386,14 +386,14 @@ tasks {
 }
 
 /** Refuse to publish a multi-APK build or an incorrectly named APK. */
-tasks.register("verifySingleArm64DevApk") {
-    dependsOn("assembleDevDebug")
+tasks.register("verifySingleArm64NeonReferenceApk") {
+    dependsOn("assembleNeonReferenceDebug")
     doLast {
         check(arm64Only) { "Use -Pjh.arm64Only=true for the requested single APK" }
-        val directory = layout.buildDirectory.dir("outputs/apk/dev/debug").get().asFile
+        val directory = layout.buildDirectory.dir("outputs/apk/neonReference/debug").get().asFile
         val apks = directory.listFiles()?.filter { it.isFile && it.extension == "apk" } ?: emptyList()
-        check(apks.size == 1 && apks.single().name == "app-dev-arm64-v8a-debug.apk") {
-            "Expected only app-dev-arm64-v8a-debug.apk, found: ${apks.map { it.name }}"
+        check(apks.size == 1 && apks.single().name == "app-neonReference-arm64-v8a-debug.apk") {
+            "Expected only app-neonReference-arm64-v8a-debug.apk, found: ${apks.map { it.name }}"
         }
         check(apks.single().length() > 1024 * 1024) { "APK is unusually small" }
         println("SINGLE_APK_OK: ${apks.single().absolutePath} (${apks.single().length()} bytes)")

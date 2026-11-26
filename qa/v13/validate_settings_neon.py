@@ -31,7 +31,7 @@ for name,record in reference.items():
 source=SRC.read_text()
 controller=CONTROLLER.read_text()
 dialog=DIALOG.read_text()
-expect('BuildConfig.FLAVOR == "dev"' in controller, 'only enhanced dev uses neon settings')
+expect('BuildConfig.FLAVOR == "neonReference"' in controller, 'only enhanced dev uses neon settings')
 expect('NeonSettingsStyler(listView, this is SettingsMainController)' in controller, 'all settings share new styling')
 expect('neonSettingsStyler?.detach()' in controller, 'detach view listener on destruction')
 expect('decorateSettingsToolbar()' in controller and 'restoreSettingsToolbar()' in controller,
@@ -49,13 +49,13 @@ expect('MaterialSwitch' in source and 'Slider' in source and 'thumbTintList' in 
        'existing switches and sliders receive visual tints')
 for forbidden in ['isChecked =', 'slider.value =', 'setOnPreferenceChangeListener', 'sharedPreferences', 'preferenceDataStore', 'notifyChanged()']:
     expect(forbidden not in source, f'styler does not alter preference behavior: {forbidden}')
-expect('materialAlertDialog()' in dialog and 'BuildConfig.FLAVOR == "dev"' in dialog,
+expect('materialAlertDialog()' in dialog and 'BuildConfig.FLAVOR == "neonReference"' in dialog,
        'non-dev dialog behavior unchanged')
 
 # The dev overrides must retain all view binding IDs of the unmodified layouts.
 for name in ['settings_search_controller.xml','settings_search_controller_card.xml']:
     base=ROOT/'app/src/main/res/layout'/name
-    dev=ROOT/'app/src/dev/res/layout'/name
+    dev=ROOT/'app/src/neonReference/res/layout'/name
     old=ET.parse(base).getroot()
     new=ET.parse(dev).getroot()
     android_id='{http://schemas.android.com/apk/res/android}id'

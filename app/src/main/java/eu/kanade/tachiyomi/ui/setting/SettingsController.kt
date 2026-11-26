@@ -61,7 +61,7 @@ abstract class SettingsController :
     ) {
         super.onViewCreated(view, savedInstanceState)
         listView.layoutManager = LinearLayoutManagerAccurateOffset(view.context)
-        if (BuildConfig.FLAVOR == "dev") {
+        if (BuildConfig.FLAVOR == "neonReference") {
             neonSettingsStyler = NeonSettingsStyler(listView, this is SettingsMainController)
         }
     }
@@ -72,7 +72,7 @@ abstract class SettingsController :
         savedInstanceState: Bundle?,
     ): View {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        view.backgroundColor = if (BuildConfig.FLAVOR == "dev") Color.rgb(6, 16, 35)
+        view.backgroundColor = if (BuildConfig.FLAVOR == "neonReference") Color.rgb(6, 16, 35)
             else view.context.getResourceColor(R.attr.background)
         // The shared expanded app bar contains the settings title and (on the main
         // settings screen) an extra search field. Its visual overlay is taller than
@@ -81,7 +81,7 @@ abstract class SettingsController :
         // Apply the gap AFTER scrollViewWith recalculates its insets (including on
         // rotation). The callback receives a fresh base padding, so it cannot stack.
         scrollViewWith(listView, padBottom = true, afterInsets = {
-            if (BuildConfig.FLAVOR == "dev") {
+            if (BuildConfig.FLAVOR == "neonReference") {
                 listView.updatePaddingRelative(top = listView.paddingTop + 112.dpToPx)
             }
         })
@@ -188,7 +188,7 @@ abstract class SettingsController :
     // overlap during a Conductor transition, so only restore its original background when
     // the LAST settings controller exits. This prevents a lingering neon toolbar elsewhere.
     private fun decorateSettingsToolbar() {
-        if (BuildConfig.FLAVOR != "dev" || leasedSettingsToolbar != null) return
+        if (BuildConfig.FLAVOR != "neonReference" || leasedSettingsToolbar != null) return
         val toolbar = activityBinding?.toolbar ?: return
         val current = settingsToolbars[toolbar]
         if (current == null) {

@@ -1490,7 +1490,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         }
 
     private fun applyV20HomeStartPreference() {
-        if (BuildConfig.FLAVOR != "dev") return
+        if (BuildConfig.FLAVOR != "neonReference") return
         val migrationPrefs = getSharedPreferences("manga_virus_v20", Context.MODE_PRIVATE)
         val key = "home_start_preference_applied"
         if (!migrationPrefs.getBoolean(key, false)) {

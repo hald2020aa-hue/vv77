@@ -5,7 +5,7 @@ import re
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
-DEV = ROOT / "app/src/dev/res"
+DEV = ROOT / "app/src/neonReference/res"
 MAIN = ROOT / "app/src/main/res"
 A = "{http://schemas.android.com/apk/res/android}"
 

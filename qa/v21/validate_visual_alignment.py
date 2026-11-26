@@ -22,21 +22,21 @@ for drawable in [
     'v21_screen_background.xml', 'v21_surface_card.xml', 'v21_header_banner.xml',
     'v21_chip.xml', 'v21_reader_panel.xml', 'v21_bottom_navigation.xml',
 ]:
-    path = ROOT / 'app/src/dev/res/drawable' / drawable
+    path = ROOT / 'app/src/neonReference/res/drawable' / drawable
     test(path.is_file(), f'V21 shared visual resource exists: {drawable}')
     ET.parse(path)
 
 screens = {
     'downloads': 'app/src/main/java/eu/kanade/tachiyomi/ui/download/NeonDownloadPanel.kt',
-    'chapters': 'app/src/dev/res/layout/chapters_item.xml',
-    'updates': 'app/src/dev/res/layout/recent_manga_item.xml',
+    'chapters': 'app/src/neonReference/res/layout/chapters_item.xml',
+    'updates': 'app/src/neonReference/res/layout/recent_manga_item.xml',
     'settings': 'app/src/main/java/eu/kanade/tachiyomi/ui/setting/NeonSettingsStyler.kt',
     'home': 'app/src/main/java/eu/kanade/tachiyomi/ui/home/HomeController.kt',
-    'reader': 'app/src/dev/res/layout/reader_activity.xml',
-    'browse': 'app/src/dev/res/layout/source_item.xml',
-    'details': 'app/src/dev/res/layout/manga_header_item.xml',
-    'search': 'app/src/dev/res/layout/source_global_search_controller_card_item.xml',
-    'library': 'app/src/dev/res/layout/manga_grid_item.xml',
+    'reader': 'app/src/neonReference/res/layout/reader_activity.xml',
+    'browse': 'app/src/neonReference/res/layout/source_item.xml',
+    'details': 'app/src/neonReference/res/layout/manga_header_item.xml',
+    'search': 'app/src/neonReference/res/layout/source_global_search_controller_card_item.xml',
+    'library': 'app/src/neonReference/res/layout/manga_grid_item.xml',
 }
 for name, path in screens.items():
     test((ROOT / path).is_file(), f'{name} has a dev-specific visual implementation')
@@ -75,7 +75,7 @@ search_xml = ET.parse(ROOT / screens['search']).getroot()
 test(any(n.attrib.get(ANDROID + 'id') == '@+id/itemImage' for n in search_xml.iter()), 'search row retains actual cover binding')
 test(any(n.attrib.get(ANDROID + 'id') == '@+id/title' for n in search_xml.iter()), 'search row retains title binding')
 test(any(n.attrib.get(ANDROID + 'id') == '@+id/gradient' for n in search_xml.iter()), 'search row retains cover fade overlay')
-chapter_header = read('app/src/dev/res/layout/chapter_header_item.xml')
+chapter_header = read('app/src/neonReference/res/layout/chapter_header_item.xml')
 test('@drawable/v21_chip' in chapter_header, 'chapter filter header uses the shared V21 chip style')
 
 # Core reading, chapter and details bindings remain intact.
@@ -97,7 +97,7 @@ for pattern, label in [
     ('item.downloadInfo.any { it.isDownloaded }', 'downloaded update count uses live download status'),
 ]:
     test(pattern in recents_controller, label)
-for path in ['app/src/dev/res/layout/recents_controller.xml', 'app/src/main/res/layout/recents_controller.xml']:
+for path in ['app/src/neonReference/res/layout/recents_controller.xml', 'app/src/main/res/layout/recents_controller.xml']:
     xml = ET.parse(ROOT / path).getroot()
     ids = {n.attrib.get(ANDROID + 'id') for n in xml.iter()}
     for view_id in ['recents_summary', 'recents_summary_title', 'recents_summary_subtitle', 'recents_summary_chapters', 'recents_summary_titles', 'recents_summary_downloaded']:
@@ -111,7 +111,7 @@ for pattern, label in [
     ('items.count { it.downloadCount > 0 }', 'download count comes from the existing download cache count'),
 ]:
     test(pattern in library_controller, label)
-for path in ['app/src/dev/res/layout/library_controller.xml', 'app/src/main/res/layout/library_controller.xml']:
+for path in ['app/src/neonReference/res/layout/library_controller.xml', 'app/src/main/res/layout/library_controller.xml']:
     xml = ET.parse(ROOT / path).getroot()
     ids = {n.attrib.get(ANDROID + 'id') for n in xml.iter()}
     for view_id in ['library_stat_total', 'library_stat_completed', 'library_stat_reading', 'library_stat_downloaded']:
@@ -139,14 +139,14 @@ test('applicationIdSuffix = ".enhanced"' in gradle, 'dev package remains isolate
 test('versionNameSuffix = "-enhanced-v21-dev"' in gradle, 'V21 development build is identifiable')
 test('versionCode = AndroidVersions.versionCode + 3' in gradle, 'V21 version code advances monotonically')
 for file, expected in [
-    ('app/src/dev/res/values/strings.xml', 'MANGA VIRUS V21'),
-    ('app/src/dev/res/values-ar/strings.xml', 'فيروس مانجا V21'),
+    ('app/src/neonReference/res/values/strings.xml', 'MANGA VIRUS V21'),
+    ('app/src/neonReference/res/values-ar/strings.xml', 'فيروس مانجا V21'),
 ]:
     test(expected in read(file), f'{file} identifies V21')
 
 # Parse every XML resource in the dev flavor and reject duplicate IDs per file.
 xml_count = 0
-for path in (ROOT / 'app/src/dev/res').rglob('*.xml'):
+for path in (ROOT / 'app/src/neonReference/res').rglob('*.xml'):
     root = ET.parse(path).getroot()
     xml_count += 1
     ids = [node.attrib.get(ANDROID + 'id') for node in root.iter() if node.attrib.get(ANDROID + 'id')]

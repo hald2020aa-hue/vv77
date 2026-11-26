@@ -55,7 +55,7 @@ def index_resources(root):
     defined = defaultdict(set)
     seen = defaultdict(list)
     xml_errors = []
-    for flavor in ("main", "dev"):
+    for flavor in ("main", "neonReference"):
         base = res_dirs(root, flavor)
         if not os.path.isdir(base):
             continue
@@ -123,7 +123,7 @@ def layout_ids(path):
 def effective_layouts(root):
     """Map '<qualifier dir>/<file>' -> path with dev overriding main, per flavor-merge rules."""
     out = {}
-    for flavor in ("main", "dev"):
+    for flavor in ("main", "neonReference"):
         base = res_dirs(root, flavor)
         if not os.path.isdir(base):
             continue
@@ -147,7 +147,7 @@ def main():
     errors += ["Duplicate resource: " + d for d in dups]
 
     # 3 + 4: references and in-layout id references
-    for flavor in ("main", "dev"):
+    for flavor in ("main", "neonReference"):
         base = res_dirs(root, flavor)
         for d in sorted(os.listdir(base)):
             dp = os.path.join(base, d)
@@ -199,7 +199,7 @@ def main():
         base_layouts = effective_layouts(baseline)
     new_layouts = effective_layouts(root)
     for key, path in sorted(new_layouts.items()):
-        if "/dev/" not in path.replace("\\", "/") and "src/dev" not in path:
+        if "/dev/" not in path.replace("\\", "/") and "src/neonReference" not in path:
             continue
         try:
             ids, dup_ids, _ = layout_ids(path)

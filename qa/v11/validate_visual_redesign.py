@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
 MAIN = ROOT / 'app/src/main'
-DEV = ROOT / 'app/src/dev'
+DEV = ROOT / 'app/src/neonReference'
 A='{http://schemas.android.com/apk/res/android}'
 P='{http://schemas.android.com/apk/res-auto}'
 
@@ -69,11 +69,11 @@ for rel,old in manifest['screen_bindings'].items():
  # V14 adds the library action row; V21 adds data-derived summary bindings.
  # Existing bound widgets must remain identical; only the declared presentation IDs are allowed.
  extra = set()
- if rel == 'app/src/dev/res/layout/library_controller.xml':
+ if rel == 'app/src/neonReference/res/layout/library_controller.xml':
   extra = {'library_top_actions','library_top_categories','library_top_group',
            'library_top_display','library_top_filter','library_top_expand',
            'library_stat_total','library_stat_completed','library_stat_reading','library_stat_downloaded'}
- elif rel == 'app/src/dev/res/layout/recents_controller.xml':
+ elif rel == 'app/src/neonReference/res/layout/recents_controller.xml':
   extra = {'recents_summary','recents_summary_title','recents_summary_subtitle',
            'recents_summary_chapters','recents_summary_titles','recents_summary_downloaded'}
  check(set(old).issubset(now) and set(now)-set(old)==extra,

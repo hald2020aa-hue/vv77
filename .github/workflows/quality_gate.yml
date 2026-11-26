@@ -77,11 +77,11 @@ jobs:
       - name: Check crash patterns (MaterialButton shared elements)
         run: python3 qa/v22/check_runtime_risks.py .
       - name: Run unit tests and compile debug APKs
-        run: ./gradlew -Pjh.arm64Only=true --no-daemon testDevDebugUnitTest verifySingleArm64DevApk --stacktrace
+        run: ./gradlew -Pjh.arm64Only=true --no-daemon testNeonReferenceDebugUnitTest verifySingleArm64NeonReferenceApk --stacktrace
       - name: Verify single APK integrity and debug signature
         run: |
           set -euo pipefail
-          APK="app/build/outputs/apk/dev/debug/app-dev-arm64-v8a-debug.apk"
+          APK="app/build/outputs/apk/neonReference/debug/app-neonReference-arm64-v8a-debug.apk"
           test -s "$APK"
           unzip -tqq "$APK"
           SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
@@ -97,8 +97,18 @@ jobs:
       - name: Upload development APKs
         uses: actions/upload-artifact@v4
         with:
-          name: app-dev-arm64-v8a-debug.apk
-          path: app/build/outputs/apk/dev/debug/app-dev-arm64-v8a-debug.apk
+          name: app-neonReference-arm64-v8a-debug.apk
+          path: app/build/outputs/apk/neonReference/debug/app-neonReference-arm64-v8a-debug.apk
+          if-no-files-found: error
+      - name: Stage APK under its release name
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/neonReference/debug/app-neonReference-arm64-v8a-debug.apk dist/manga-virus-neon-reference-arm64-v8a.apk
+      - name: Upload manga-virus-neon-reference-arm64-v8a.apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: manga-virus-neon-reference-arm64-v8a.apk
+          path: dist/manga-virus-neon-reference-arm64-v8a.apk
           if-no-files-found: error
 
 
@@ -141,13 +151,13 @@ jobs:
             printf 'JH_UPDATE_KEY_PASSWORD=%s\n' "$JH_UPDATE_KEY_PASSWORD"
           } >> "$GITHUB_ENV"
       - name: Build universal Android APK
-        run: ./gradlew -Pjh.arm64Only=false --no-daemon assembleDevDebug --stacktrace
+        run: ./gradlew -Pjh.arm64Only=false --no-daemon assembleNeonReferenceDebug --stacktrace
       - name: Verify universal APK, architecture coverage and signature
         shell: bash
         run: |
           set -euo pipefail
-          OUTPUT_DIR="app/build/outputs/apk/dev/debug"
-          APK="$OUTPUT_DIR/app-dev-universal-debug.apk"
+          OUTPUT_DIR="app/build/outputs/apk/neonReference/debug"
+          APK="$OUTPUT_DIR/app-neonReference-universal-debug.apk"
           if [[ ! -s "$APK" ]]; then
             echo "Universal APK missing. Actual outputs:" >&2
             find "$OUTPUT_DIR" -maxdepth 1 -name '*.apk' -print >&2
@@ -171,6 +181,6 @@ jobs:
       - name: Upload universal dev APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-dev-universal-debug.apk
-          path: app/build/outputs/apk/dev/debug/app-dev-universal-debug.apk
+          name: app-neonReference-universal-debug.apk
+          path: app/build/outputs/apk/neonReference/debug/app-neonReference-universal-debug.apk
           if-no-files-found: error

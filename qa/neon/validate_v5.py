@@ -18,7 +18,7 @@ def test(ok, name):
 def src(path):
     return (ROOT / path).read_text(encoding='utf-8')
 
-source_path = ROOT / 'app/src/dev/res/layout/source_item.xml'
+source_path = ROOT / 'app/src/neonReference/res/layout/source_item.xml'
 source_xml = ET.parse(source_path).getroot()
 card = next(n for n in source_xml.iter() if n.attrib.get(ANDROID+'id') == '@+id/source_card')
 test(card.attrib.get(ANDROID+'layout_height') == '154dp', 'source cards use the compact V21 grid height')
@@ -70,14 +70,14 @@ test('it.body.byteStream()' in downloader and 'download.addReceivedBytes' in dow
 test('val transferStats: StateFlow<DownloadTransferStats>' in model, 'byte-speed telemetry observable by Compose')
 test('DownloadStore.kt' not in '\n'.join(str(x) for x in (ROOT/'qa').rglob('*.patch')), 'no migration assumed for persistent queue')
 
-a=ET.parse(ROOT/'app/src/dev/res/values-ar/strings.xml').getroot()
+a=ET.parse(ROOT/'app/src/neonReference/res/values-ar/strings.xml').getroot()
 translations={node.attrib.get('name'):node.text for node in a}
 test(translations.get('download_queue')=='قائمة التنزيل', 'Arabic download queue label corrected')
 for k in ['downloading','downloads','enhanced_retry_failed']:
     test('تحميل' not in translations[k] and 'تنزيل' in translations[k], f'{k} terminology uses تنزيل')
-test('app-dev-arm64-v8a-debug.apk' in src('.github/workflows/quality_gate.yml'), 'single arm64 APK CI target remains unchanged')
+test('app-neonReference-arm64-v8a-debug.apk' in src('.github/workflows/quality_gate.yml'), 'single arm64 APK CI target remains unchanged')
 
-for f in (ROOT/'app/src/dev/res').rglob('*.xml'):
+for f in (ROOT/'app/src/neonReference/res').rglob('*.xml'):
     ET.parse(f)
 test(True, 'all dev XML files parse')
 print(f'V5 INTEGRATION STATIC: {checks}/{checks} PASS (not an Android build)')

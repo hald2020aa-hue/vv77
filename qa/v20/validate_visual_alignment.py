@@ -17,7 +17,7 @@ def test(ok, label):
 def read(path):
     return (ROOT / path).read_text(encoding='utf-8')
 
-palette = read('app/src/dev/res/values/neon_v19_colors.xml')
+palette = read('app/src/neonReference/res/values/neon_v19_colors.xml')
 for color, value in [
     ('v19_bg', '#05050D'), ('v19_cyan', '#31E4FF'), ('v19_purple', '#A94DFF'),
     ('v19_pink', '#FF32CB'), ('v19_success', '#36E2B0'),
@@ -27,15 +27,15 @@ for color, value in [
 # Ten reference areas: existing real screens and adapters remain the source of content.
 screens = {
     'downloads': 'app/src/main/java/eu/kanade/tachiyomi/ui/download/NeonDownloadPanel.kt',
-    'chapter_list': 'app/src/dev/res/layout/chapters_item.xml',
-    'updates': 'app/src/dev/res/layout/recent_manga_item.xml',
+    'chapter_list': 'app/src/neonReference/res/layout/chapters_item.xml',
+    'updates': 'app/src/neonReference/res/layout/recent_manga_item.xml',
     'settings': 'app/src/main/java/eu/kanade/tachiyomi/ui/setting/NeonSettingsStyler.kt',
     'home': 'app/src/main/java/eu/kanade/tachiyomi/ui/home/HomeController.kt',
-    'reader': 'app/src/dev/res/layout/reader_activity.xml',
-    'browse': 'app/src/dev/res/layout/source_item.xml',
-    'manga_details': 'app/src/dev/res/layout/manga_header_item.xml',
-    'search': 'app/src/dev/res/layout/source_global_search_controller_card_item.xml',
-    'library': 'app/src/dev/res/layout/manga_grid_item.xml',
+    'reader': 'app/src/neonReference/res/layout/reader_activity.xml',
+    'browse': 'app/src/neonReference/res/layout/source_item.xml',
+    'manga_details': 'app/src/neonReference/res/layout/manga_header_item.xml',
+    'search': 'app/src/neonReference/res/layout/source_global_search_controller_card_item.xml',
+    'library': 'app/src/neonReference/res/layout/manga_grid_item.xml',
 }
 for name, path in screens.items():
     test((ROOT / path).is_file(), f'{name} screen has a dev-specific visual implementation')
@@ -89,8 +89,8 @@ main_activity = read('app/src/main/java/eu/kanade/tachiyomi/ui/main/MainActivity
 test('applyV20HomeStartPreference()' in main_activity, 'V21 retains the one-time Home landing preference')
 test('preferences.startingTab().set(-4)' in main_activity, 'first V20 launch opens the redesigned Home screen')
 test('home_start_preference_applied' in main_activity, 'the Home landing change is not repeated after user customization')
-test('MANGA VIRUS V21' in read('app/src/dev/res/values/strings.xml'), 'English launcher label identifies V21')
-test('فيروس مانجا V21' in read('app/src/dev/res/values-ar/strings.xml'), 'Arabic launcher label identifies V21')
+test('MANGA VIRUS V21' in read('app/src/neonReference/res/values/strings.xml'), 'English launcher label identifies V21')
+test('فيروس مانجا V21' in read('app/src/neonReference/res/values-ar/strings.xml'), 'Arabic launcher label identifies V21')
 workflow = read('.github/workflows/quality_gate.yml')
 test('qa/v21/validate_visual_alignment.py' in workflow, 'GitHub Actions runs the V21 ten-screen source gate')
 test("'feature/**'" in workflow, 'feature branch pushes automatically trigger CI')
@@ -102,7 +102,7 @@ test('Missing required GitHub Actions secret' in workflow, 'CI refuses to produc
 
 # Parse every XML resource in the active dev flavor and ensure no duplicated IDs per layout.
 xml_count = 0
-for xml_path in (ROOT / 'app/src/dev/res').rglob('*.xml'):
+for xml_path in (ROOT / 'app/src/neonReference/res').rglob('*.xml'):
     root = ET.parse(xml_path).getroot()
     xml_count += 1
     ids = [node.attrib.get(ANDROID + 'id') for node in root.iter() if node.attrib.get(ANDROID + 'id')]

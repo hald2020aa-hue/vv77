@@ -2,7 +2,7 @@
   "base_source_commit": "7ffa25b17ad6ccd3062a179fd355e8a1d60f0803",
   "schema": "j2k-v11-functional-baseline-v1",
   "screen_bindings": {
-    "app/src/dev/res/layout/browse_source_controller.xml": {
+    "app/src/neonReference/res/layout/browse_source_controller.xml": {
       "buttonGroup": {
         "functional_attrs": {
           "style": "@style/Widget.Material3Expressive.MaterialButtonGroup.Connected",
@@ -83,7 +83,7 @@
         "tag": "androidx.coordinatorlayout.widget.CoordinatorLayout"
       }
     },
-    "app/src/dev/res/layout/chapters_item.xml": {
+    "app/src/neonReference/res/layout/chapters_item.xml": {
       "bookmark": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res-auto}tint": "?colorOnPrimary",
@@ -182,7 +182,7 @@
         "tag": "com.google.android.material.card.MaterialCardView"
       }
     },
-    "app/src/dev/res/layout/download_bottom_sheet.xml": {
+    "app/src/neonReference/res/layout/download_bottom_sheet.xml": {
       "dl_bottom_sheet": {
         "functional_attrs": {
           "style": "@style/BottomSheetDialogTheme",
@@ -285,7 +285,7 @@
         "tag": "com.google.android.material.textview.MaterialTextView"
       }
     },
-    "app/src/dev/res/layout/download_header.xml": {
+    "app/src/neonReference/res/layout/download_header.xml": {
       "container": {
         "functional_attrs": {
           "style": "@style/Widget.Tachiyomi.CardView.Draggable",
@@ -313,7 +313,7 @@
         "tag": "TextView"
       }
     },
-    "app/src/dev/res/layout/download_item.xml": {
+    "app/src/neonReference/res/layout/download_item.xml": {
       "chapter_title": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res-auto}layout_constraintEnd_toStartOf": "@+id/download_menu",
@@ -441,7 +441,7 @@
         "tag": "TextView"
       }
     },
-    "app/src/dev/res/layout/download_swipe_tut_item.xml": {
+    "app/src/neonReference/res/layout/download_swipe_tut_item.xml": {
       "close_left": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res-auto}tint": "@color/md_white_1000",
@@ -510,7 +510,7 @@
         "tag": "TextView"
       }
     },
-    "app/src/dev/res/layout/library_controller.xml": {
+    "app/src/neonReference/res/layout/library_controller.xml": {
       "category_hopper_frame": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res/android}id": "@+id/category_hopper_frame"
@@ -631,7 +631,7 @@
         "tag": "androidx.swiperefreshlayout.widget.SwipeRefreshLayout"
       }
     },
-    "app/src/dev/res/layout/main_activity.xml": {
+    "app/src/neonReference/res/layout/main_activity.xml": {
       "action_mode_status_bar": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res-auto}layout_constraintStart_toStartOf": "parent",
@@ -876,7 +876,7 @@
         "tag": "com.google.android.material.textview.MaterialTextView"
       }
     },
-    "app/src/dev/res/layout/manga_grid_item.xml": {
+    "app/src/neonReference/res/layout/manga_grid_item.xml": {
       "badge_guide": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res-auto}layout_constraintTop_toTopOf": "@+id/card",
@@ -1044,7 +1044,7 @@
         "tag": "include"
       }
     },
-    "app/src/dev/res/layout/manga_header_item.xml": {
+    "app/src/neonReference/res/layout/manga_header_item.xml": {
       "backdrop": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res-auto}layout_constraintBottom_toBottomOf": "@+id/true_backdrop",
@@ -1436,7 +1436,7 @@
         "tag": "com.google.android.material.button.MaterialButton"
       }
     },
-    "app/src/dev/res/layout/manga_list_item.xml": {
+    "app/src/neonReference/res/layout/manga_list_item.xml": {
       "bottom_list_line": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res-auto}barrierDirection": "bottom",
@@ -1601,7 +1601,7 @@
         "tag": "include"
       }
     },
-    "app/src/dev/res/layout/reader_activity.xml": {
+    "app/src/neonReference/res/layout/reader_activity.xml": {
       "app_bar": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res/android}id": "@+id/app_bar",
@@ -1709,7 +1709,7 @@
         "tag": "FrameLayout"
       }
     },
-    "app/src/dev/res/layout/reader_chapter_item.xml": {
+    "app/src/neonReference/res/layout/reader_chapter_item.xml": {
       "bookmark_button": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res-auto}layout_constraintBottom_toBottomOf": "parent",
@@ -1770,7 +1770,7 @@
         "tag": "androidx.constraintlayout.widget.ConstraintLayout"
       }
     },
-    "app/src/dev/res/layout/reader_chapters_sheet.xml": {
+    "app/src/neonReference/res/layout/reader_chapters_sheet.xml": {
       "buttonGroup": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res/android}id": "@+id/buttonGroup",
@@ -1898,7 +1898,7 @@
         "tag": "com.google.android.material.button.MaterialButton"
       }
     },
-    "app/src/dev/res/layout/reader_color_filter.xml": {
+    "app/src/neonReference/res/layout/reader_color_filter.xml": {
       "brightness_slider": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res-auto}layout_constraintBottom_toTopOf": "@id/grayscale",
@@ -2147,7 +2147,7 @@
         "tag": "TextView"
       }
     },
-    "app/src/dev/res/layout/reader_general_layout.xml": {
+    "app/src/neonReference/res/layout/reader_general_layout.xml": {
       "always_show_chapter_transition": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res/android}id": "@+id/always_show_chapter_transition",
@@ -2338,7 +2338,7 @@
         "tag": "eu.kanade.tachiyomi.widget.MaterialSpinnerView"
       }
     },
-    "app/src/dev/res/layout/reader_nav.xml": {
+    "app/src/neonReference/res/layout/reader_nav.xml": {
       "end_cell": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res/android}id": "@+id/end_cell"
@@ -2440,7 +2440,7 @@
         "tag": "ImageButton"
       }
     },
-    "app/src/dev/res/layout/reader_paged_layout.xml": {
+    "app/src/neonReference/res/layout/reader_paged_layout.xml": {
       "crop_borders": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res/android}id": "@+id/crop_borders",
@@ -2623,7 +2623,7 @@
         "tag": "eu.kanade.tachiyomi.widget.MaterialSpinnerView"
       }
     },
-    "app/src/dev/res/layout/source_filter_sheet.xml": {
+    "app/src/neonReference/res/layout/source_filter_sheet.xml": {
       "bottom_divider": {
         "functional_attrs": {
           "{http://schemas.android.com/apk/res-auto}layout_constraintStart_toStartOf": "parent",

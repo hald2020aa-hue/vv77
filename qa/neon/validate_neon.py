@@ -8,7 +8,7 @@ import re
 
 ROOT=Path(__file__).resolve().parents[2]
 MAIN=ROOT/'app/src/main/res'
-DEV=ROOT/'app/src/dev/res'
+DEV=ROOT/'app/src/neonReference/res'
 A='{http://schemas.android.com/apk/res/android}'
 AP='{http://schemas.android.com/apk/res-auto}'
 checks=0
@@ -33,7 +33,7 @@ for f in (DEV/'layout').glob('*.xml'):
  old=set(ids(main));new=set(ids(f));check(old<=new,f'{f.name} keeps existing binding IDs')
  check(len(ids(f))==len(set(ids(f))),f'{f.name} does not repeat IDs')
 
-for src in ('main','dev','devDebug'):
+for src in ('main','neonReference','neonReferenceDebug'):
  folder=ROOT/f'app/src/{src}/res'
  if not folder.exists():continue
  files=list(folder.rglob('*.xml'))
@@ -78,6 +78,6 @@ check('sortDownloadRows' in dl.read_text() and 'DropdownMenuItem' in dl.read_tex
 check('Channel.CONFLATED' in dl.read_text() and 'receiveAsFlow' in dl.read_text(), 'download events coalesce before UI rendering')
 check('manager.queue.addListener' in dl.read_text(), 'download center follows real queue state')
 check('v4_neon_mode' in reader.read_text(), 'reader fold change gated to dev version')
-check('app-dev-arm64-v8a-debug.apk' in (ROOT/'.github/workflows/quality_gate.yml').read_text(), 'single APK target preserved')
+check('app-neonReference-arm64-v8a-debug.apk' in (ROOT/'.github/workflows/quality_gate.yml').read_text(), 'single APK target preserved')
 check('NeonUxUnitTest' in (ROOT/'app/src/test/java/eu/kanade/tachiyomi/ui/enhanced/NeonUxUnitTest.kt').read_text(), 'new unit tests registered for Gradle')
 print(f'NEON DESIGN/INTEGRATION: {checks}/{checks} PASS — not an Android build')

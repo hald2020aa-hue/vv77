@@ -50,7 +50,7 @@ menu = ET.parse(ROOT / 'app/src/main/res/menu/reader.xml')
 ids = [i.attrib.get(android+'id', '') for i in menu.getroot()]
 for key in ['action_translation_toggle', 'action_translation_appearance', 'action_translation_retry']:
     check('XML menu: '+key, any(v.endswith('/'+key) for v in ids))
-for location in ['app/src/main/res/values/strings.xml','app/src/dev/res/values-ar/strings.xml']:
+for location in ['app/src/main/res/values/strings.xml','app/src/neonReference/res/values-ar/strings.xml']:
     elements = ET.parse(ROOT/location).getroot()
     keys = [e.attrib.get('name') for e in elements if e.tag=='string']
     check('translation strings present in '+location, all(key in keys for key in ['v7_translation_toggle','v7_translation_appearance','v7_translation_retry']))
@@ -58,7 +58,7 @@ for location in ['app/src/main/res/values/strings.xml','app/src/dev/res/values-a
 
 workflow = src('.github/workflows/quality_gate.yml')
 check('CI runs V7 source validator', 'qa/v7/validate_v7.py' in workflow)
-check('CI builds a single arm64 APK', 'verifySingleArm64DevApk' in workflow)
+check('CI builds a single arm64 APK', 'verifySingleArm64NeonReferenceApk' in workflow)
 check('Gradle uses arm64-only property', '-Pjh.arm64Only=true' in workflow)
 
 assert all(ok for _, ok in checks), 'V7 prechecks failed!'

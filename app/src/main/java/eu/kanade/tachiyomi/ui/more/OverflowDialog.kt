@@ -34,7 +34,7 @@ class OverflowDialog(
     init {
         setContentView(binding.root)
 
-        if (BuildConfig.FLAVOR != "dev") {
+        if (BuildConfig.FLAVOR != "neonReference") {
             // The dev variant uses its own neon card background and border.
             // Applying the runtime tint would turn that card into a flat gray panel.
             binding.overflowCardView.backgroundTintList =

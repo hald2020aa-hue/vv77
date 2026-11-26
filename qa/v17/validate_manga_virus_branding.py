@@ -81,8 +81,8 @@ checks = {}
 
 main = ET.parse(R / "app/src/main/res/values/strings.xml").getroot()
 main_ar = ET.parse(R / "app/src/main/res/values-ar/strings.xml").getroot()
-dev = ET.parse(R / "app/src/dev/res/values/strings.xml").getroot()
-dev_ar = ET.parse(R / "app/src/dev/res/values-ar/strings.xml").getroot()
+dev = ET.parse(R / "app/src/neonReference/res/values/strings.xml").getroot()
+dev_ar = ET.parse(R / "app/src/neonReference/res/values-ar/strings.xml").getroot()
 
 def string_value(root, name):
     node = root.find(f"./string[@name='{name}']")
@@ -115,7 +115,7 @@ checks["Manifest round launcher reference preserved"] = application is not None 
 branding = ET.parse(R / "app/src/main/res/values/manga_virus_branding.xml").getroot()
 checks["Brand background color exists"] = branding.find("./color[@name='manga_virus_icon_background']") is not None
 
-for source_set in ("main", "debug", "devDebug"):
+for source_set in ("main", "debug", "neonReferenceDebug"):
     for filename in ("ic_launcher.xml", "ic_launcher_round.xml"):
         path = f"app/src/{source_set}/res/mipmap-anydpi-v26/{filename}"
         root = ET.parse(R / path).getroot()
@@ -163,8 +163,8 @@ for density, size in adaptive_sizes.items():
 for rel in (
     "app/src/main/res/values/strings.xml",
     "app/src/main/res/values-ar/strings.xml",
-    "app/src/dev/res/values/strings.xml",
-    "app/src/dev/res/values-ar/strings.xml",
+    "app/src/neonReference/res/values/strings.xml",
+    "app/src/neonReference/res/values-ar/strings.xml",
     "app/src/main/res/values/themes.xml",
     "app/src/main/res/values/manga_virus_branding.xml",
     "app/src/main/res/drawable/splash_background.xml",
@@ -172,8 +172,8 @@ for rel in (
     "app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
     "app/src/debug/res/mipmap-anydpi-v26/ic_launcher.xml",
     "app/src/debug/res/mipmap-anydpi-v26/ic_launcher_round.xml",
-    "app/src/devDebug/res/mipmap-anydpi-v26/ic_launcher.xml",
-    "app/src/devDebug/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+    "app/src/neonReferenceDebug/res/mipmap-anydpi-v26/ic_launcher.xml",
+    "app/src/neonReferenceDebug/res/mipmap-anydpi-v26/ic_launcher_round.xml",
 ):
     try:
         ET.parse(R / rel)

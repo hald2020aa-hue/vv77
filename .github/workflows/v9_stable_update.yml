@@ -46,12 +46,12 @@ jobs:
             echo "JH_UPDATE_CERT_SHA256=$EXPECTED_SHA"
           } >> "$GITHUB_ENV"
       - name: Run full Android tests and create only the signed arm64 APK
-        run: ./gradlew -Pjh.arm64Only=true --no-daemon testDevDebugUnitTest verifySingleArm64DevApk
+        run: ./gradlew -Pjh.arm64Only=true --no-daemon testNeonReferenceDebugUnitTest verifySingleArm64NeonReferenceApk
       - name: Assert app identity, upgrade version and pinned signer fingerprint
         shell: bash
         run: |
           set -euo pipefail
-          APK="app/build/outputs/apk/dev/debug/app-dev-arm64-v8a-debug.apk"
+          APK="app/build/outputs/apk/neonReference/debug/app-neonReference-arm64-v8a-debug.apk"
           test -s "$APK"
           BUILD_TOOLS="$(find "${ANDROID_SDK_ROOT:-$ANDROID_HOME}/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
           "$BUILD_TOOLS/apksigner" verify --print-certs "$APK" > "$RUNNER_TEMP/jh-cert.txt"
@@ -64,8 +64,8 @@ jobs:
       - name: Upload one verified, signed stable-update APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-dev-arm64-v8a-debug.apk
-          path: app/build/outputs/apk/dev/debug/app-dev-arm64-v8a-debug.apk
+          name: app-neonReference-arm64-v8a-debug.apk
+          path: app/build/outputs/apk/neonReference/debug/app-neonReference-arm64-v8a-debug.apk
           if-no-files-found: error
       - name: Clean up signing file
         if: always()

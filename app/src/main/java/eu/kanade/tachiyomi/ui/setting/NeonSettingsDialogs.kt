@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.util.system.withOriginalWidth
 
 /** Settings-only dialog presentation. The builder and its callbacks remain unchanged. */
 internal fun Context.neonSettingsDialog(): MaterialAlertDialogBuilder =
-    if (BuildConfig.FLAVOR == "dev") {
+    if (BuildConfig.FLAVOR == "neonReference") {
         MaterialAlertDialogBuilder(withOriginalWidth(), R.style.ThemeOverlay_J2K_NeonSettingsDialog)
     } else {
         materialAlertDialog()

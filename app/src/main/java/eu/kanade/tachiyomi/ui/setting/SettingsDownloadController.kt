@@ -210,7 +210,7 @@ class SettingsDownloadController : SettingsController() {
     class DownloadDirectoriesDialog(
         val controller: SettingsDownloadController,
     ) : MaterialAlertDialogBuilder(controller.activity!!.withOriginalWidth(),
-        if (BuildConfig.FLAVOR == "dev") R.style.ThemeOverlay_J2K_NeonSettingsDialog else 0) {
+        if (BuildConfig.FLAVOR == "neonReference") R.style.ThemeOverlay_J2K_NeonSettingsDialog else 0) {
         private val preferences: PreferencesHelper = Injekt.get()
 
         val activity = controller.activity!!

@@ -67,5 +67,5 @@ for label,marker in [('page bounds','expandedOcrTextRegion('),('neighbor protect
 test('webtoon overlay wired', 'decorateTranslationImage(frame, page)' in webtoon)
 test('paged overlay wired', 'decorateTranslationImage(this, page' in pager)
 test('image files not rewritten by translation', all(x not in engine for x in ['openOutputStream(', 'deleteChapter(', 'replaceChapter(', 'writeBytes(']))
-test('single arm64 APK target still enforced', 'verifySingleArm64DevApk' in read('.github/workflows/quality_gate.yml'))
+test('single arm64 APK target still enforced', 'verifySingleArm64NeonReferenceApk' in read('.github/workflows/quality_gate.yml'))
 print('V8 STATIC CHECKS PASS (NOT device testing)')

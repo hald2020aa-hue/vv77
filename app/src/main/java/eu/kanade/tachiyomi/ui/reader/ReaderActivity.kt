@@ -349,7 +349,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             binding.appBar.setBackgroundColor(contextCompatColor(R.color.surface_alpha))
         }
         // Preserve the enhanced reader panel's high-contrast surface in the development fork.
-        if (BuildConfig.FLAVOR != "dev") {
+        if (BuildConfig.FLAVOR != "neonReference") {
             ViewCompat.setBackgroundTintList(
                 binding.readerNav.root,
                 ColorStateList.valueOf(contextCompatColor(R.color.surface_alpha)),
