@@ -140,6 +140,7 @@
       "SettingsLibraryController()) }",
       "SettingsReaderController()) }",
       "SettingsDownloadController()) }",
+      "StorageController()) }",
       "SettingsBrowseController()) }",
       "SettingsTrackingController()) }",
       "SettingsBackupController()) }",
