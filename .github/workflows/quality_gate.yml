@@ -81,6 +81,7 @@ jobs:
           python3 qa/storage/check_migration21.py
           python3 qa/storage/check_refresh_branding.py
           python3 qa/storage/check_deletion.py
+          python3 qa/storage/check_navigation.py
       - name: Run unit tests and compile debug APKs
         run: ./gradlew -Pjh.arm64Only=true --no-daemon testDevDebugUnitTest verifySingleArm64DevApk --stacktrace
       - name: Verify single APK integrity and debug signature

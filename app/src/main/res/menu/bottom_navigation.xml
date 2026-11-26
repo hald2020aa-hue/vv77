@@ -18,5 +18,9 @@
             android:id="@+id/nav_browse"
             android:icon="@drawable/ic_browse_selector_24dp"
             android:title="@string/browse" />
+        <item
+            android:id="@+id/nav_storage"
+            android:icon="@drawable/ic_storage_outline_24dp"
+            android:title="@string/storage_inventory_title" />
     </group>
 </menu>

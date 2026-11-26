@@ -30,6 +30,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -39,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -50,6 +52,8 @@ import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.HomeControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.enhanced.EnhancedReadingTheme
+import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.system.isOnline
@@ -69,7 +73,7 @@ import uy.kohesive.injekt.api.get
 
 /** Storage inventory, classification, additive refresh and confirmed file-only deletion. */
 @OptIn(ExperimentalFoundationApi::class)
-class StorageController : BaseController<HomeControllerBinding>() {
+class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarInterface {
     private val storage by lazy { Injekt.get<DownloadManager>().storageManager }
     private val reload = MutableStateFlow(0L)
     private var snapshot by mutableStateOf<StorageSnapshot?>(null)
@@ -105,6 +109,10 @@ class StorageController : BaseController<HomeControllerBinding>() {
         binding.homeCompose.setContent {
             EnhancedReadingTheme {
                 val context = LocalContext.current
+                // The system back callback must follow in-screen navigation even when storage is a root tab.
+                LaunchedEffect(canStillGoBack()) {
+                    (activity as? MainActivity)?.reEnableBackPressedCallBack()
+                }
                 val data = snapshot
                 val selected = data?.works?.firstOrNull { it.manga.id == selectedMangaId }
                 val classifyWork = classifyMangaId?.let { id -> data?.works?.firstOrNull { it.manga.id == id } }
@@ -393,8 +401,13 @@ class StorageController : BaseController<HomeControllerBinding>() {
         }
         val density = view.resources.displayMetrics.density
         val updateInsets = {
-            topInset = ((activityBinding?.appBar?.height ?: 0) / density).dp
-            bottomInset = ((activityBinding?.bottomNav?.height ?: 0) / density).dp
+            val mainActivity = activity as? MainActivity
+            val appBar = activityBinding?.appBar
+            val bottomNav = activityBinding?.bottomNav
+            val top = appBar?.takeIf { it.isVisible }?.height ?: mainActivity?.cachedSystemInsets?.top ?: 0
+            val bottom = bottomNav?.takeIf { it.isVisible }?.height ?: mainActivity?.cachedSystemInsets?.bottom ?: 0
+            topInset = (top / density).dp
+            bottomInset = (bottom / density).dp
         }
         updateInsets()
         insetsListener = ViewTreeObserver.OnGlobalLayoutListener { updateInsets() }
@@ -518,6 +531,8 @@ class StorageController : BaseController<HomeControllerBinding>() {
             }
         }
     }
+
+    override fun canChangeTabs(block: () -> Unit): Boolean = !deleting && !savingType
 
     override fun canStillGoBack(): Boolean = deleting || selectedWorkIds.isNotEmpty() || selectedMangaId != null || selectedCategory != null
 

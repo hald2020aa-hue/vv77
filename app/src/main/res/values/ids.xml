@@ -2,6 +2,7 @@
 <resources>
 
     <item name="nav_home" type="id"/>
+    <item name="nav_storage" type="id"/>
     <item name="reader_pager" type="id"/>
     <item name="action_remove_from_library" type="id"/>
     <item name="v22_header_chrome" type="id"/>

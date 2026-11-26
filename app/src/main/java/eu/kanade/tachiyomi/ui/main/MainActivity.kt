@@ -104,6 +104,7 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.currentIncognitoSourceId
 import eu.kanade.tachiyomi.ui.home.HomeController
+import eu.kanade.tachiyomi.ui.home.StorageController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.more.AboutController
@@ -568,6 +569,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             nav.selectedItemId =
                 when (router.backstack.firstOrNull()?.controller) {
                     is HomeController -> R.id.nav_home
+                    is StorageController -> R.id.nav_storage
                     is RecentsController -> R.id.nav_recents
                     is BrowseController -> R.id.nav_browse
                     else -> R.id.nav_library
@@ -580,6 +582,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             if (isSyncingNavSelection) return@setOnItemSelectedListener true
             val currentController = router.backstack.lastOrNull()?.controller
             if (id == R.id.nav_settings) {
+                if (currentController is StorageController && !currentController.canChangeTabs {}) {
+                    return@setOnItemSelectedListener false
+                }
                 showSettings()
                 return@setOnItemSelectedListener false
             }
@@ -628,6 +633,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 setRoot(
                     when (id) {
                         R.id.nav_home -> HomeController()
+                        R.id.nav_storage -> StorageController()
                         R.id.nav_library -> LibraryController()
                         R.id.nav_recents -> RecentsController()
                         else -> BrowseController()
@@ -927,6 +933,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     private fun currentTabId(): Int =
         when (router.backstack.firstOrNull()?.controller) {
             is HomeController -> R.id.nav_home
+            is StorageController -> R.id.nav_storage
             is RecentsController -> R.id.nav_recents
             is BrowseController -> R.id.nav_browse
             else -> R.id.nav_library
@@ -1466,7 +1473,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     private fun setStartingTab() {
         if (this is SearchActivity || !isBindingInitialized) return
         val tabId = currentTabId()
-        if (tabId != R.id.nav_browse &&
+        // Storage is not a start-screen preference value; retain the previous choice.
+        if (tabId != R.id.nav_browse && tabId != R.id.nav_storage &&
             preferences.startingTab().get() >= 0
         ) {
             preferences.startingTab().set(
@@ -1817,7 +1825,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     .distinct()
             val navWidth = sideNav.width.takeIf { it != 0 } ?: 80.dpToPx
             controllers.forEach { controller ->
-                val isRootController = controller is RootSearchInterface
+                val isRootController = controller is RootSearchInterface ||
+                    (controller is StorageController && controller === router.backstack.firstOrNull()?.controller)
                 if (controller.view?.layoutParams !is ViewGroup.MarginLayoutParams) return@forEach
                 controller.view?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     marginStart =

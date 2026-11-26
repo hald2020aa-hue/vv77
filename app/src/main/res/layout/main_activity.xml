@@ -280,6 +280,9 @@
         android:background="@drawable/enhanced_bottom_nav_background"
         android:elevation="8dp"
         app:labelVisibilityMode="labeled"
+        app:itemIconGravity="top"
+        app:itemHorizontalTranslationEnabled="false"
+        app:labelMaxLines="2"
         app:itemActiveIndicatorEnabled="true" />
 
     <View
