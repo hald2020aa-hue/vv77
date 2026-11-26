@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="storage_inventory_title">Storage</string>
+    <string name="storage_inventory_refresh">Refresh storage</string>
+    <string name="storage_inventory_summary">%1$d works · %2$d chapters · %3$s</string>
+    <string name="storage_inventory_work">%1$d chapters · %2$s</string>
+    <string name="storage_inventory_scope">Completed downloads matched to installed sources and known chapters only.</string>
+    <string name="storage_inventory_error">Could not read downloads. Check folder permissions and refresh.</string>
+    <string name="storage_inventory_empty">No matching downloaded chapters.</string>
+    <string name="storage_inventory_unclassified">Unclassified</string>
+    <string name="storage_inventory_chapters">Downloaded chapters</string>
+</resources>

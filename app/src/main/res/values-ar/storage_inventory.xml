@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="storage_inventory_title">التخزين</string>
+    <string name="storage_inventory_refresh">تحديث مساحة التخزين</string>
+    <string name="storage_inventory_summary">%1$d أعمال · %2$d فصول · %3$s</string>
+    <string name="storage_inventory_work">%1$d فصول · %2$s</string>
+    <string name="storage_inventory_scope">التنزيلات المكتملة المطابقة للمصادر المثبتة والفصول المعروفة فقط.</string>
+    <string name="storage_inventory_error">تعذرت قراءة التنزيلات. تحقق من صلاحية المجلد وأعد التحديث.</string>
+    <string name="storage_inventory_empty">لا توجد فصول منزلة مطابقة.</string>
+    <string name="storage_inventory_unclassified">غير مصنف</string>
+    <string name="storage_inventory_chapters">الفصول المنزلة</string>
+</resources>

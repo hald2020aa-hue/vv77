@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromByteArray
@@ -90,6 +91,8 @@ class DownloadCache(
     private var mangaFiles: MutableMap<Long, MutableSet<String>> = ConcurrentHashMap()
 
     private val _isInitialized = MutableStateFlow(false)
+    private val _storageRevision = MutableStateFlow(0L)
+    internal val storageRevision: StateFlow<Long> = _storageRevision.asStateFlow()
 
     /**
      * True once the first scan of the downloads directory has completed. Reads made before this
@@ -120,6 +123,7 @@ class DownloadCache(
             .onEach {
                 lastRenew = 0L // invalidate cache
                 diskCacheFile.delete()
+                _storageRevision.update { it + 1 }
             }.launchIn(scope)
     }
 
@@ -147,6 +151,7 @@ class DownloadCache(
     // and interleave their writeBytes() into the same file.
     @Synchronized
     private fun persistToDiskDebounced() {
+        _storageRevision.update { it + 1 }
         persistJob?.cancel()
         persistJob =
             scope.launch {

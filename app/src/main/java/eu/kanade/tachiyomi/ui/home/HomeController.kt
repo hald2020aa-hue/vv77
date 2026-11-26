@@ -119,6 +119,7 @@ class HomeController : BaseController<HomeControllerBinding>(), RootSearchInterf
                     onOpenLibrary = { navigateTo(R.id.nav_library) },
                     onOpenRecents = { navigateTo(R.id.nav_recents) },
                     onBrowse = { navigateTo(R.id.nav_browse) },
+                    onStorage = { router.pushController(StorageController().withFadeTransaction()) },
                     onDownloads = {
                         view.context.startActivity(Intent(view.context, DownloadCenterActivity::class.java))
                     },
@@ -219,6 +220,7 @@ private fun HomeDashboard(
     onOpenRecents: () -> Unit,
     onBrowse: () -> Unit,
     onDownloads: () -> Unit,
+    onStorage: () -> Unit,
 ) {
     val context = LocalContext.current
     val featured = recent.firstOrNull() ?: library.firstOrNull()
@@ -255,6 +257,10 @@ private fun HomeDashboard(
                 HomeAction(context.getString(R.string.browse), sourceCount.toString(), homeCyan, Modifier.weight(1f), onBrowse)
                 HomeAction(context.getString(R.string.downloads), null, homeBlue, Modifier.weight(1f), onDownloads)
             }
+        }
+
+        item {
+            HomeGradientButton(context.getString(R.string.storage_inventory_title), onStorage, Modifier.fillMaxWidth())
         }
 
         item {
