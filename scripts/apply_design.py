@@ -19,11 +19,11 @@ ET.register_namespace('android', A[1:-1]); ET.register_namespace('app', P[1:-1])
 # expect dark surfaces. A light theme would need a separate contrast/runtime audit.
 # bg, surface, raised, border, text, muted, primary, secondary, tertiary.
 DESIGNS = {
-    'neon': dict(name='Neon Reference', palette=('05030F','0E0B27','1B1442','3B2A78','FFFFFF','B3ABD6','19E6FF','A14BFF','FF2FD0'), radius=16, gutter=12, source='stack', source_height=164, columns_at=600, hero=206, poster=112, poster_h=150, chapter=12, nav=8, icon='M12,3 L21,12 L12,21 L3,12 Z'),
-    'cinema': dict(name='Cinema Nova', palette=('100D0C','211916','38271F','72523E','FFF4DF','D7BDA1','F8BD67','B96B41','E5A76A'), radius=12, gutter=16, source='horizontal', source_height=126, columns_at=820, hero=270, poster=144, poster_h=202, chapter=18, nav=12, icon='M3,5 L21,5 L21,19 L3,19 Z M8,8 L8,16 L16,12 Z'),
-    'ink': dict(name='Ink Atelier', palette=('151613','23251F','32342C','5A5E4D','F5F0DE','CEC8B3','E2D5A8','A8B19B','B4A180'), radius=3, gutter=10, source='horizontal-reverse', source_height=116, columns_at=740, hero=172, poster=100, poster_h=145, chapter=9, nav=2, icon='M3,5 L11,7 L12,19 L3,17 Z M13,7 L21,5 L21,17 L12,19 Z'),
-    'fluid': dict(name='Fluid Bloom', palette=('111C22','1C3035','28434B','4B7271','F3FFF9','BEDBD4','7EE8CD','94C7F5','D9B9ED'), radius=27, gutter=20, source='center', source_height=206, columns_at=680, hero=242, poster=130, poster_h=172, chapter=17, nav=15, icon='M12,2 C16,7 21,11 21,15 A9,9 0,0 1,3 15 C3,11 8,7 12,2 Z M9,15 A3,3 0,0 0,15 15'),
-    'reactor': dict(name='Reactor X', palette=('0A1213','132223','223738','3E6565','E9FFF4','AACCC5','B5F65A','5AD8C7','87A9FC'), radius=5, gutter=6, source='stack', source_height=166, columns_at=460, hero=184, poster=94, poster_h=130, chapter=8, nav=1, icon='M8,3 L16,3 L22,12 L16,21 L8,21 L2,12 Z M12,7 L16,12 L12,17 L8,12 Z'),
+    'neon': dict(name='Neon Reference', palette=('05030F','0E0B27','1B1442','3B2A78','FFFFFF','B3ABD6','19E6FF','A14BFF','FF2FD0'), radius=16, gutter=12, source='row', source_height=68, source_min_width=300, source_icon=42, source_latest=72, hero=206, poster=112, poster_h=150, chapter=12, nav=8, icon='M12,3 L21,12 L12,21 L3,12 Z'),
+    'cinema': dict(name='Cinema Nova', palette=('100D0C','211916','38271F','72523E','FFF4DF','D7BDA1','F8BD67','B96B41','E5A76A'), radius=12, gutter=16, source='row', source_height=76, source_min_width=330, source_icon=48, source_latest=80, hero=270, poster=144, poster_h=202, chapter=18, nav=12, icon='M3,5 L21,5 L21,19 L3,19 Z M8,8 L8,16 L16,12 Z'),
+    'ink': dict(name='Ink Atelier', palette=('151613','23251F','32342C','5A5E4D','F5F0DE','CEC8B3','E2D5A8','A8B19B','B4A180'), radius=3, gutter=10, source='reverse', source_height=64, source_min_width=300, source_icon=38, source_latest=72, hero=172, poster=100, poster_h=145, chapter=9, nav=2, icon='M3,5 L11,7 L12,19 L3,17 Z M13,7 L21,5 L21,17 L12,19 Z'),
+    'fluid': dict(name='Fluid Bloom', palette=('111C22','1C3035','28434B','4B7271','F3FFF9','BEDBD4','7EE8CD','94C7F5','D9B9ED'), radius=27, gutter=20, source='row', source_height=80, source_min_width=340, source_icon=48, source_latest=80, hero=242, poster=130, poster_h=172, chapter=17, nav=15, icon='M12,2 C16,7 21,11 21,15 A9,9 0,0 1,3 15 C3,11 8,7 12,2 Z M9,15 A3,3 0,0 0,15 15'),
+    'reactor': dict(name='Reactor X', palette=('0A1213','132223','223738','3E6565','E9FFF4','AACCC5','B5F65A','5AD8C7','87A9FC'), radius=5, gutter=6, source='row', source_height=64, source_min_width=300, source_icon=36, source_latest=72, hero=184, poster=94, poster_h=130, chapter=8, nav=1, icon='M8,3 L16,3 L22,12 L16,21 L8,21 L2,12 Z M12,7 L16,12 L12,17 L8,12 Z'),
 }
 
 # Explicit palette roles shared by XML and Kotlin UI. Keep read/error/success colours
@@ -90,29 +90,24 @@ def change_xml(path, fn):
 
 
 def source_layout(root,d):
-    card, image, title, pin, latest, divider=(byid(root,x) for x in ['source_card','source_image','title','source_pin','source_latest','source_divider'])
-    setv(card,{A+'layout_height':f"{d['source_height']}dp",P+'cardCornerRadius':f"{d['radius']}dp"})
-    setv(pin,{A+'layout_width':'48dp',A+'layout_height':'48dp'})
-    setv(latest,{A+'layout_height':'48dp',P+'cornerRadius':f"{min(24,d['radius'])}dp"})
-    kind=d['source']
-    if kind.startswith('horizontal'):
-        image_at_start=kind=='horizontal'
-        # Replace constraints, retaining all views, click targets and binding types.
-        for n in (image,title,pin):
-            for k in list(n.attrib):
-                if k.startswith(P+'layout_constraint') or k.startswith(A+'layout_margin'): del n.attrib[k]
-        edge='Start' if image_at_start else 'End'; other='End' if image_at_start else 'Start'
-        setv(image,{A+'layout_width':'52dp',A+'layout_height':'52dp',A+'layout_margin'+edge:'10dp',A+'layout_marginTop':'4dp',P+f'layout_constraint{edge}_to{edge}Of':'parent',P+'layout_constraintTop_toTopOf':'parent',P+'layout_constraintBottom_toTopOf':'@id/source_divider'})
-        setv(pin,{P+f'layout_constraint{other}_to{other}Of':'parent',P+'layout_constraintTop_toTopOf':'parent',P+'layout_constraintBottom_toTopOf':'@id/source_divider'})
-        setv(title,{A+'layout_marginStart':'6dp',A+'layout_marginEnd':'6dp',P+'layout_constraintTop_toTopOf':'parent',P+'layout_constraintBottom_toTopOf':'@id/source_divider',P+'layout_constraintStart_toEndOf':'@id/source_image' if image_at_start else '@id/source_pin',P+'layout_constraintEnd_toStartOf':'@id/source_pin' if image_at_start else '@id/source_image'})
-    else:
-        # Larger vertical cards retain the source name below the real source icon.
-        if kind=='center':
-            setv(image,{A+'layout_width':'76dp',A+'layout_height':'76dp',A+'layout_marginTop':'18dp',A+'layout_marginEnd':'0dp',P+'layout_constraintStart_toStartOf':'parent',P+'layout_constraintEnd_toEndOf':'parent'})
-            setv(title,{A+'gravity':'center',A+'textSize':'16sp'})
-        else:
-            setv(image,{A+'layout_width':'44dp',A+'layout_height':'44dp',A+'layout_marginTop':'10dp'})
-    # Source name remains real text from the existing adapter. No data is supplied here.
+    card, body, image, title, pin, latest, divider=(byid(root,x) for x in ['source_card','card','source_image','title','source_pin','source_latest','source_divider'])
+    setv(card,{A+'layout_height':'wrap_content',P+'cardCornerRadius':f"{d['radius']}dp"})
+    setv(body,{A+'layout_height':'wrap_content',A+'minHeight':f"{d['source_height']}dp",A+'paddingStart':'6dp',A+'paddingEnd':'6dp',A+'paddingTop':'4dp',A+'paddingBottom':'4dp'})
+    # One compact horizontal row. Logical start/end mirror in Arabic. Wrap height
+    # accommodates a two-line title and large text rather than clipping it.
+    for n in (image,title,pin,latest,divider):
+        for k in list(n.attrib):
+            if k.startswith(P+'layout_constraint') or k.startswith(A+'layout_margin'): del n.attrib[k]
+        setv(n,{P+'layout_constraintTop_toTopOf':'parent',P+'layout_constraintBottom_toBottomOf':'parent'})
+    reverse=d['source']=='reverse'
+    first='End' if reverse else 'Start'
+    last='Start' if reverse else 'End'
+    setv(image,{A+'layout_width':f"{d['source_icon']}dp",A+'layout_height':f"{d['source_icon']}dp",P+f'layout_constraint{first}_to{first}Of':'parent',A+'contentDescription':'@null'})
+    setv(pin,{A+'layout_width':'48dp',A+'layout_height':'48dp',P+f'layout_constraint{last}_to{last}Of':'parent'})
+    setv(latest,{A+'layout_width':f"{d['source_latest']}dp",A+'layout_height':'wrap_content',A+'minHeight':'48dp',A+'paddingStart':'3dp',A+'paddingEnd':'3dp',A+'maxLines':'2',A+'ellipsize':'end',P+'cornerRadius':f"{min(24,d['radius'])}dp",P+f'layout_constraint{last}_to{first}Of':'@id/source_pin'})
+    setv(divider,{A+'layout_width':'1dp',A+'layout_height':'24dp',A+'layout_margin'+last:'4dp',P+f'layout_constraint{last}_to{first}Of':'@id/source_latest'})
+    setv(title,{A+'layout_width':'0dp',A+'layout_height':'wrap_content',A+'layout_marginStart':'6dp',A+'layout_marginEnd':'6dp',A+'maxLines':'2',A+'textSize':'14sp',A+'gravity':'start|center_vertical',P+f'layout_constraint{first}_to{last}Of':'@id/source_image',P+f'layout_constraint{last}_to{first}Of':'@id/source_divider'})
+    # When latest and its divider are GONE the title expands to the pin.
 
 
 def visual_layouts(res,d):
@@ -236,8 +231,8 @@ def render(root, design):
                 v=''.join(f'{int(x):02X}' for x in m.groups()); val=mapped(v,palette); return 'Color.rgb('+', '.join(str(int(val[i:i+2],16)) for i in (0,2,4))+')'
             t=re.sub(r'Color\.rgb\((\d+),\s*(\d+),\s*(\d+)\)',rgb,t)
         if t!=s: p.write_text(t)
-    p=root/KBASE/'ui/source/BrowseController.kt'; s=p.read_text(); old='recycler.width >= 600.dpToPx'; assert s.count(old)==1
-    p.write_text(s.replace(old,f"recycler.width >= {d['columns_at']}.dpToPx"))
+    p=root/KBASE/'ui/source/BrowseController.kt'; s=p.read_text(); old='val minCardWidth = 300.dpToPx'; assert s.count(old)==1
+    p.write_text(s.replace(old,f"val minCardWidth = {d['source_min_width']}.dpToPx"))
     # On-primary text must remain legible on the new pale accents.
     for p in res.glob('values*/colors.xml'):
         s=p.read_text(); t=re.sub(r'(<color name="onPrimaryTachiyomi">)#[0-9A-Fa-f]{6}(</color>)',lambda m:m.group(1)+'#'+palette[0]+m.group(2),s)

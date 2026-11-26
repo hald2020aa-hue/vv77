@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 import xml.etree.ElementTree as ET
+from check_source_cards import validate_source_card, validate_grid
 
 ROOT=Path(__file__).resolve().parents[2]
 SPEC=importlib.util.spec_from_file_location('mv_design',ROOT/'scripts/apply_design.py')
@@ -101,10 +102,9 @@ def main():
             # Distinct geometry is verified in generated Android resources, not just in specs.
             sr=ET.parse(res/'layout/source_item.xml').getroot()
             actual_layout_hashes.append(hashlib.sha256((res/'layout/source_item.xml').read_bytes()).hexdigest())
+            validate_source_card(sr, mod.DESIGNS[edition], edition)
+            validate_grid((r/mod.KBASE/'ui/source/BrowseController.kt').read_text(), mod.DESIGNS[edition], edition)
             if edition!='neon':
-                require(mod.byid(sr,'source_pin').get(A+'layout_width')=='48dp',edition+' source pin touch target')
-                require(mod.byid(sr,'source_latest').get(A+'layout_height')=='48dp',edition+' latest touch target')
-                require(mod.byid(sr,'source_card').get(A+'layout_height')==str(mod.DESIGNS[edition]['source_height'])+'dp',edition+' card geometry')
                 icon_hashes.append(hashlib.sha256((res/'drawable/mv_design_mark.xml').read_bytes()).hexdigest())
                 nav=ET.parse(res/'layout/reader_nav.xml').getroot()
                 require(mod.byid(nav,'left_chapter').get(A+'layout_width')=='48dp',edition+' reader touch target')

@@ -16,6 +16,7 @@ class SourceHolder(
     val adapter: SourceAdapter,
 ) : BaseFlexibleViewHolder(view, adapter) {
     val binding = SourceItemBinding.bind(view)
+    private var iconBindGeneration = 0L
 
     init {
         binding.sourcePin.setOnClickListener {
@@ -59,12 +60,15 @@ class SourceHolder(
             )
         }
 
-        // Set circle letter image.
+        // A recycled holder must not retain or receive a previous source's icon.
+        val generation = ++iconBindGeneration
+        binding.sourceImage.setImageDrawable(null)
         itemView.post {
+            if (generation != iconBindGeneration) return@post
             val icon = source.icon()
             when {
                 icon != null -> binding.sourceImage.setImageDrawable(icon)
-                item.source.id == LocalSource.ID -> binding.sourceImage.setImageResource(R.mipmap.ic_local_source)
+                source.id == LocalSource.ID -> binding.sourceImage.setImageResource(R.mipmap.ic_local_source)
             }
         }
 
