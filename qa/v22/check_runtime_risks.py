@@ -16,7 +16,7 @@ A = "{http://schemas.android.com/apk/res/android}"
 root = sys.argv[1]
 errors = []
 
-for flavor in ("main", "neonReference"):
+for flavor in ("main", "neonReference", "cinemaNova"):
     base = os.path.join(root, "app", "src", flavor, "res")
     for d in sorted(os.listdir(base)):
         if not d.startswith("layout"):
@@ -29,7 +29,7 @@ for flavor in ("main", "neonReference"):
                 continue
             for el in tree.iter():
                 tag = el.tag.split(".")[-1]
-                if tag in ("MaterialButton", "Button") and A + "background" in el.attrib and flavor == "neonReference":
+                if tag in ("MaterialButton", "Button") and A + "background" in el.attrib and flavor != "main":
                     errors.append("%s: %s has android:background (MaterialButton overwritten-background crash)" % (fp, tag))
 
 kt_root = os.path.join(root, "app", "src", "main", "java")

@@ -127,6 +127,12 @@ android {
             versionCode = AndroidVersions.versionCode + 4
             versionNameSuffix = "-enhanced-v22-neon-reference"
         }
+        create("cinemaNova") {
+            // Installs next to the other editions; user data moves only through the in-app backup/restore.
+            applicationIdSuffix = ".cinema"
+            versionCode = AndroidVersions.versionCode + 4
+            versionNameSuffix = "-cinema-nova"
+        }
     }
 
     lint {
@@ -386,16 +392,20 @@ tasks {
 }
 
 /** Refuse to publish a multi-APK build or an incorrectly named APK. */
-tasks.register("verifySingleArm64NeonReferenceApk") {
-    dependsOn("assembleNeonReferenceDebug")
-    doLast {
-        check(arm64Only) { "Use -Pjh.arm64Only=true for the requested single APK" }
-        val directory = layout.buildDirectory.dir("outputs/apk/neonReference/debug").get().asFile
-        val apks = directory.listFiles()?.filter { it.isFile && it.extension == "apk" } ?: emptyList()
-        check(apks.size == 1 && apks.single().name == "app-neonReference-arm64-v8a-debug.apk") {
-            "Expected only app-neonReference-arm64-v8a-debug.apk, found: ${apks.map { it.name }}"
+fun registerSingleArm64Check(taskName: String, flavor: String, assembleTask: String) {
+    tasks.register(taskName) {
+        dependsOn(assembleTask)
+        doLast {
+            check(arm64Only) { "Use -Pjh.arm64Only=true for the requested single APK" }
+            val directory = layout.buildDirectory.dir("outputs/apk/$flavor/debug").get().asFile
+            val apks = directory.listFiles()?.filter { it.isFile && it.extension == "apk" } ?: emptyList()
+            check(apks.size == 1 && apks.single().name == "app-$flavor-arm64-v8a-debug.apk") {
+                "Expected only app-$flavor-arm64-v8a-debug.apk, found: ${apks.map { it.name }}"
+            }
+            check(apks.single().length() > 1024 * 1024) { "APK is unusually small" }
+            println("SINGLE_APK_OK: ${apks.single().absolutePath} (${apks.single().length()} bytes)")
         }
-        check(apks.single().length() > 1024 * 1024) { "APK is unusually small" }
-        println("SINGLE_APK_OK: ${apks.single().absolutePath} (${apks.single().length()} bytes)")
     }
 }
+registerSingleArm64Check("verifySingleArm64NeonReferenceApk", "neonReference", "assembleNeonReferenceDebug")
+registerSingleArm64Check("verifySingleArm64CinemaNovaApk", "cinemaNova", "assembleCinemaNovaDebug")

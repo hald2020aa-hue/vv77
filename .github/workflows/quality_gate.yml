@@ -76,6 +76,10 @@ jobs:
         run: python3 qa/v22/check_resources.py . qa/v22/baseline_ids.json
       - name: Check crash patterns (MaterialButton shared elements)
         run: python3 qa/v22/check_runtime_risks.py .
+      - name: Validate Cinema Nova resources and theme copy
+        run: |
+          python3 qa/v22/check_resources.py . qa/v22/baseline_ids.json cinemaNova
+          python3 qa/variants/check_theme_copies.py .
       - name: Run unit tests and compile debug APKs
         run: ./gradlew -Pjh.arm64Only=true --no-daemon testNeonReferenceDebugUnitTest verifySingleArm64NeonReferenceApk --stacktrace
       - name: Verify single APK integrity and debug signature
@@ -111,6 +115,72 @@ jobs:
           path: dist/manga-virus-neon-reference-arm64-v8a.apk
           if-no-files-found: error
 
+
+  cinema-nova:
+    name: Cinema Nova arm64 APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+      - name: Configure JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Configure Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Restore persistent V19-compatible signing key when configured
+        shell: bash
+        env:
+          JH_UPDATE_KEYSTORE_BASE64: ${{ secrets.JH_UPDATE_KEYSTORE_BASE64 }}
+          JH_UPDATE_STORE_PASSWORD: ${{ secrets.JH_UPDATE_STORE_PASSWORD }}
+          JH_UPDATE_KEY_ALIAS: ${{ secrets.JH_UPDATE_KEY_ALIAS }}
+          JH_UPDATE_KEY_PASSWORD: ${{ secrets.JH_UPDATE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${JH_UPDATE_KEYSTORE_BASE64:-}" || -z "${JH_UPDATE_STORE_PASSWORD:-}" || -z "${JH_UPDATE_KEY_ALIAS:-}" || -z "${JH_UPDATE_KEY_PASSWORD:-}" ]]; then
+            echo "::warning::Using temporary CI debug signing for isolated development APK."
+            exit 0
+          fi
+          KEYSTORE="$RUNNER_TEMP/jh-update-keystore.jks"
+          printf '%s' "$JH_UPDATE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE"
+          test -s "$KEYSTORE"
+          {
+            printf 'JH_UPDATE_STORE_FILE=%s\n' "$KEYSTORE"
+            printf 'JH_UPDATE_STORE_PASSWORD=%s\n' "$JH_UPDATE_STORE_PASSWORD"
+            printf 'JH_UPDATE_KEY_ALIAS=%s\n' "$JH_UPDATE_KEY_ALIAS"
+            printf 'JH_UPDATE_KEY_PASSWORD=%s\n' "$JH_UPDATE_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+      - name: Validate Cinema Nova resources and theme copy
+        run: |
+          python3 qa/v22/check_resources.py . qa/v22/baseline_ids.json cinemaNova
+          python3 qa/variants/check_theme_copies.py .
+          python3 qa/v22/check_runtime_risks.py .
+      - name: Compile Cinema Nova and verify the single arm64 APK
+        run: ./gradlew -Pjh.arm64Only=true --no-daemon verifySingleArm64CinemaNovaApk --stacktrace
+      - name: Verify package identity, label and signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="app/build/outputs/apk/cinemaNova/debug/app-cinemaNova-arm64-v8a-debug.apk"
+          test -s "$APK"
+          unzip -tqq "$APK"
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          BUILD_TOOLS="$(find "$SDK/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
+          "$BUILD_TOOLS/aapt" dump badging "$APK" | grep -E "^(package:|application-label)" | head -4
+          sha256sum "$APK"
+      - name: Stage APK under its release name
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/cinemaNova/debug/app-cinemaNova-arm64-v8a-debug.apk dist/manga-virus-cinema-nova-arm64-v8a.apk
+      - name: Upload manga-virus-cinema-nova-arm64-v8a.apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: manga-virus-cinema-nova-arm64-v8a.apk
+          path: dist/manga-virus-cinema-nova-arm64-v8a.apk
+          if-no-files-found: error
 
   # The base job above already compiles, verifies, and uploads the ARM64 APK.
   universal-debug:
