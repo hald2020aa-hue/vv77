@@ -75,6 +75,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.navigationrail.NavigationRailView
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import com.google.common.primitives.Floats.max
 import com.google.common.primitives.Ints.max
 import eu.kanade.tachiyomi.BuildConfig
@@ -134,7 +135,6 @@ import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.SafeContainerTransformCallback
 import eu.kanade.tachiyomi.util.view.BackHandlerControllerInterface
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.blurBehindWindow
@@ -275,7 +275,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         // Set up shared element transition and disable overlay so views don't show above system bars
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
         setExitSharedElementCallback(
-            object : SafeContainerTransformCallback() {
+            object : MaterialContainerTransformSharedElementCallback() {
                 override fun onMapSharedElements(
                     names: MutableList<String>,
                     sharedElements: MutableMap<String, View>,
