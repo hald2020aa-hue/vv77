@@ -78,6 +78,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.enhanced.DownloadQueueSort
 import eu.kanade.tachiyomi.ui.enhanced.sortDownloadRows
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -177,7 +178,11 @@ internal class DownloadCenterModel : ViewModel() {
         viewModelScope.launch(Dispatchers.Main.immediate) {
             refreshSignals.receiveAsFlow().collect {
                 _paused.value = manager.isPaused()
-                _neonRows.value = manager.queue.map { download ->
+                val snapshot = manager.queue.toList()
+                val countsByManga = snapshot.distinctBy { it.manga.id }.associate { download ->
+                    download.manga.id to manager.getDownloadCount(download.manga)
+                }
+                _neonRows.value = snapshot.map { download ->
                     NeonDownloadRow(
                         download = download,
                         name = download.manga.title,
@@ -187,10 +192,10 @@ internal class DownloadCenterModel : ViewModel() {
                         totalPages = download.pages?.size,
                         paused = download.chapter.id?.let(manager::isChapterPaused) ?: false,
                         status = download.status,
-                        completedInCache = manager.getDownloadCount(download.manga),
+                        completedInCache = countsByManga[download.manga.id] ?: 0,
                     )
                 }
-                _rows.value = manager.queue.mapNotNull { download ->
+                _rows.value = snapshot.mapNotNull { download ->
                     val id = download.chapter.id ?: return@mapNotNull null
                     DownloadCenterRow(
                         chapterId = id,
@@ -206,6 +211,8 @@ internal class DownloadCenterModel : ViewModel() {
                         dateFetchedAt = download.chapter.date_fetch,
                     )
                 }
+                // Bound expensive full-list snapshots to ~8 per second; conflation retains the final event.
+                delay(125)
             }
         }
         viewModelScope.launch { manager.queue.state.collect { refresh() } }

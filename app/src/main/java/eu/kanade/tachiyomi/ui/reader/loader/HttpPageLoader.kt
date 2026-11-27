@@ -13,7 +13,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -42,30 +41,46 @@ class HttpPageLoader(
     /** At most one scheduled entry per page, even if pager and OCR request it together. */
     private val queuedByPage = mutableMapOf<ReaderPage, PriorityPage>()
     private var focusedPage = -1
+    private var loadingPage: ReaderPage? = null
 
     fun focusOnPage(index: Int) {
         synchronized(queue) {
             focusedPage = index
+            // Demote old focus requests before pruning; rapid swipes must not leave them at
+            // the same priority as the newly visible page.
+            queuedByPage.values.filter { it.priority == 3 && it.page.index != index }.forEach { old ->
+                queue.remove(old)
+                val replacement = PriorityPage(old.page, old.basePriority, old.basePriority)
+                queuedByPage[old.page] = replacement
+                queue.offer(replacement)
+            }
             // Cancel stale speculative queue entries, not pages already cached or being read.
             val pending = queuedByPage.filter { (page, entry) ->
-                entry.priority == 0 && outsideReadAheadWindow(page.index, index, chapter.pages?.size ?: 0, preloadSize)
+                entry.priority == 0 && page.index != index && outsideReadAheadWindow(page.index, index, chapter.pages?.size ?: 0, preloadSize)
             }
             pending.forEach { (page, entry) ->
                 queue.remove(entry)
                 queuedByPage.remove(page)
             }
+            // A speculative request for the newly visible page must outrank old requests.
+            val visible = chapter.pages?.getOrNull(index)
+            if (visible != null && queuedByPage.containsKey(visible)) {
+                offerPage(visible, queuedByPage.getValue(visible).basePriority)
+            }
         }
     }
 
     private fun offerPage(page: ReaderPage, priority: Int): PriorityPage? = synchronized(queue) {
-        if (page.status != Page.State.QUEUE) return@synchronized null
-        if (priority == 0 && focusedPage >= 0 &&
+        if (page.status != Page.State.QUEUE || loadingPage === page) return@synchronized null
+        if (priority == 0 && focusedPage >= 0 && page.index != focusedPage &&
             outsideReadAheadWindow(page.index, focusedPage, chapter.pages?.size ?: 0, preloadSize)
         ) return@synchronized null
         val old = queuedByPage[page]
-        if (old != null && old.priority >= priority) return@synchronized null
+        val basePriority = maxOf(priority, old?.basePriority ?: priority)
+        val effectivePriority = if (page.index == focusedPage) 3 else basePriority
+        if (old != null && old.priority >= effectivePriority && old.basePriority >= basePriority) return@synchronized null
         if (old != null) queue.remove(old)
-        val request = PriorityPage(page, priority)
+        val request = PriorityPage(page, effectivePriority, basePriority)
         queuedByPage[page] = request
         queue.offer(request)
         request
@@ -91,16 +106,22 @@ class HttpPageLoader(
                             false
                         } else {
                             queuedByPage.remove(request.page)
-                            request.priority != 0 || focusedPage < 0 ||
-                                !outsideReadAheadWindow(request.page.index, focusedPage, chapter.pages?.size ?: 0, preloadSize)
+                            val valid = request.page.status == Page.State.QUEUE &&
+                                (request.priority != 0 || focusedPage < 0 ||
+                                    !outsideReadAheadWindow(request.page.index, focusedPage, chapter.pages?.size ?: 0, preloadSize))
+                            if (valid) loadingPage = request.page
+                            valid
                         }
                     }
                     if (isCurrent) emit(request.page)
                 }
-            }.filter { it.status == Page.State.QUEUE }
-                .collect {
-                    _loadPage(it)
+            }.collect { page ->
+                try {
+                    if (page.status == Page.State.QUEUE) _loadPage(page)
+                } finally {
+                    synchronized(queue) { if (loadingPage === page) loadingPage = null }
                 }
+            }
         }
     }
 
@@ -139,13 +160,13 @@ class HttpPageLoader(
     override suspend fun getPages(): List<ReaderPage> {
         val pages =
             try {
-                chapterCache.getPageListFromCache(chapter.chapter)
+                chapterCache.getPageListFromCache(chapter.chapter).takeIf { it.isNotEmpty() }
             } catch (e: Throwable) {
                 if (e is CancellationException) {
                     throw e
                 }
-                source.getPageList(chapter.chapter)
-            }
+                null
+            } ?: source.getPageList(chapter.chapter)
         return pages.mapIndexed { index, page ->
             // Don't trust sources and use our own indexing
             ReaderPage(index, page.url, page.imageUrl)
@@ -211,6 +232,7 @@ class HttpPageLoader(
     private class PriorityPage(
         val page: ReaderPage,
         val priority: Int,
+        val basePriority: Int,
     ) : Comparable<PriorityPage> {
         companion object {
             private val idGenerator = AtomicInteger()

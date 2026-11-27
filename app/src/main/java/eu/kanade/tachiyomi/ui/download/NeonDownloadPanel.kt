@@ -173,11 +173,13 @@ fun NeonDownloadPanel(
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
     var showDeleteAll by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
+    var showRetryFailed by remember { mutableStateOf(false) }
     var selectedFilter by remember { mutableStateOf("all") }
     val downloadingCount = rows.count { it.status == Download.State.DOWNLOADING && !it.paused }
     val waitingCount = rows.count { it.status == Download.State.QUEUE }
     val pausedCount = rows.count { it.paused }
     val failedCount = rows.count { it.status == Download.State.ERROR }
+    val retryableCount = rows.count { it.status == Download.State.ERROR && !it.paused }
     val completedCount = rows.count { it.status == Download.State.DOWNLOADED }
     val visibleRows = when (selectedFilter) {
         "downloading" -> rows.filter { it.status == Download.State.DOWNLOADING && !it.paused }
@@ -256,6 +258,11 @@ fun NeonDownloadPanel(
                 }
             }
         }
+        if (retryableCount > 0) {
+            TextButton(onClick = { showRetryFailed = true }) {
+                Text("إعادة محاولة الفصول المتعثرة ($retryableCount)", color = cyan)
+            }
+        }
         if (rows.isEmpty() || visibleRows.isEmpty()) {
             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
@@ -329,6 +336,21 @@ fun NeonDownloadPanel(
             text = { Text("سيُلغى طابور التنزيل. لا تُحذف الفصول التي اكتمل تنزيلها.") },
             confirmButton = { TextButton(onClick = { showDeleteAll = false; onDeleteAll() }) { Text("إلغاء القائمة") } },
             dismissButton = { TextButton(onClick = { showDeleteAll = false }) { Text("رجوع") } },
+        )
+    }
+    if (showRetryFailed) {
+        AlertDialog(
+            onDismissRequest = { showRetryFailed = false },
+            title = { Text("إعادة محاولة التنزيلات المتعثرة؟") },
+            text = { Text("ستُعاد محاولة الفصول المتعثرة فقط، مع الاحتفاظ بالملفات المكتملة.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRetryFailed = false
+                    rows.filter { it.download.status == Download.State.ERROR && !it.paused }
+                        .forEach { onResume(it.download) }
+                }) { Text("إعادة المحاولة") }
+            },
+            dismissButton = { TextButton(onClick = { showRetryFailed = false }) { Text("رجوع") } },
         )
     }
     if (showSettings) {

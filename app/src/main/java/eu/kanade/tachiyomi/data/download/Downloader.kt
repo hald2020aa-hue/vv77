@@ -50,6 +50,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -319,7 +321,7 @@ class Downloader(
                                         .filter { it.status <= Download.State.DOWNLOADING && it.chapter.id !in paused }
                                         .groupBy { it.source }
                                         .toList()
-                                        .take(parallelCount)
+                                        .take(parallelCount.coerceIn(1, 10))
                                         .map { (_, downloads) -> downloads.first() }
                                 emit(activeDownloads)
 
@@ -567,10 +569,12 @@ class Downloader(
 
             // Get all the URLs to the source images, fetch pages if necessary
             pageList.filter { it.imageUrl.isNullOrEmpty() }.forEach { page ->
+                currentCoroutineContext().ensureActive()
                 page.status = Page.State.LOAD_PAGE
                 try {
                     page.imageUrl = download.source.getImageUrl(page)
                 } catch (e: Throwable) {
+                    if (e is CancellationException) throw e
                     page.status = Page.State.ERROR
                 }
             }
@@ -578,7 +582,7 @@ class Downloader(
             // Start downloading images, consider we can have downloaded images already
             pageList
                 .asFlow()
-                .flatMapMerge(concurrency = preferences.numberOfConcurrentPageDownloads().get()) { page ->
+                .flatMapMerge(concurrency = preferences.numberOfConcurrentPageDownloads().get().coerceIn(1, 15)) { page ->
                     flow {
                         withIOContext { getOrDownloadImage(page, download, tmpDir) }
                         emit(page)
@@ -700,23 +704,25 @@ class Downloader(
         page.status = Page.State.DOWNLOAD_IMAGE
         page.progress = 0
         return flow {
-            val response = download.source.getImage(page)
             val file = tmpDir.createFile("$filename.tmp")
             try {
-                response.use {
+                download.source.getImage(page).use {
                     // Track bytes from the actual HTTP response as each chunk arrives.
                     // Do not infer a total chapter size from a single image's Content-Length.
                     val sourceStream = it.body.byteStream()
                     file.openOutputStream().use { output ->
                         val buffer = ByteArray(32 * 1024)
                         while (true) {
+                            currentCoroutineContext().ensureActive()
                             val read = sourceStream.read(buffer)
                             if (read < 0) break
+                            currentCoroutineContext().ensureActive()
                             output.write(buffer, 0, read)
                             download.addReceivedBytes(read.toLong())
                         }
                         output.flush()
                     }
+                    currentCoroutineContext().ensureActive()
                     download.addReceivedBytes(0, force = true)
                     val extension = getImageExtension(file)
                     if (!file.renameTo("$filename.$extension")) {
@@ -724,14 +730,14 @@ class Downloader(
                     }
                 }
             } catch (e: Exception) {
-                response.close()
                 file.delete()
                 throw e
             }
             emit(file)
         }
             // Retry 3 times, waiting 2, 4 and 8 seconds between attempts.
-            .retryWhen { _, attempt ->
+            .retryWhen { cause, attempt ->
+                if (cause is CancellationException) throw cause
                 if (attempt < 3) {
                     delay((2L shl attempt.toInt()).seconds)
                     true

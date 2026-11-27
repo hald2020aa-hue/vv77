@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadStore
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,9 +21,11 @@ class DownloadQueue(
     /** Emits the queue's contents on every change, so the downloader can re-pick what to run. */
     val state: StateFlow<List<Download>> = _state.asStateFlow()
 
-    private val downloadListeners = mutableListOf<DownloadListener>()
+    private val downloadListeners = CopyOnWriteArrayList<DownloadListener>()
 
-    private var scope = MainScope()
+    private val scope = MainScope()
+    // A chapter may be paused and resumed many times. Own exactly one set of page observers.
+    private val pageObservers = mutableMapOf<Download, List<Job>>()
 
     fun addAll(downloads: List<Download>) {
         downloads.forEach { download ->
@@ -50,6 +53,7 @@ class DownloadQueue(
         val removed = queue.remove(download)
         store.remove(download)
         download.setStatusCallback(null)
+        stopPageObservers(download)
         if (download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE) {
             download.status = Download.State.NOT_DOWNLOADED
         }
@@ -87,29 +91,44 @@ class DownloadQueue(
             downloadListeners.forEach { it.updateDownload(download) }
         }
         queue.clear()
+        stopAllPageObservers()
         store.clear()
         _state.value = queue.toList()
     }
 
+    @Synchronized
+    private fun stopPageObservers(download: Download) {
+        pageObservers.remove(download)?.forEach { it.cancel() }
+    }
+
+    @Synchronized
+    private fun stopAllPageObservers() {
+        pageObservers.values.flatten().forEach { it.cancel() }
+        pageObservers.clear()
+    }
+
     private fun setPagesFor(download: Download) {
-        if (download.status == Download.State.DOWNLOADING) {
-            if (download.pages != null) {
-                for (page in download.pages!!) {
-                    scope.launch {
-                        page.statusFlow.collectLatest {
-                            callListeners(download)
+        synchronized(this) {
+            if (download.status == Download.State.DOWNLOADING && download in queue) {
+                if (download !in pageObservers) {
+                    val pages = download.pages.orEmpty()
+                    if (pages.isNotEmpty()) {
+                        pageObservers[download] = pages.map { page ->
+                            scope.launch {
+                                page.statusFlow.collectLatest {
+                                    if (download.status == Download.State.DOWNLOADING && download in queue) {
+                                        callListeners(download)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
+            } else {
+                stopPageObservers(download)
             }
-            callListeners(download)
-        } else if (download.status == Download.State.DOWNLOADED || download.status == Download.State.ERROR) {
-            if (download.status == Download.State.ERROR) {
-                callListeners(download)
-            }
-        } else {
-            callListeners(download)
         }
+        if (download.status != Download.State.DOWNLOADED) callListeners(download)
     }
 
     private fun callListeners(download: Download) {
@@ -117,7 +136,7 @@ class DownloadQueue(
     }
 
     fun addListener(listener: DownloadListener) {
-        downloadListeners.add(listener)
+        downloadListeners.addIfAbsent(listener)
     }
 
     fun removeListener(listener: DownloadListener) {
