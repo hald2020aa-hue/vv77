@@ -77,7 +77,7 @@ internal class DownloadNotifier(
         return "$title - $chapter"
     }
 
-    /** Keep system actions and the collapsed notification native; decorate expanded content only. */
+    /** The expanded neon card owns its progress and controls; keep the system header native. */
     private fun NotificationCompat.Builder.decorateProgress(
         localized: Context,
         title: String,
@@ -86,19 +86,33 @@ internal class DownloadNotifier(
         completed: Int,
         download: Download?,
         hidden: Boolean,
+        paused: Boolean = false,
     ) {
         setStyle(null)
         setCustomBigContentView(null)
         setCategory(NotificationCompat.CATEGORY_PROGRESS)
         setOnlyAlertOnce(true)
         if (!localized.resources.getBoolean(R.bool.v4_neon_mode)) return
+        // Avoid the second, system-drawn progress bar and white action row.
+        setProgress(0, 0, false)
+        clearActions()
         val views = RemoteViews(localized.packageName, R.layout.mv_download_notification)
         views.setTextViewText(R.id.mv_notification_title, title)
         views.setTextViewText(R.id.mv_notification_status, status)
-        views.setProgressBar(R.id.mv_notification_progress, total.coerceAtLeast(1), completed, total == 0)
-        val percent = if (total > 0) NumberFormat.getPercentInstance(localized.resources.configuration.locales[0])
-            .format(completed.toDouble() / total) else localized.getString(R.string.mv_notification_waiting)
+        val maximum = total.coerceAtLeast(1)
+        val progress = completed.coerceIn(0, maximum)
+        val percent = if (total > 0) {
+            NumberFormat.getPercentInstance(localized.resources.configuration.locales[0])
+                .format(progress.toDouble() / total)
+        } else {
+            localized.getString(R.string.mv_notification_waiting)
+        }
+        views.setProgressBar(R.id.mv_notification_progress, maximum, progress, total == 0 && !paused)
         views.setTextViewText(R.id.mv_notification_percent, percent)
+        views.setViewVisibility(R.id.mv_notification_progress_row, if (paused) android.view.View.GONE else android.view.View.VISIBLE)
+        if (!paused && total > 0 && !hidden) {
+            setContentText(localized.getString(R.string.mv_notification_compact_status, status, percent))
+        }
         val stats = if (hidden) null else download?.transferStats?.value
         val bytes = stats?.let {
             val received = Formatter.formatShortFileSize(localized, it.receivedBytes.coerceAtLeast(0L))
@@ -106,8 +120,27 @@ internal class DownloadNotifier(
             if (known == null) localized.getString(R.string.mv_notification_received, received)
             else localized.getString(R.string.mv_notification_sizes, received, known)
         }.orEmpty()
+        val speed = stats?.speedBytesPerSecond?.takeIf { it > 0L }?.let {
+            localized.getString(R.string.mv_notification_speed, Formatter.formatShortFileSize(localized, it))
+        }.orEmpty()
         views.setTextViewText(R.id.mv_notification_bytes, bytes)
+        views.setTextViewText(R.id.mv_notification_speed, speed)
         views.setViewVisibility(R.id.mv_notification_bytes, if (bytes.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE)
+        views.setViewVisibility(R.id.mv_notification_speed, if (speed.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE)
+        views.setViewVisibility(R.id.mv_notification_stats, if (bytes.isEmpty() && speed.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE)
+        val actionLabel = localized.getString(if (paused) R.string.resume else R.string.mv_notification_pause)
+        views.setTextViewText(R.id.mv_notification_primary_label, actionLabel)
+        views.setContentDescription(R.id.mv_notification_primary, actionLabel)
+        views.setImageViewResource(R.id.mv_notification_primary_icon, if (paused) R.drawable.mv_notification_ic_play else R.drawable.mv_notification_ic_pause)
+        views.setOnClickPendingIntent(
+            R.id.mv_notification_primary,
+            if (paused) NotificationReceiver.resumeDownloadsPendingBroadcast(localized)
+            else NotificationReceiver.pauseDownloadsPendingBroadcast(localized),
+        )
+        // Manage/cancel opens the existing queue, rather than silently deleting all queued files.
+        views.setTextViewText(R.id.mv_notification_manage_label, localized.getString(R.string.mv_notification_manage))
+        views.setContentDescription(R.id.mv_notification_manage, localized.getString(R.string.mv_notification_manage))
+        views.setOnClickPendingIntent(R.id.mv_notification_manage, NotificationHandler.openDownloadManagerPendingActivity(localized))
         setStyle(NotificationCompat.DecoratedCustomViewStyle())
         setCustomBigContentView(views)
         color = android.graphics.Color.rgb(25, 230, 255)
@@ -228,6 +261,7 @@ internal class DownloadNotifier(
                 context.getString(R.string.cancel_all),
                 NotificationReceiver.clearDownloadsPendingBroadcast(context),
             )
+            decorateProgress(context, context.getString(R.string.paused), context.getString(R.string.download_paused), 0, 0, null, true, paused = true)
             show()
         }
 

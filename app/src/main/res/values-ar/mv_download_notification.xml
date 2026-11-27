@@ -3,4 +3,8 @@
     <string name="mv_notification_waiting">جارٍ التجهيز</string>
     <string name="mv_notification_received">المستلم: %1$s</string>
     <string name="mv_notification_sizes">المستلم: %1$s · حجم الفصل: %2$s</string>
+    <string name="mv_notification_speed">السرعة: %1$s/ث</string>
+    <string name="mv_notification_pause">إيقاف مؤقت</string>
+    <string name="mv_notification_manage">إدارة / إلغاء</string>
+    <string name="mv_notification_compact_status">%1$s · %2$s</string>
 </resources>

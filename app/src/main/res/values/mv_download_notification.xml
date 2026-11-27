@@ -3,4 +3,8 @@
     <string name="mv_notification_waiting">Preparing</string>
     <string name="mv_notification_received">Received: %1$s</string>
     <string name="mv_notification_sizes">Received: %1$s · chapter size: %2$s</string>
+    <string name="mv_notification_speed">Speed: %1$s/s</string>
+    <string name="mv_notification_pause">Pause</string>
+    <string name="mv_notification_manage">Manage / cancel</string>
+    <string name="mv_notification_compact_status">%1$s · %2$s</string>
 </resources>
