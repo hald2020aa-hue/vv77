@@ -2,7 +2,7 @@
 """MANGA VIRUS V22 static resource gate.
 
 Offline substitute for aapt2 / ViewBinding generation, which cannot run without an Android SDK.
-It verifies, for the `dev` flavor (main + dev source sets merged):
+It verifies, for one flavor (main + that flavor's source set merged):
 
   1. every XML file under app/src/{main,dev}/res is well-formed;
   2. every layout that exists in the BASELINE project keeps every android:id it had, with the
@@ -13,7 +13,7 @@ It verifies, for the `dev` flavor (main + dev source sets merged):
   5. no duplicate android:id inside one layout, no duplicate value-resource names in one
      source set + qualifier.
 
-Usage: check_resources.py <project_root> <baseline_root | qa/v22/baseline_ids.json>
+Usage: check_resources.py <project_root> <baseline_root | qa/v22/baseline_ids.json> [flavor=neonReference]
 Exit status is non-zero when any hard error is found.
 """
 import os
@@ -22,6 +22,7 @@ import sys
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
+FLAVOR = sys.argv[3] if len(sys.argv) > 3 else "neonReference"
 ANDROID_NS = "http://schemas.android.com/apk/res/android"
 AID = "{%s}id" % ANDROID_NS
 
@@ -55,7 +56,7 @@ def index_resources(root):
     defined = defaultdict(set)
     seen = defaultdict(list)
     xml_errors = []
-    for flavor in ("main", "neonReference"):
+    for flavor in ("main", FLAVOR):
         base = res_dirs(root, flavor)
         if not os.path.isdir(base):
             continue
@@ -123,7 +124,7 @@ def layout_ids(path):
 def effective_layouts(root):
     """Map '<qualifier dir>/<file>' -> path with dev overriding main, per flavor-merge rules."""
     out = {}
-    for flavor in ("main", "neonReference"):
+    for flavor in ("main", FLAVOR):
         base = res_dirs(root, flavor)
         if not os.path.isdir(base):
             continue
@@ -146,8 +147,22 @@ def main():
     errors += ["XML parse: " + e for e in xml_errors]
     errors += ["Duplicate resource: " + d for d in dups]
 
+    # attributes that aapt2 rejects ("attribute ... not found") but XML parsing and reference checks accept
+    invalid_attrs = (("android:style=", "use style=, not android:style="),
+                     ("itemActiveIndicatorEnabled", "not an attribute of this Material version"))
+    for flavor in ("main", FLAVOR):
+        base = res_dirs(root, flavor)
+        for dpath, _dirs, files in os.walk(base):
+            for fn in files:
+                if fn.endswith(".xml"):
+                    fp = os.path.join(dpath, fn)
+                    text = open(fp, encoding="utf-8", errors="replace").read()
+                    for needle, why in invalid_attrs:
+                        if needle in text:
+                            errors.append("%s: %s (%s)" % (os.path.relpath(fp, root), needle, why))
+
     # 3 + 4: references and in-layout id references
-    for flavor in ("main", "neonReference"):
+    for flavor in ("main", FLAVOR):
         base = res_dirs(root, flavor)
         for d in sorted(os.listdir(base)):
             dp = os.path.join(base, d)
@@ -199,7 +214,7 @@ def main():
         base_layouts = effective_layouts(baseline)
     new_layouts = effective_layouts(root)
     for key, path in sorted(new_layouts.items()):
-        if "/dev/" not in path.replace("\\", "/") and "src/neonReference" not in path:
+        if "/dev/" not in path.replace("\\", "/") and f"src/{FLAVOR}" not in path:
             continue
         try:
             ids, dup_ids, _ = layout_ids(path)
