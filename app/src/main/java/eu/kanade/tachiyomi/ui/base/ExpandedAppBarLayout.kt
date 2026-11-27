@@ -260,7 +260,15 @@ ExpandedAppBarLayout@JvmOverloads
             val textHeight =
                 max(bigTitleView?.height ?: 0, bigTitleView?.measuredHeight ?: 0) +
                     (bigTitleView?.marginTop?.plus(bigView?.paddingBottom ?: 0) ?: 0)
-            return appBarHeight + (if (hasLargeToolbar) textHeight else 0) +
+            // The Neon banner has artwork, a subtitle and its own minimum height, not just title text.
+            val bannerHeight = if (hasLargeToolbar && resources.getBoolean(R.bool.v4_neon_mode)) {
+                bigView?.let { banner ->
+                    val margins = banner.layoutParams as? MarginLayoutParams
+                    maxOf(textHeight, maxOf(banner.minimumHeight, banner.height, banner.measuredHeight) +
+                        (margins?.topMargin ?: 0) + (margins?.bottomMargin ?: 0))
+                } ?: textHeight
+            } else textHeight
+            return appBarHeight + (if (hasLargeToolbar) bannerHeight else 0) +
                 if (includeTabs) 48.dpToPx else 0
         }
 

@@ -6,6 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.LinearProgressIndicator
+import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.BuildConfig
+import android.text.format.DateUtils
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -83,7 +90,7 @@ import uy.kohesive.injekt.api.get
  */
 class HomeController : BaseController<HomeControllerBinding>(), RootSearchInterface, FloatingSearchInterface {
     private var libraryManga by mutableStateOf<List<Manga>>(emptyList())
-    private var recentManga by mutableStateOf<List<Manga>>(emptyList())
+    private var recentManga by mutableStateOf<List<MangaChapterHistory>>(emptyList())
     private var sourceCount by mutableIntStateOf(0)
     private var genreTags by mutableStateOf<List<String>>(emptyList())
     private var loading by mutableStateOf(true)
@@ -98,7 +105,7 @@ class HomeController : BaseController<HomeControllerBinding>(), RootSearchInterf
 
     override fun getTitle(): String? = view?.context?.getString(R.string.home)
 
-    override fun getBigIcon(): Drawable? = activity?.let { ContextCompat.getDrawable(it, R.mipmap.ic_launcher) }
+    override fun getBigIcon(): Drawable? = if (BuildConfig.FLAVOR == "dev" && BuildConfig.DESIGN_EDITION == "neon") null else activity?.let { ContextCompat.getDrawable(it, R.mipmap.ic_launcher) }
 
     override fun getSearchTitle(): String? = searchTitle(getTitle()?.lowercase())
 
@@ -115,10 +122,13 @@ class HomeController : BaseController<HomeControllerBinding>(), RootSearchInterf
                     topInset = topInsetDp,
                     bottomInset = bottomInsetDp,
                     onOpenManga = ::openManga,
+                    onContinueReading = { entry ->
+                        view.context.startActivity(ReaderActivity.newIntent(view.context, entry.manga, entry.chapter))
+                    },
                     onOpenLibrary = { navigateTo(R.id.nav_library) },
                     onOpenRecents = { navigateTo(R.id.nav_recents) },
                     onBrowse = { navigateTo(R.id.nav_browse) },
-                    onStorage = { router.pushController(StorageController().withFadeTransaction()) },
+                    onStorage = { navigateTo(R.id.nav_storage) },
                     onDownloads = {
                         view.context.startActivity(Intent(view.context, DownloadCenterActivity::class.java))
                     },
@@ -140,10 +150,9 @@ class HomeController : BaseController<HomeControllerBinding>(), RootSearchInterf
                 val data = withContext(Dispatchers.IO) {
                     val library = db.getFavoriteMangas().executeOnIO().sortedByDescending { it.date_added }
                     val recent = db.getRecentMangaLimit("", 0, false).executeOnIO()
-                        .map { it.manga }
-                        .distinctBy { it.id }
+                        .distinctBy { it.manga.id ?: "${it.manga.source}:${it.manga.url}" }
                         .take(12)
-                    val genres = (library + recent)
+                    val genres = (library + recent.map { it.manga })
                         .flatMap { it.getGenres().orEmpty() }
                         .map { it.trim() }
                         .filter { it.isNotBlank() }
@@ -167,8 +176,13 @@ class HomeController : BaseController<HomeControllerBinding>(), RootSearchInterf
         super.onAttach(view)
         // Home has no list that drives the app bar, so reset whatever state the previous tab left behind.
         activityBinding?.appBar?.apply {
-            setToolbarModeBy(this@HomeController)
-            hideBigView(true)
+            if (BuildConfig.FLAVOR == "dev" && BuildConfig.DESIGN_EDITION == "neon") {
+                setToolbarModeBy(this@HomeController)
+                hideBigView(false)
+            } else {
+                setToolbarModeBy(this@HomeController)
+                hideBigView(true)
+            }
             y = 0f
             lockYPos = true
         }
@@ -208,13 +222,14 @@ private val homeNeonBorder = Brush.horizontalGradient(listOf(homeCyan, homePurpl
 @Composable
 private fun HomeDashboard(
     library: List<Manga>,
-    recent: List<Manga>,
+    recent: List<MangaChapterHistory>,
     sourceCount: Int,
     genres: List<String>,
     loading: Boolean,
     topInset: Dp,
     bottomInset: Dp,
     onOpenManga: (Manga) -> Unit,
+    onContinueReading: (MangaChapterHistory) -> Unit,
     onOpenLibrary: () -> Unit,
     onOpenRecents: () -> Unit,
     onBrowse: () -> Unit,
@@ -222,7 +237,7 @@ private fun HomeDashboard(
     onStorage: () -> Unit,
 ) {
     val context = LocalContext.current
-    val featured = recent.firstOrNull() ?: library.firstOrNull()
+    val featured = recent.firstOrNull()?.manga ?: library.firstOrNull()
     LazyColumn(
         modifier = Modifier.fillMaxSize().background(homeBackground),
         contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = topInset + 10.dp, bottom = bottomInset + 16.dp),
@@ -251,10 +266,10 @@ private fun HomeDashboard(
 
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                HomeAction(context.getString(R.string.library), library.size.toString(), homePurple, Modifier.weight(1f), onOpenLibrary)
-                HomeAction(context.getString(R.string.updates), null, homePink, Modifier.weight(1f), onOpenRecents)
-                HomeAction(context.getString(R.string.browse), sourceCount.toString(), homeCyan, Modifier.weight(1f), onBrowse)
-                HomeAction(context.getString(R.string.downloads), null, homeBlue, Modifier.weight(1f), onDownloads)
+                HomeAction(R.drawable.ic_library_outline_24dp, context.getString(R.string.library), library.size.toString(), homePurple, Modifier.weight(1f), onOpenLibrary)
+                HomeAction(R.drawable.ic_history_24dp, context.getString(R.string.updates), null, homePink, Modifier.weight(1f), onOpenRecents)
+                HomeAction(R.drawable.ic_browse_outline_24dp, context.getString(R.string.browse), sourceCount.toString(), homeCyan, Modifier.weight(1f), onBrowse)
+                HomeAction(R.drawable.ic_file_download_24dp, context.getString(R.string.downloads), null, homeBlue, Modifier.weight(1f), onDownloads)
             }
         }
 
@@ -269,9 +284,11 @@ private fun HomeDashboard(
             item { HomeEmptyHint(if (loading) context.getString(R.string.loading) else context.getString(R.string.home_no_recent)) }
         } else {
             item {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(vertical = 3.dp)) {
-                    items(recent, key = { "recent:${it.id ?: "${it.source}:${it.url}"}" }) { manga ->
-                        HomePosterCard(manga, onClick = { onOpenManga(manga) })
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    recent.take(3).forEach { entry ->
+                        androidx.compose.runtime.key(entry.manga.id ?: "${entry.manga.source}:${entry.manga.url}") {
+                            HomeRecentCard(entry, onClick = { onContinueReading(entry) })
+                        }
                     }
                 }
             }
@@ -320,7 +337,7 @@ private fun HomeGradientButton(label: String, onClick: () -> Unit, modifier: Mod
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(50))
-            .background(Brush.horizontalGradient(listOf(Color(0xFF19C8FF), Color(0xFF3D7CFF))))
+            .background(Brush.horizontalGradient(listOf(Color(0xFF087B9E), Color(0xFF304DBB), Color(0xFF8A24D8))))
             .clickable(onClick = onClick)
             .padding(horizontal = 22.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center,
@@ -350,20 +367,22 @@ private fun HomeGenreChip(label: String, index: Int) {
 }
 
 @Composable
-private fun HomeAction(label: String, value: String?, accent: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun HomeAction(icon: Int, label: String, value: String?, accent: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
-        modifier = modifier.height(64.dp).clickable(onClick = onClick),
+        modifier = modifier.heightIn(min = 74.dp).clickable(onClick = onClick),
         shape = RoundedCornerShape(15.dp),
         color = homePanel,
         border = BorderStroke(1.2.dp, accent.copy(alpha = 0.8f)),
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            if (value != null) Text(value, color = accent, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-            Text(label, color = homeText, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            androidx.compose.material3.Icon(painterResource(icon), contentDescription = null, tint = accent, modifier = Modifier.size(22.dp))
+            Spacer(Modifier.height(4.dp))
+            Text(label, color = homeText, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            if (value != null) Text(value, color = homeText, fontSize = 15.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -438,7 +457,8 @@ private fun HomeEmptyCard(loading: Boolean, onBrowse: () -> Unit) {
         color = homePanel,
         border = BorderStroke(1.4.dp, homeNeonBorder),
     ) {
-        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(LocalContext.current.getString(R.string.app_name), color = homeCyan, fontWeight = FontWeight.Black, fontSize = 20.sp)
             Text(
                 if (loading) LocalContext.current.getString(R.string.loading) else LocalContext.current.getString(R.string.home_empty_library),
@@ -447,6 +467,30 @@ private fun HomeEmptyCard(loading: Boolean, onBrowse: () -> Unit) {
             )
             if (!loading) {
                 HomeGradientButton(LocalContext.current.getString(R.string.browse), onBrowse)
+            }
+        }
+        Image(painterResource(R.drawable.mv_neon_books), contentDescription = null, modifier = Modifier.widthIn(max = 108.dp).size(94.dp), contentScale = ContentScale.Fit)
+        }
+    }
+}
+
+@Composable
+private fun HomeRecentCard(entry: MangaChapterHistory, onClick: () -> Unit) {
+    val context = LocalContext.current
+    val chapter = entry.chapter
+    val total = chapter.last_page_read.toLong() + chapter.pages_left.toLong()
+    val progress = if (chapter.read) 1f else if (total > 0) ((chapter.last_page_read.toLong() + 1).toDouble() / total).toFloat().coerceIn(0f, 1f) else null
+    Surface(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick), shape = RoundedCornerShape(14.dp), color = homePanel, border = BorderStroke(1.dp, homeNeonBorder)) {
+        Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            MangaCover(entry.manga, Modifier.size(width = 68.dp, height = 88.dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(entry.manga.title, color = homeText, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(chapter.name, color = homeMuted, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                if (entry.history.last_read > 0) Text(DateUtils.getRelativeTimeSpanString(entry.history.last_read, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString(), color = homeMuted, fontSize = 11.sp)
+                if (progress != null) {
+                    Text(java.text.NumberFormat.getPercentInstance().format(progress.toDouble()), color = homeCyan, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(5.dp), color = homeCyan, trackColor = homePanelRaised)
+                }
             }
         }
     }

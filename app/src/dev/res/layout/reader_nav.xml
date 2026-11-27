@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <eu.kanade.tachiyomi.ui.reader.ReaderNavView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:id="@+id/reader_nav" android:background="@drawable/v21_reader_panel" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="12dp" android:paddingEnd="12dp" android:elevation="4dp" android:layout_gravity="top" android:paddingBottom="12dp" android:paddingTop="12dp" android:clickable="true" android:focusable="false" android:descendantFocusability="afterDescendants" android:gravity="center" android:layoutDirection="ltr" android:orientation="horizontal">
 
-    <FrameLayout android:id="@+id/start_cell" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center">
+    <FrameLayout android:id="@+id/start_cell" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="center">
 
         <com.google.android.material.progressindicator.CircularProgressIndicator android:id="@+id/left_progress" style="@style/Widget.Material3.CircularProgressIndicator.Small" android:indeterminate="true" app:indicatorColor="@color/v19_pink" android:visibility="gone" tools:visibility="visible" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center"/>
 
-        <ImageButton android:id="@+id/left_chapter" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="visible" android:background="?selectableItemBackgroundBorderless" android:contentDescription="@string/previous_chapter" android:padding="@dimen/material_layout_keylines_screen_edge_margin" app:tint="@color/v19_cyan" app:srcCompat="@drawable/ic_skip_previous_24"/>
+        <ImageButton android:id="@+id/left_chapter" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="center" android:visibility="visible" android:background="?selectableItemBackgroundBorderless" android:contentDescription="@string/previous_chapter" android:padding="@dimen/material_layout_keylines_screen_edge_margin" app:tint="@color/v19_cyan" app:srcCompat="@drawable/ic_skip_previous_24"/>
 
     </FrameLayout>
 
@@ -19,11 +19,11 @@
 
     </LinearLayout>
 
-    <ImageButton android:id="@+id/toggle_spread" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:padding="9dp" android:background="?selectableItemBackgroundBorderless" android:contentDescription="@string/enhanced_toggle_spread" app:tint="@color/v19_cyan" app:srcCompat="@drawable/ic_view_module_24dp"/>
+    <ImageButton android:id="@+id/toggle_spread" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="center" android:padding="9dp" android:background="?selectableItemBackgroundBorderless" android:contentDescription="@string/enhanced_toggle_spread" app:tint="@color/v19_cyan" app:srcCompat="@drawable/ic_view_module_24dp"/>
 
-    <FrameLayout android:id="@+id/end_cell" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center">
+    <FrameLayout android:id="@+id/end_cell" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="center">
 
-        <ImageButton android:id="@+id/right_chapter" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:background="?selectableItemBackgroundBorderless" android:contentDescription="@string/next_chapter" android:padding="@dimen/material_layout_keylines_screen_edge_margin" app:tint="@color/v19_cyan" app:srcCompat="@drawable/ic_skip_next_24"/>
+        <ImageButton android:id="@+id/right_chapter" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="center" android:background="?selectableItemBackgroundBorderless" android:contentDescription="@string/next_chapter" android:padding="@dimen/material_layout_keylines_screen_edge_margin" app:tint="@color/v19_cyan" app:srcCompat="@drawable/ic_skip_next_24"/>
 
         <com.google.android.material.progressindicator.CircularProgressIndicator android:id="@+id/right_progress" style="@style/Widget.Material3.CircularProgressIndicator.Small" android:indeterminate="true" tools:indeterminate="false" tools:progress="30" tools:visibility="visible" app:indicatorColor="@color/v19_pink" android:visibility="gone" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center"/>
 

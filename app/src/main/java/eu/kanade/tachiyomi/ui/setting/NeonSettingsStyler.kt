@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.ColorFilter
 import android.graphics.LinearGradient
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.PixelFormat
 import android.graphics.RectF
 import android.graphics.Shader
@@ -89,7 +90,9 @@ internal class NeonSettingsStyler(
     private fun style(view: android.view.View) {
         val preference = preferenceAt(list.getChildAdapterPosition(view)) ?: return
         val category = preference is PreferenceCategory
-        val background = NeonPreferenceBackground(density, category)
+        val position = list.getChildAdapterPosition(view)
+        val accent = if (position % 2 == 0) cyan else pink
+        val background = NeonPreferenceBackground(density, category, accent)
         view.background = if (category || !preference.isSelectable || !preference.isEnabled) {
             background
         } else {
@@ -104,8 +107,13 @@ internal class NeonSettingsStyler(
         view.findViewById<TextView>(android.R.id.summary)?.setTextColor(secondary)
         // Keep the original icon and click target, but align its visual tint with the app.
         if (mainMenu) {
-            view.findViewById<ImageView>(android.R.id.icon)?.imageTintList =
-                ColorStateList.valueOf(if (category) pink else cyan)
+            view.findViewById<ImageView>(android.R.id.icon)?.apply {
+                imageTintList = ColorStateList.valueOf(accent)
+                this.background = GradientDrawable().apply {
+                    cornerRadius = dp(10).toFloat()
+                    setColor(Color.argb(28, Color.red(accent), Color.green(accent), Color.blue(accent)))
+                }
+            }
         }
 
         // Restore widget state handling to the original Preference; tint only the visuals.
@@ -126,6 +134,7 @@ internal class NeonSettingsStyler(
     private inner class NeonPreferenceBackground(
         density: Float,
         private val category: Boolean,
+        private val accent: Int,
     ) : Drawable() {
         private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.rgb(14, 11, 39)
@@ -144,6 +153,8 @@ internal class NeonSettingsStyler(
             strokeWidth = density * 2f
         }
         private val boundsRect = RectF()
+        private val wavePath = Path()
+        private val wavePaint = Paint(Paint.ANTI_ALIAS_FLAG)
         private var lastWidth = -1
         override fun draw(canvas: Canvas) {
             boundsRect.set(bounds)
@@ -165,6 +176,25 @@ internal class NeonSettingsStyler(
             boundsRect.inset(inset, inset)
             val radius = density * 17f
             canvas.drawRoundRect(boundsRect, radius, radius, backgroundPaint)
+            if (mainMenu) {
+                val save = canvas.save()
+                wavePath.reset()
+                wavePath.addRoundRect(boundsRect, radius, radius, Path.Direction.CW)
+                canvas.clipPath(wavePath)
+                val left = boundsRect.left
+                val top = boundsRect.top
+                val w = boundsRect.width()
+                val bottom = boundsRect.bottom
+                wavePaint.shader = LinearGradient(left, top, left + w * .45f, bottom,
+                    Color.argb(55, Color.red(accent), Color.green(accent), Color.blue(accent)), Color.TRANSPARENT, Shader.TileMode.CLAMP)
+                wavePath.reset()
+                wavePath.moveTo(left, top)
+                wavePath.cubicTo(left + w * .13f, top, left + w * .20f, bottom, left + w * .45f, bottom)
+                wavePath.lineTo(left, bottom)
+                wavePath.close()
+                canvas.drawPath(wavePath, wavePaint)
+                canvas.restoreToCount(save)
+            }
             // Tiny blurred-looking rim without expensive blur or bitmap layers.
             canvas.drawRoundRect(boundsRect, radius, radius, haloPaint)
             canvas.drawRoundRect(boundsRect, radius, radius, borderPaint)

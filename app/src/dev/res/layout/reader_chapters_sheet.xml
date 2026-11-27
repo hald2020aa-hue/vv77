@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterSheet xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:id="@+id/chapters_bottom_sheet" android:layout_width="match_parent" android:layout_height="300dp" android:background="@drawable/v19_reader_panel" android:orientation="vertical" app:behavior_peekHeight="60dp" app:layout_behavior="eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterSheetBehavior" android:paddingBottom="12dp">
+<eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterSheet xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:id="@+id/chapters_bottom_sheet" android:layout_width="match_parent" android:layout_height="300dp" android:background="@drawable/v21_reader_panel" android:orientation="vertical" app:behavior_peekHeight="60dp" app:layout_behavior="eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterSheetBehavior" android:paddingBottom="12dp">
 
-    <FrameLayout android:id="@+id/topbar_layout" android:layout_width="match_parent" android:layout_height="?attr/actionBarSize" android:clickable="true" android:focusable="false" android:descendantFocusability="afterDescendants">
+    <FrameLayout android:id="@+id/topbar_layout" android:layout_width="match_parent" android:layout_height="?attr/actionBarSize" android:clickable="true" android:focusable="false" android:descendantFocusability="afterDescendants" android:paddingTop="3dp">
 
         <ImageView android:id="@+id/pill" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:alpha="0.25" android:contentDescription="@string/drag_handle" android:src="@drawable/draggable_pill" android:layout_gravity="top|center" app:tint="?actionBarTintColor"/>
 

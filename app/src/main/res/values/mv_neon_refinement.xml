@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="mv_neon_storage_summary">Storage summary</string>
+    <string name="mv_neon_storage_size">Total downloaded size</string>
+    <string name="mv_neon_storage_works">Works</string>
+    <string name="mv_neon_refresh_updates">Refresh updates</string>
+    <string name="mv_neon_summary_general">Language and general app settings</string>
+    <string name="mv_neon_summary_appearance">Theme, colors and display</string>
+    <string name="mv_neon_summary_library">Library organization and display</string>
+    <string name="mv_neon_summary_reader">Reading experience and page controls</string>
+    <string name="mv_neon_summary_downloads">Download behavior and folders</string>
+    <string name="mv_neon_summary_storage">Downloaded works, chapters and file sizes</string>
+    <string name="mv_neon_summary_browse">Sources and browsing preferences</string>
+    <string name="mv_neon_summary_tracking">Manage reading trackers</string>
+    <string name="mv_neon_summary_backup">Save and restore your data</string>
+    <string name="mv_neon_summary_security">App lock and privacy options</string>
+    <string name="mv_neon_summary_advanced">Advanced app options</string>
+    <string name="mv_neon_summary_about">App information and version</string>
+    <string name="mv_neon_discover">Discover new manga</string>
+</resources>

@@ -6,6 +6,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.remember
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -184,10 +203,7 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     item {
-                        Text(stringResource(R.string.storage_inventory_title), style = MaterialTheme.typography.headlineSmall)
-                        Button(onClick = { reload.update { it + 1 } }, enabled = !loading && !deleting) {
-                            Text(stringResource(R.string.storage_inventory_refresh))
-                        }
+                        StorageSummaryPanel(data, !loading && !deleting, onRefresh = { reload.update { it + 1 } })
                         if (loading) Text(stringResource(R.string.loading))
                         if (failed) Text(stringResource(R.string.storage_inventory_error), color = MaterialTheme.colorScheme.error)
                         if (deleting) Text(stringResource(R.string.storage_delete_running))
@@ -198,10 +214,6 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                         }
                     }
                     if (data != null && !failed) {
-                        item {
-                            Text(stringResource(R.string.storage_inventory_summary, data.works.size, data.chapterCount, Formatter.formatFileSize(context, data.bytes)))
-                            Text(stringResource(R.string.storage_inventory_scope), style = MaterialTheme.typography.bodySmall)
-                        }
                         if (selected != null) {
                             item {
                                 Button(onClick = { closeWork() }) { Text(stringResource(R.string.all)) }
@@ -353,7 +365,7 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                             items(visible, key = { "work:${it.manga.id ?: "${it.manga.source}:${it.manga.url}"}" }) { work ->
                                 val workId = work.manga.id
                                 val canSelect = !work.manga.isLocal() && workId != null
-                                Card(modifier = Modifier.fillMaxWidth().combinedClickable(
+                                Card(shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, Color(0xFF8557DB)), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), modifier = Modifier.fillMaxWidth().combinedClickable(
                                     enabled = !loading && !deleting,
                                     onClick = { if (selectedWorkIds.isNotEmpty() && canSelect && workId != null) toggleSelection(workId) else openWork(workId) },
                                     onLongClick = { if (canSelect && workId != null) toggleSelection(workId) },
@@ -364,15 +376,15 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                                             onReset = null,
                                             onRelease = { it.releaseCover() },
                                             update = { it.bindCover(work.manga) },
-                                            modifier = Modifier.size(width = 72.dp, height = 104.dp),
+                                            modifier = Modifier.size(width = 72.dp, height = 100.dp).clip(RoundedCornerShape(10.dp)),
                                         )
                                         Column(Modifier.weight(1f)) {
-                                            if (canSelect && workId != null) Row(verticalAlignment = Alignment.CenterVertically) {
+                                            if (selectedWorkIds.isNotEmpty() && canSelect && workId != null) Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Checkbox(checked = workId in selectedWorkIds, enabled = !loading && !deleting,
                                                     onCheckedChange = { toggleSelection(workId) })
                                                 Text(stringResource(R.string.storage_delete_select_work))
                                             }
-                                            Text(work.manga.title, style = MaterialTheme.typography.titleMedium)
+                                            Text(work.manga.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                                             Text(stringResource(R.string.storage_inventory_work, work.chapters.size, Formatter.formatFileSize(context, work.bytes)))
                                             val fraction = if (data.bytes > 0L) (work.bytes.toDouble() / data.bytes).toFloat().coerceIn(0f, 1f) else 0f
                                             LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
@@ -382,15 +394,38 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                                                 StorageSeriesType.MANHUA -> R.string.manhua
                                                 StorageSeriesType.UNCLASSIFIED -> R.string.storage_inventory_unclassified
                                             }))
-                                            TextButton(enabled = !loading && !savingType, onClick = {
-                                                typeSaveFailed = false
-                                                classifyMangaId = work.manga.id
-                                            }) { Text(stringResource(R.string.storage_inventory_classify)) }
-                                            Button(onClick = { openWork(work.manga.id) }) { Text(stringResource(R.string.storage_inventory_chapters)) }
-                                            val next = work.chapters.sortedByDescending { it.chapter.source_order }.firstOrNull { !it.chapter.read }
-                                            if (next != null) Button(enabled = !loading, onClick = {
-                                                context.startActivity(ReaderActivity.newIntent(context, work.manga, next.chapter))
-                                            }) { Text(stringResource(R.string.continue_reading)) }
+                                        }
+                                        Box {
+                                            var menuOpen by remember { mutableStateOf(false) }
+                                            IconButton(enabled = !loading && !deleting, onClick = { menuOpen = true }) {
+                                                Icon(painterResource(R.drawable.ic_more_vert_24dp), contentDescription = stringResource(R.string.more))
+                                            }
+                                            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                                                DropdownMenuItem(text = { Text(stringResource(R.string.storage_inventory_chapters)) }, onClick = {
+                                                    menuOpen = false
+                                                    openWork(workId)
+                                                })
+                                                DropdownMenuItem(enabled = !savingType, text = { Text(stringResource(R.string.storage_inventory_classify)) }, onClick = {
+                                                    menuOpen = false
+                                                    typeSaveFailed = false
+                                                    classifyMangaId = workId
+                                                })
+                                                val next = work.chapters.sortedByDescending { it.chapter.source_order }.firstOrNull { !it.chapter.read }
+                                                if (next != null) DropdownMenuItem(text = { Text(stringResource(R.string.continue_reading)) }, onClick = {
+                                                    menuOpen = false
+                                                    context.startActivity(ReaderActivity.newIntent(context, work.manga, next.chapter))
+                                                })
+                                                if (canSelect && workId != null) {
+                                                    DropdownMenuItem(text = { Text(stringResource(R.string.storage_delete_select_work)) }, onClick = {
+                                                        menuOpen = false
+                                                        toggleSelection(workId)
+                                                    })
+                                                    DropdownMenuItem(text = { Text(stringResource(R.string.storage_delete_title)) }, onClick = {
+                                                        menuOpen = false
+                                                        prepareDeletion(setOf(workId))
+                                                    })
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -564,5 +599,43 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
         insetsListener?.let { if (view.viewTreeObserver.isAlive) view.viewTreeObserver.removeOnGlobalLayoutListener(it) }
         insetsListener = null
         super.onDestroyView(view)
+    }
+}
+
+
+@Composable
+private fun StorageSummaryPanel(data: StorageSnapshot?, enabled: Boolean, onRefresh: () -> Unit) {
+    val context = LocalContext.current
+    val outline = Brush.horizontalGradient(listOf(Color(0xFF19E6FF), Color(0xFFA14BFF), Color(0xFFFF2FD0)))
+    Surface(shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.5.dp, outline)) {
+        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.mv_neon_storage_summary), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.mv_neon_storage_size), style = MaterialTheme.typography.bodySmall)
+                    Text(data?.let { Formatter.formatFileSize(context, it.bytes) } ?: "—", color = Color(0xFF19E6FF), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                }
+                Image(painterResource(R.drawable.mv_neon_books), contentDescription = null, modifier = Modifier.size(82.dp))
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                StorageMetric(stringResource(R.string.mv_neon_storage_works), data?.works?.size?.toString() ?: "—", Color(0xFFA14BFF), Modifier.weight(1f))
+                StorageMetric(stringResource(R.string.chapters), data?.chapterCount?.toString() ?: "—", Color(0xFFFF2FD0), Modifier.weight(1f))
+                StorageMetric(stringResource(R.string.mv_neon_storage_size), data?.let { Formatter.formatFileSize(context, it.bytes) } ?: "—", Color(0xFF19E6FF), Modifier.weight(1f))
+            }
+            if (data != null) Text(stringResource(R.string.storage_inventory_scope), style = MaterialTheme.typography.bodySmall)
+            Button(onClick = onRefresh, enabled = enabled, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
+                Text(stringResource(R.string.storage_inventory_refresh), fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun StorageMetric(label: String, value: String, accent: Color, modifier: Modifier = Modifier) {
+    Surface(modifier = modifier, color = accent.copy(alpha = 0.08f), shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, accent.copy(alpha = 0.8f))) {
+        Column(Modifier.padding(horizontal = 6.dp, vertical = 9.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = accent)
+        }
     }
 }

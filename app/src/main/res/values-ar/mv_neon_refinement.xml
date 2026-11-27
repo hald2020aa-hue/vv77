@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="mv_neon_storage_summary">ملخص التخزين</string>
+    <string name="mv_neon_storage_size">حجم التنزيلات الكلي</string>
+    <string name="mv_neon_storage_works">الأعمال</string>
+    <string name="mv_neon_refresh_updates">تحديث التحديثات</string>
+    <string name="mv_neon_summary_general">إعدادات التطبيق العامة واللغة</string>
+    <string name="mv_neon_summary_appearance">المظهر والألوان والعرض</string>
+    <string name="mv_neon_summary_library">تنظيم المكتبة وطريقة عرضها</string>
+    <string name="mv_neon_summary_reader">تجربة القراءة والتحكم بالصفحات</string>
+    <string name="mv_neon_summary_downloads">إدارة التنزيلات والمجلدات</string>
+    <string name="mv_neon_summary_storage">مساحة الأعمال والفصول المنزّلة وإدارتها</string>
+    <string name="mv_neon_summary_browse">المصادر وخيارات التصفح</string>
+    <string name="mv_neon_summary_tracking">إدارة خدمات تتبّع القراءة</string>
+    <string name="mv_neon_summary_backup">حفظ البيانات واستعادتها</string>
+    <string name="mv_neon_summary_security">قفل التطبيق وخيارات الخصوصية</string>
+    <string name="mv_neon_summary_advanced">خيارات التطبيق المتقدمة</string>
+    <string name="mv_neon_summary_about">معلومات التطبيق والإصدار</string>
+    <string name="mv_neon_discover">اكتشف مانجات جديدة</string>
+</resources>

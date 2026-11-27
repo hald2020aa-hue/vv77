@@ -23,6 +23,8 @@ class EmptyView
     ) : RelativeLayout(context, attrs) {
         private val binding: CommonViewEmptyBinding =
             CommonViewEmptyBinding.inflate(LayoutInflater.from(context), this, true)
+        private val normalContentBackground = binding.root.background
+        private val normalScaleType = binding.imageView.scaleType
 
         /**
          * Hide the information view
@@ -53,7 +55,18 @@ class EmptyView
             message: String,
             actions: List<Action>? = null,
         ) {
-            binding.imageView.setVectorCompat(drawable, android.R.attr.textColorHint)
+            val illustration = context.resources.getBoolean(R.bool.v4_neon_mode) &&
+                (drawable == R.drawable.mv_neon_library || drawable == R.drawable.mv_neon_updates)
+            if (illustration) {
+                binding.root.setBackgroundResource(if (drawable == R.drawable.mv_neon_library) R.drawable.mv_neon_empty_card else android.R.color.transparent)
+                binding.imageView.imageTintList = null
+                binding.imageView.setImageResource(drawable)
+                binding.imageView.scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+            } else {
+                binding.root.background = normalContentBackground
+                binding.imageView.scaleType = normalScaleType
+                binding.imageView.setVectorCompat(drawable, android.R.attr.textColorHint)
+            }
             binding.textLabel.text = message
 
             binding.actionsContainer.removeAllViews()

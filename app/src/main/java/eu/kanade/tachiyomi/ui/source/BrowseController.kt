@@ -207,6 +207,7 @@ class BrowseController :
             },
         )
         if (view.resources.getBoolean(R.bool.v4_neon_mode)) {
+            binding.sourceRecycler.addItemDecoration(SourceGroupDecoration { adapter })
             installSourceViewport(view)
         }
         if (!isReturning) {

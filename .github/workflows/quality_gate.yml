@@ -88,6 +88,7 @@ jobs:
         run: |
           python3 qa/core/check_cover_binding.py
           python3 qa/core/check_final_designs.py
+          python3 qa/core/check_neon_reference_refined.py
       - name: Run unit tests and compile debug APKs
         run: ./gradlew -Pjh.arm64Only=true --no-daemon testDevDebugUnitTest verifySingleArm64DevApk --stacktrace
       - name: Verify single APK integrity and debug signature
@@ -100,7 +101,7 @@ jobs:
           test -d "$SDK/build-tools"
           BUILD_TOOLS="$(find "$SDK/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
           "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
-          if [[ "$GITHUB_REF" == "refs/heads/design/final-five" ]]; then
+          if [[ "$GITHUB_REF" == "refs/heads/design/final-five" || "$GITHUB_REF" == "refs/heads/design/neon-reference-refined" ]]; then
             "$BUILD_TOOLS/aapt" dump badging "$APK" > "$RUNNER_TEMP/neon-badging.txt"
             grep -F "package: name='eu.kanade.tachiyomi.enhanced.debugJ2K'" "$RUNNER_TEMP/neon-badging.txt"
             grep -F "application-label:'فيروس مانجا'" "$RUNNER_TEMP/neon-badging.txt"
@@ -114,14 +115,14 @@ jobs:
       - name: Upload development APKs
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.ref == 'refs/heads/design/final-five' && 'Manga-Virus-Neon-Reference-ARM64' || 'app-dev-arm64-v8a-debug.apk' }}
+          name: ${{ (github.ref == 'refs/heads/design/final-five' || github.ref == 'refs/heads/design/neon-reference-refined') && 'Manga-Virus-Neon-Reference-ARM64' || 'app-dev-arm64-v8a-debug.apk' }}
           path: app/build/outputs/apk/dev/debug/app-dev-arm64-v8a-debug.apk
           if-no-files-found: error
 
 
   # The base job above already compiles, verifies, and uploads the ARM64 APK.
   universal-debug:
-    if: github.ref != 'refs/heads/design/final-five'
+    if: github.ref != 'refs/heads/design/final-five' && github.ref != 'refs/heads/design/neon-reference-refined'
     name: Build and verify universal dev APK
     needs: android-debug-and-tests
     runs-on: ubuntu-24.04

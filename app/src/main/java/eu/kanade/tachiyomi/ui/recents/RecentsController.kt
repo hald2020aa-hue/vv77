@@ -249,13 +249,13 @@ class RecentsController(
                 afterInsets = {
                     val appBarHeight = activityBinding?.appBar?.attrToolbarHeight ?: 0
                     val systemInsets = it.ignoredSystemInsets
-                    headerHeight = systemInsets.top + appBarHeight + 48.dpToPx
+                    headerHeight = systemInsets.top + (fullAppBarHeight ?: (appBarHeight + 48.dpToPx))
                     val showUpdateSummary = presenter.viewType == RecentsViewType.Updates && presenter.recentItems.isNotEmpty()
                     binding.recentsSummary.isVisible = showUpdateSummary
                     summarySpaceApplied = showUpdateSummary
                     recentsBaseTopPadding = headerHeight + 8.dpToPx
                     binding.recentsSummary.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        topMargin = systemInsets.top + appBarHeight + 48.dpToPx + 8.dpToPx
+                        topMargin = headerHeight + 8.dpToPx
                     }
                     val summarySpace = if (showUpdateSummary) 112.dpToPx else 0
                     binding.recycler.updatePaddingRelative(
@@ -268,7 +268,7 @@ class RecentsController(
                     val bigToolbarHeight = fullAppBarHeight ?: 0
 
                     binding.recentsEmptyView.updatePadding(
-                        top = bigToolbarHeight + systemInsets.top,
+                        top = max(bigToolbarHeight + systemInsets.top, headerHeight),
                         bottom = activityBinding?.bottomNav?.height ?: systemInsets.bottom,
                     )
                     binding.progress.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -753,7 +753,7 @@ class RecentsController(
         if (recents.isEmpty()) {
             binding.recentsEmptyView.show(
                 if (!isSearching()) {
-                    R.drawable.ic_history_off_24dp
+                    if (binding.root.resources.getBoolean(R.bool.v4_neon_mode)) R.drawable.mv_neon_updates else R.drawable.ic_history_off_24dp
                 } else {
                     R.drawable.ic_search_off_24dp
                 },
@@ -766,6 +766,17 @@ class RecentsController(
                         else -> R.string.no_recent_read_updated_manga
                     }
                 },
+                if (!isSearching() && presenter.viewType != RecentsViewType.History && binding.root.resources.getBoolean(R.bool.v4_neon_mode)) {
+                    listOf(eu.kanade.tachiyomi.widget.EmptyView.Action(R.string.mv_neon_refresh_updates) {
+                        val context = binding.root.context
+                        if (!LibraryUpdateJob.isRunning(context)) LibraryUpdateJob.startNow(context)
+                        binding.swipeRefresh.isRefreshing = LibraryUpdateJob.isRunning(context)
+                    }, eu.kanade.tachiyomi.widget.EmptyView.Action(R.string.mv_neon_discover) {
+                        (activityBinding?.bottomNav ?: activityBinding?.sideNav)?.selectedItemId = R.id.nav_browse
+                    }, eu.kanade.tachiyomi.widget.EmptyView.Action(R.string.library) {
+                        (activityBinding?.bottomNav ?: activityBinding?.sideNav)?.selectedItemId = R.id.nav_library
+                    })
+                } else null,
             )
         } else {
             binding.recentsEmptyView.hide()

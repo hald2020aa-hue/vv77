@@ -719,6 +719,9 @@ open class LibraryController(
                         if (recycler.paddingTop < contentTop) {
                             recycler.updatePaddingRelative(top = contentTop)
                         }
+                        if (binding.emptyView.isVisible && binding.emptyView.paddingTop != contentTop) {
+                            binding.emptyView.updatePadding(top = contentTop, bottom = recycler.paddingBottom)
+                        }
                     }
                     true
                 }
@@ -831,7 +834,9 @@ open class LibraryController(
             binding.emptyView.updatePadding(
                 // Leave room for the V14 action row even when the library is empty.
                 top = bigToolbarHeight + activityBinding.appBar.paddingTop +
-                    (if (resources?.getBoolean(R.bool.v14_library_actions_top) == true) 86.dpToPx else 0),
+                    (if (resources?.getBoolean(R.bool.v14_library_actions_top) == true) {
+                        (binding.root.findViewById<View>(R.id.library_top_actions)?.height ?: 0).coerceAtLeast(86.dpToPx) + 14.dpToPx
+                    } else 0),
                 bottom = binding.libraryGridRecycler.recycler.paddingBottom,
             )
             binding.progress.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -1343,7 +1348,7 @@ open class LibraryController(
             binding.emptyView.hide()
         } else {
             binding.emptyView.show(
-                R.drawable.ic_heart_off_24dp,
+                if (!hasActiveFilters && resources?.getBoolean(R.bool.v4_neon_mode) == true) R.drawable.mv_neon_library else R.drawable.ic_heart_off_24dp,
                 if (hasActiveFilters) {
                     R.string.no_matches_for_filters
                 } else {

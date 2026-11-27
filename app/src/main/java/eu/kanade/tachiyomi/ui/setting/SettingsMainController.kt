@@ -41,36 +41,42 @@ class SettingsMainController :
                 iconRes = R.drawable.ic_tune_24dp
                 iconTint = tintColor
                 titleRes = R.string.general
+                summaryRes = R.string.mv_neon_summary_general
                 onClick { navigateTo(SettingsGeneralController()) }
             }
             preference {
                 iconRes = R.drawable.ic_appearance_outline_24dp
                 iconTint = tintColor
                 titleRes = R.string.appearance
+                summaryRes = R.string.mv_neon_summary_appearance
                 onClick { navigateTo(SettingsAppearanceController()) }
             }
             preference {
                 iconRes = R.drawable.ic_library_outline_24dp
                 iconTint = tintColor
                 titleRes = R.string.library
+                summaryRes = R.string.mv_neon_summary_library
                 onClick { navigateTo(SettingsLibraryController()) }
             }
             preference {
                 iconRes = R.drawable.ic_read_outline_24dp
                 iconTint = tintColor
                 titleRes = R.string.reader
+                summaryRes = R.string.mv_neon_summary_reader
                 onClick { navigateTo(SettingsReaderController()) }
             }
             preference {
                 iconRes = R.drawable.ic_file_download_24dp
                 iconTint = tintColor
                 titleRes = R.string.downloads
+                summaryRes = R.string.mv_neon_summary_downloads
                 onClick { navigateTo(SettingsDownloadController()) }
             }
             preference {
                 iconRes = R.drawable.ic_file_download_24dp
                 iconTint = tintColor
                 titleRes = R.string.storage_inventory_settings
+                summaryRes = R.string.mv_neon_summary_storage
                 onClick { navigateTo(StorageController()) }
             }
             preference {
@@ -84,6 +90,7 @@ class SettingsMainController :
                 iconRes = R.drawable.ic_browse_outline_24dp
                 iconTint = tintColor
                 titleRes = R.string.browse
+                summaryRes = R.string.mv_neon_summary_browse
                 onClick { navigateTo(SettingsBrowseController()) }
             }
             preference {
@@ -104,30 +111,35 @@ class SettingsMainController :
                 iconRes = R.drawable.ic_sync_24dp
                 iconTint = tintColor
                 titleRes = R.string.tracking
+                summaryRes = R.string.mv_neon_summary_tracking
                 onClick { navigateTo(SettingsTrackingController()) }
             }
             preference {
                 iconRes = R.drawable.ic_backup_restore_24dp
                 iconTint = tintColor
                 titleRes = R.string.backup_and_restore
+                summaryRes = R.string.mv_neon_summary_backup
                 onClick { navigateTo(SettingsBackupController()) }
             }
             preference {
                 iconRes = R.drawable.ic_security_24dp
                 iconTint = tintColor
                 titleRes = R.string.security
+                summaryRes = R.string.mv_neon_summary_security
                 onClick { navigateTo(SettingsSecurityController()) }
             }
             preference {
                 iconRes = R.drawable.ic_code_24dp
                 iconTint = tintColor
                 titleRes = R.string.advanced
+                summaryRes = R.string.mv_neon_summary_advanced
                 onClick { navigateTo(SettingsAdvancedController()) }
             }
             preference {
                 iconRes = R.drawable.ic_info_outline_24dp
                 iconTint = tintColor
                 titleRes = R.string.about
+                summaryRes = R.string.mv_neon_summary_about
                 onClick { navigateTo(AboutController()) }
             }
             this
