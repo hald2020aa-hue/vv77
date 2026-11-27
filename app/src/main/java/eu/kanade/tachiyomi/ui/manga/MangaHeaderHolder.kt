@@ -19,6 +19,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.text.buildSpannedString
@@ -211,7 +212,10 @@ class MangaHeaderHolder(
 
     private fun applyBlur() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            binding?.backdrop?.alpha = 0.2f
+            binding?.backdrop?.alpha = ResourcesCompat.getFloat(
+                itemView.resources,
+                R.dimen.details_backdrop_alpha,
+            )
             binding?.backdrop?.setRenderEffect(
                 RenderEffect.createBlurEffect(
                     20f,

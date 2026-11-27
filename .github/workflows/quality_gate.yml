@@ -80,6 +80,7 @@ jobs:
         run: |
           python3 qa/v22/check_resources.py . qa/v22/baseline_ids.json cinemaNova
           python3 qa/variants/check_theme_copies.py .
+          python3 qa/variants/derive_cinema_layouts.py . --check
       - name: Run unit tests and compile debug APKs
         run: ./gradlew -Pjh.arm64Only=true --no-daemon testNeonReferenceDebugUnitTest verifySingleArm64NeonReferenceApk --stacktrace
       - name: Verify single APK integrity and debug signature
@@ -156,6 +157,7 @@ jobs:
         run: |
           python3 qa/v22/check_resources.py . qa/v22/baseline_ids.json cinemaNova
           python3 qa/variants/check_theme_copies.py .
+          python3 qa/variants/derive_cinema_layouts.py . --check
           python3 qa/v22/check_runtime_risks.py .
       - name: Compile Cinema Nova and verify the single arm64 APK
         run: ./gradlew -Pjh.arm64Only=true --no-daemon verifySingleArm64CinemaNovaApk --stacktrace

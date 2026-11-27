@@ -49,4 +49,6 @@
 
     <dimen name="appwidget_background_radius">16dp</dimen>
     <dimen name="appwidget_inner_radius">12dp</dimen>
+    <!-- Opacity of the blurred backdrop behind the details header (Android 12+). Editions may override. -->
+    <item name="details_backdrop_alpha" format="float" type="dimen">0.2</item>
 </resources>
