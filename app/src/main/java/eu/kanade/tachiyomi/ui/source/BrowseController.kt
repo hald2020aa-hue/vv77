@@ -539,10 +539,11 @@ class BrowseController :
                 val expandedBottom = visibleBottom - bar.translationY.toInt()
                 val desiredTop = (expandedBottom + gap).coerceAtLeast(0)
                 val grid = recycler.layoutManager as? GridLayoutManager
-                val minCardWidth = 300.dpToPx
+                val minCardWidth = 280.dpToPx
                 val availableWidth = (recycler.width - recycler.paddingLeft - recycler.paddingRight).coerceAtLeast(1)
                 val fontScale = recycler.resources.configuration.fontScale.coerceAtLeast(1f)
-                val scaledMinWidth = (minCardWidth * fontScale).toInt().coerceAtLeast(1)
+                val fixedChrome = 190.dpToPx
+                val scaledMinWidth = (fixedChrome + (minCardWidth - fixedChrome).coerceAtLeast(1) * fontScale).toInt().coerceAtLeast(1)
                 val spans = (availableWidth / scaledMinWidth).coerceIn(1, 3)
                 if (grid != null && grid.spanCount != spans) grid.spanCount = spans
                 // Padding reserves the expanded header; clipping follows its visible edge as it scrolls.

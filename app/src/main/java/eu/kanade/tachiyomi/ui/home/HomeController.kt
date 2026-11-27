@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.LinearProgressIndicator
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
@@ -265,7 +266,7 @@ private fun HomeDashboard(
         }
 
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
                 HomeAction(R.drawable.ic_library_outline_24dp, context.getString(R.string.library), library.size.toString(), homePurple, Modifier.weight(1f), onOpenLibrary)
                 HomeAction(R.drawable.ic_history_24dp, context.getString(R.string.updates), null, homePink, Modifier.weight(1f), onOpenRecents)
                 HomeAction(R.drawable.ic_browse_outline_24dp, context.getString(R.string.browse), sourceCount.toString(), homeCyan, Modifier.weight(1f), onBrowse)
@@ -274,11 +275,11 @@ private fun HomeDashboard(
         }
 
         item {
-            HomeGradientButton(context.getString(R.string.storage_inventory_title), onStorage, Modifier.fillMaxWidth())
+            HomeGradientButton(context.getString(R.string.storage_inventory_title), onStorage, Modifier.fillMaxWidth(), R.drawable.ic_storage_outline_24dp)
         }
 
         item {
-            HomeSectionHeader(context.getString(R.string.continue_reading), recent.size.takeIf { it > 0 }, onOpenRecents)
+            HomeSectionHeader(context.getString(R.string.continue_reading), recent.size.takeIf { it > 0 }, onOpenRecents, R.drawable.ic_book_24dp)
         }
         if (recent.isEmpty()) {
             item { HomeEmptyHint(if (loading) context.getString(R.string.loading) else context.getString(R.string.home_no_recent)) }
@@ -295,7 +296,7 @@ private fun HomeDashboard(
         }
 
         item {
-            HomeSectionHeader(context.getString(R.string.v22_home_recently_added), library.size.takeIf { it > 0 }, onOpenLibrary)
+            HomeSectionHeader(context.getString(R.string.v22_home_recently_added), library.size.takeIf { it > 0 }, onOpenLibrary, R.drawable.ic_library_outline_24dp)
         }
         if (library.isEmpty()) {
             item { HomeEmptyHint(if (loading) context.getString(R.string.loading) else context.getString(R.string.home_empty_library)) }
@@ -325,7 +326,7 @@ private fun HomeDashboard(
                         Text(context.getString(R.string.browse), color = homeText, fontWeight = FontWeight.Bold)
                         Text(context.getString(R.string.home_sources_available, sourceCount), color = homeMuted, fontSize = 12.sp)
                     }
-                    HomeGradientButton(context.getString(R.string.browse), onBrowse)
+                    androidx.compose.material3.Icon(painterResource(R.drawable.ic_browse_outline_24dp), null, tint = homePurple, modifier = Modifier.size(46.dp))
                 }
             }
         }
@@ -333,16 +334,20 @@ private fun HomeDashboard(
 }
 
 @Composable
-private fun HomeGradientButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun HomeGradientButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: Int? = null) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(50))
-            .background(Brush.horizontalGradient(listOf(Color(0xFF087B9E), Color(0xFF304DBB), Color(0xFF8A24D8))))
+            .background(Brush.horizontalGradient(listOf(Color(0xFF00A6C7), Color(0xFF2858CB), Color(0xFF9724E5))))
             .clickable(onClick = onClick)
-            .padding(horizontal = 22.dp, vertical = 10.dp),
+            .heightIn(min = 48.dp)
+            .padding(horizontal = 18.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            icon?.let { androidx.compose.material3.Icon(painterResource(it), null, tint = Color.White, modifier = Modifier.size(22.dp)) }
+            Text(label, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+        }
     }
 }
 
@@ -369,10 +374,10 @@ private fun HomeGenreChip(label: String, index: Int) {
 @Composable
 private fun HomeAction(icon: Int, label: String, value: String?, accent: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
-        modifier = modifier.heightIn(min = 74.dp).clickable(onClick = onClick),
+        modifier = modifier.fillMaxSize().heightIn(min = 82.dp).clickable(onClick = onClick),
         shape = RoundedCornerShape(15.dp),
-        color = homePanel,
-        border = BorderStroke(1.2.dp, accent.copy(alpha = 0.8f)),
+        color = accent.copy(alpha = 0.12f),
+        border = BorderStroke(1.2.dp, accent),
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp),
@@ -469,7 +474,7 @@ private fun HomeEmptyCard(loading: Boolean, onBrowse: () -> Unit) {
                 HomeGradientButton(LocalContext.current.getString(R.string.browse), onBrowse)
             }
         }
-        Image(painterResource(R.drawable.mv_neon_books), contentDescription = null, modifier = Modifier.widthIn(max = 108.dp).size(94.dp), contentScale = ContentScale.Fit)
+        Image(painterResource(R.drawable.mv_neon_books), contentDescription = null, modifier = Modifier.widthIn(max = 144.dp).size(124.dp), contentScale = ContentScale.Fit)
         }
     }
 }
@@ -497,8 +502,10 @@ private fun HomeRecentCard(entry: MangaChapterHistory, onClick: () -> Unit) {
 }
 
 @Composable
-private fun HomeSectionHeader(title: String, count: Int?, onSeeAll: (() -> Unit)?) {
+private fun HomeSectionHeader(title: String, count: Int?, onSeeAll: (() -> Unit)?, icon: Int) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        androidx.compose.material3.Icon(painterResource(icon), null, tint = homePurple, modifier = Modifier.size(24.dp))
+        Spacer(Modifier.width(8.dp))
         Text(title, color = homeText, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
         if (count != null) Text(count.toString(), color = homeCyan, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         if (onSeeAll != null) {

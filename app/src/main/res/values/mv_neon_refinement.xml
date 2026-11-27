@@ -17,4 +17,7 @@
     <string name="mv_neon_summary_advanced">Advanced app options</string>
     <string name="mv_neon_summary_about">App information and version</string>
     <string name="mv_neon_discover">Discover new manga</string>
+    <string name="mv_neon_empty_library_title">Your library is empty</string>
+    <string name="mv_neon_empty_updates_title">No updates yet</string>
+    <string name="mv_neon_storage_volume">Download share of volume (%1$s)</string>
 </resources>

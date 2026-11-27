@@ -39,16 +39,11 @@ class SourceHolder(
         binding.title.text = sourceName
 
         binding.sourcePin.apply {
-            iconTint =
-                ColorStateList.valueOf(
-                    context.getResourceColor(
-                        if (isPinned) {
-                            R.attr.colorPrimary
-                        } else {
-                            android.R.attr.textColorSecondary
-                        },
-                    ),
-                )
+            iconTint = ColorStateList.valueOf(
+                if (itemView.resources.getBoolean(R.bool.v4_neon_mode)) {
+                    if (isPinned) android.graphics.Color.rgb(25, 230, 255) else android.graphics.Color.rgb(101, 178, 201)
+                } else context.getResourceColor(if (isPinned) R.attr.colorPrimary else android.R.attr.textColorSecondary),
+            )
             tooltipText = context.getString(if (isPinned) R.string.unpin else R.string.pin)
             contentDescription = context.getString(if (isPinned) R.string.unpin else R.string.pin)
             setIconResource(

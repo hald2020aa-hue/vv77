@@ -6,6 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.content.res.ColorStateList
+import android.graphics.Color
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.view.isVisible
@@ -25,6 +29,8 @@ class EmptyView
             CommonViewEmptyBinding.inflate(LayoutInflater.from(context), this, true)
         private val normalContentBackground = binding.root.background
         private val normalScaleType = binding.imageView.scaleType
+        private fun dp(value: Int): Int = (resources.displayMetrics.density * value).toInt()
+        private var illustrationTitle: TextView? = null
 
         /**
          * Hide the information view
@@ -67,20 +73,53 @@ class EmptyView
                 binding.imageView.scaleType = normalScaleType
                 binding.imageView.setVectorCompat(drawable, android.R.attr.textColorHint)
             }
+            illustrationTitle?.let { (it.parent as? ViewGroup)?.removeView(it) }
+            illustrationTitle = null
+            val body = binding.textLabel.parent as? LinearLayout
+            if (illustration && body != null && (drawable == R.drawable.mv_neon_library || actions?.size == 3)) {
+                val title = TextView(context).apply {
+                    text = context.getString(if (drawable == R.drawable.mv_neon_library) R.string.mv_neon_empty_library_title else R.string.mv_neon_empty_updates_title)
+                    textSize = 21f
+                    setTextColor(Color.WHITE)
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    gravity = android.view.Gravity.CENTER
+                    setPadding(0, dp(4), 0, dp(4))
+                }
+                body.addView(title, body.indexOfChild(binding.textLabel), LinearLayout.LayoutParams(-1, -2))
+                illustrationTitle = title
+            }
             binding.textLabel.text = message
 
             binding.actionsContainer.removeAllViews()
             binding.actionsContainer.isVisible = !actions.isNullOrEmpty()
             if (!actions.isNullOrEmpty()) {
-                actions.forEach {
+                val useRow = illustration && drawable == R.drawable.mv_neon_updates && actions.size == 3 && resources.configuration.screenWidthDp >= 360 && resources.configuration.fontScale <= 1.3f
+                val secondaryRow = if (useRow) LinearLayout(context).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = android.view.Gravity.CENTER
+                } else null
+                actions.forEachIndexed { index, action ->
+                    val primary = illustration && drawable == R.drawable.mv_neon_updates && index == 0
                     val button =
-                        (inflate(context, R.layout.material_text_button, null) as MaterialButton)
+                        (if (primary) NeonGradientButton(context) else inflate(context, R.layout.material_text_button, null) as MaterialButton)
                             .apply {
-                                setText(it.resId)
-                                setOnClickListener(it.listener)
+                                setText(action.resId)
+                                setOnClickListener(action.listener)
+                                if (illustration) {
+                                    setTextColor(Color.WHITE)
+                                    minHeight = dp(48)
+                                    if (drawable == R.drawable.mv_neon_updates && index == 0) {
+                                        (this as NeonGradientButton).applyNeonGradient(fillStart = Color.rgb(0, 174, 208), fillEnd = Color.rgb(151, 36, 229))
+                                        setIconResource(R.drawable.ic_refresh_24dp)
+                                    } else {
+                                        setIconResource(if (drawable == R.drawable.mv_neon_library || action.resId == R.string.library) R.drawable.ic_book_24dp else R.drawable.ic_browse_outline_24dp)
+                                    }
+                                }
                             }
-                    binding.actionsContainer.addView(button)
-                    if (context.resources.configuration.screenHeightDp < 600) {
+                    if (secondaryRow != null && index > 0) {
+                        secondaryRow.addView(button, LinearLayout.LayoutParams(0, -2, 1f).apply { marginStart = dp(4); marginEnd = dp(4) })
+                    } else binding.actionsContainer.addView(button)
+                    if (context.resources.configuration.screenHeightDp < 600 && !(useRow && index > 0)) {
                         button.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
                         button.updateLayoutParams<MarginLayoutParams> {
                             width = ViewGroup.LayoutParams.WRAP_CONTENT
@@ -88,6 +127,7 @@ class EmptyView
                         }
                     }
                 }
+                if (secondaryRow != null) binding.actionsContainer.addView(secondaryRow, LinearLayout.LayoutParams(-1, -2))
             }
 
             this.isVisible = true

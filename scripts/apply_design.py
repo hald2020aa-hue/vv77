@@ -19,7 +19,7 @@ ET.register_namespace('android', A[1:-1]); ET.register_namespace('app', P[1:-1])
 # expect dark surfaces. A light theme would need a separate contrast/runtime audit.
 # bg, surface, raised, border, text, muted, primary, secondary, tertiary.
 DESIGNS = {
-    'neon': dict(name='Neon Reference', palette=('05030F','0E0B27','1B1442','3B2A78','FFFFFF','B3ABD6','19E6FF','A14BFF','FF2FD0'), radius=16, gutter=12, source='row', source_height=68, source_min_width=300, source_icon=42, source_latest=72, hero=206, poster=112, poster_h=150, chapter=12, nav=8, icon='M12,3 L21,12 L12,21 L3,12 Z'),
+    'neon': dict(name='Neon Reference', palette=('05030F','0E0B27','1B1442','3B2A78','FFFFFF','B3ABD6','19E6FF','A14BFF','FF2FD0'), radius=16, gutter=12, source='row', source_height=64, source_min_width=280, source_icon=38, source_latest=64, hero=206, poster=112, poster_h=150, chapter=12, nav=8, icon='M12,3 L21,12 L12,21 L3,12 Z'),
     'cinema': dict(name='Cinema Nova', palette=('100D0C','211916','38271F','72523E','FFF4DF','D7BDA1','F8BD67','B96B41','E5A76A'), radius=12, gutter=16, source='row', source_height=76, source_min_width=330, source_icon=48, source_latest=80, hero=270, poster=144, poster_h=202, chapter=18, nav=12, icon='M3,5 L21,5 L21,19 L3,19 Z M8,8 L8,16 L16,12 Z'),
     'ink': dict(name='Ink Atelier', palette=('151613','23251F','32342C','5A5E4D','F5F0DE','CEC8B3','E2D5A8','A8B19B','B4A180'), radius=3, gutter=10, source='reverse', source_height=64, source_min_width=300, source_icon=38, source_latest=72, hero=172, poster=100, poster_h=145, chapter=9, nav=2, icon='M3,5 L11,7 L12,19 L3,17 Z M13,7 L21,5 L21,17 L12,19 Z'),
     'fluid': dict(name='Fluid Bloom', palette=('111C22','1C3035','28434B','4B7271','F3FFF9','BEDBD4','7EE8CD','94C7F5','D9B9ED'), radius=27, gutter=20, source='row', source_height=80, source_min_width=340, source_icon=48, source_latest=80, hero=242, poster=130, poster_h=172, chapter=17, nav=15, icon='M12,2 C16,7 21,11 21,15 A9,9 0,0 1,3 15 C3,11 8,7 12,2 Z M9,15 A3,3 0,0 0,15 15'),
@@ -217,7 +217,7 @@ def render(root, design):
             # Compact editions put the navigation actions before the feature. Cinema and Fluid
             # use a full-height editorial feature, with Fluid displaying a larger cover.
             if design in ('ink','reactor'):
-                a=t.index('        item {\n            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {')
+                a=t.index('        item {\n            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {')
                 b=t.index('        item {\n            HomeGradientButton',a)
                 actions=t[a:b]; t=t[:a]+t[b:]
                 at=t.index('        item {\n            if (featured != null)'); t=t[:at]+actions+t[at:]
@@ -231,7 +231,7 @@ def render(root, design):
                 v=''.join(f'{int(x):02X}' for x in m.groups()); val=mapped(v,palette); return 'Color.rgb('+', '.join(str(int(val[i:i+2],16)) for i in (0,2,4))+')'
             t=re.sub(r'Color\.rgb\((\d+),\s*(\d+),\s*(\d+)\)',rgb,t)
         if t!=s: p.write_text(t)
-    p=root/KBASE/'ui/source/BrowseController.kt'; s=p.read_text(); old='val minCardWidth = 300.dpToPx'; assert s.count(old)==1
+    p=root/KBASE/'ui/source/BrowseController.kt'; s=p.read_text(); old='val minCardWidth = 280.dpToPx'; assert s.count(old)==1
     p.write_text(s.replace(old,f"val minCardWidth = {d['source_min_width']}.dpToPx"))
     # On-primary text must remain legible on the new pale accents.
     for p in res.glob('values*/colors.xml'):

@@ -1,6 +1,12 @@
 package eu.kanade.tachiyomi.ui.home
 
 import android.app.Activity
+import android.net.Uri
+import android.os.StatFs
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +16,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -176,9 +185,9 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                         title = { Text(stringResource(R.string.storage_delete_title)) },
                         text = {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                FilterChip(selected = deleteReadOnly, enabled = !deleting,
+                                NeonStorageChip(selected = deleteReadOnly, enabled = !deleting,
                                     onClick = { deleteReadOnly = true }, label = { Text(stringResource(R.string.storage_delete_read)) })
-                                FilterChip(selected = !deleteReadOnly, enabled = !deleting,
+                                NeonStorageChip(selected = !deleteReadOnly, enabled = !deleting,
                                     onClick = { deleteReadOnly = false }, label = { Text(stringResource(R.string.storage_delete_all)) })
                                 Text(stringResource(R.string.storage_delete_estimate, request.targets.size, Formatter.formatFileSize(context, request.bytes)))
                                 Text(stringResource(R.string.storage_delete_warning))
@@ -198,7 +207,7 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                     )
                 }
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+                    modifier = Modifier.fillMaxSize().background(Color(0xFF090719)),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = topInset + 12.dp, bottom = bottomInset + 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
@@ -268,7 +277,7 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                                     val options = listOf(null, StorageSeriesType.MANGA, StorageSeriesType.MANHWA) +
                                         listOf(StorageSeriesType.MANHUA).filter { type -> data.works.any { it.type == type } }
                                     items(options) { option ->
-                                        FilterChip(
+                                        NeonStorageChip(
                                             selected = selectedType == option,
                                             onClick = { selectedType = option; selectedCategory = null; selectedWorkIds = emptySet() },
                                             label = { Text(stringResource(when (option) {
@@ -283,17 +292,17 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
                             }
                             item {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    FilterChip(selected = !groupMode, onClick = {
+                                    NeonStorageChip(selected = !groupMode, onClick = {
                                         groupMode = false; selectedCategory = null; selectedWorkIds = emptySet()
                                     }, label = { Text(stringResource(R.string.storage_inventory_by_work)) })
-                                    FilterChip(selected = groupMode, onClick = {
+                                    NeonStorageChip(selected = groupMode, onClick = {
                                         groupMode = true; selectedCategory = null; selectedWorkIds = emptySet()
                                     }, label = { Text(stringResource(R.string.storage_inventory_by_category)) })
                                 }
                                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     val sorts = listOf(R.string.storage_inventory_sort_size, R.string.storage_inventory_sort_read, R.string.storage_inventory_sort_file)
                                     items(sorts.indices.toList()) { mode ->
-                                        FilterChip(selected = sortMode == mode, onClick = { sortMode = mode }, label = { Text(stringResource(sorts[mode])) })
+                                        NeonStorageChip(selected = sortMode == mode, onClick = { sortMode = mode }, label = { Text(stringResource(sorts[mode])) })
                                     }
                                 }
                             }
@@ -606,8 +615,17 @@ class StorageController : BaseController<HomeControllerBinding>(), BottomNavBarI
 @Composable
 private fun StorageSummaryPanel(data: StorageSnapshot?, enabled: Boolean, onRefresh: () -> Unit) {
     val context = LocalContext.current
+    var capacity by remember { mutableStateOf<Long?>(null) }
+    LaunchedEffect(data) {
+        capacity = null
+        if (data != null) capacity = withContext(Dispatchers.IO) {
+            val uri = Uri.parse(Injekt.get<PreferencesHelper>().downloadsDirectory().get())
+            val path = uri.path?.takeIf { uri.scheme == "file" && File(it).exists() }
+            path?.let { runCatching { StatFs(it).totalBytes }.getOrNull()?.takeIf { total -> total > 0L } }
+        }
+    }
     val outline = Brush.horizontalGradient(listOf(Color(0xFF19E6FF), Color(0xFFA14BFF), Color(0xFFFF2FD0)))
-    Surface(shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.5.dp, outline)) {
+    Surface(shape = RoundedCornerShape(18.dp), color = Color(0xFF15102F), border = BorderStroke(1.5.dp, outline)) {
         Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Column(Modifier.weight(1f)) {
@@ -615,27 +633,56 @@ private fun StorageSummaryPanel(data: StorageSnapshot?, enabled: Boolean, onRefr
                     Text(stringResource(R.string.mv_neon_storage_size), style = MaterialTheme.typography.bodySmall)
                     Text(data?.let { Formatter.formatFileSize(context, it.bytes) } ?: "—", color = Color(0xFF19E6FF), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 }
-                Image(painterResource(R.drawable.mv_neon_books), contentDescription = null, modifier = Modifier.size(82.dp))
+                Image(painterResource(R.drawable.mv_neon_books), contentDescription = null, modifier = Modifier.size(120.dp))
+            }
+            val total = capacity
+            if (data != null && total != null && data.bytes <= total) {
+                val ratio = (data.bytes.toDouble() / total).toFloat().coerceIn(0f, 1f)
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.mv_neon_storage_volume, Formatter.formatFileSize(context, total)), modifier = Modifier.weight(1f), color = Color.White)
+                    Text(java.text.NumberFormat.getPercentInstance().format(ratio.toDouble()), color = Color(0xFF19E6FF), fontWeight = FontWeight.Bold)
+                }
+                LinearProgressIndicator(progress = { ratio }, modifier = Modifier.fillMaxWidth().height(7.dp), color = Color(0xFF19E6FF), trackColor = Color(0xFF30234F))
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                StorageMetric(stringResource(R.string.mv_neon_storage_works), data?.works?.size?.toString() ?: "—", Color(0xFFA14BFF), Modifier.weight(1f))
-                StorageMetric(stringResource(R.string.chapters), data?.chapterCount?.toString() ?: "—", Color(0xFFFF2FD0), Modifier.weight(1f))
-                StorageMetric(stringResource(R.string.mv_neon_storage_size), data?.let { Formatter.formatFileSize(context, it.bytes) } ?: "—", Color(0xFF19E6FF), Modifier.weight(1f))
+                StorageMetric(R.drawable.ic_library_outline_24dp, stringResource(R.string.mv_neon_storage_works), data?.works?.size?.toString() ?: "—", Color(0xFFA14BFF), Modifier.weight(1f))
+                StorageMetric(R.drawable.ic_book_24dp, stringResource(R.string.chapters), data?.chapterCount?.toString() ?: "—", Color(0xFFFF2FD0), Modifier.weight(1f))
+                StorageMetric(R.drawable.ic_storage_outline_24dp, stringResource(R.string.mv_neon_storage_size), data?.let { Formatter.formatFileSize(context, it.bytes) } ?: "—", Color(0xFF19E6FF), Modifier.weight(1f))
             }
             if (data != null) Text(stringResource(R.string.storage_inventory_scope), style = MaterialTheme.typography.bodySmall)
-            Button(onClick = onRefresh, enabled = enabled, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
-                Text(stringResource(R.string.storage_inventory_refresh), fontWeight = FontWeight.Bold)
+            Box(Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp))
+                .background(Brush.horizontalGradient(listOf(Color(0xFF00A6C7), Color(0xFF2858CB), Color(0xFF9724E5))))
+                .clickable(enabled = enabled, onClick = onRefresh).padding(10.dp), contentAlignment = Alignment.Center) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(painterResource(R.drawable.ic_refresh_24dp), null, tint = Color.White)
+                    Text(stringResource(R.string.storage_inventory_refresh), color = Color.White, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun StorageMetric(label: String, value: String, accent: Color, modifier: Modifier = Modifier) {
+private fun StorageMetric(icon: Int, label: String, value: String, accent: Color, modifier: Modifier = Modifier) {
     Surface(modifier = modifier, color = accent.copy(alpha = 0.08f), shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, accent.copy(alpha = 0.8f))) {
         Column(Modifier.padding(horizontal = 6.dp, vertical = 9.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Icon(painterResource(icon), null, tint = accent, modifier = Modifier.size(24.dp))
             Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = accent)
         }
     }
+}
+
+@Composable
+private fun NeonStorageChip(selected: Boolean, onClick: () -> Unit, label: @Composable () -> Unit, enabled: Boolean = true) {
+    FilterChip(
+        selected = selected, onClick = onClick, label = label, enabled = enabled,
+        shape = RoundedCornerShape(14.dp),
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = Color(0xFF10102B), labelColor = Color.White,
+            selectedContainerColor = Color(0xFF782CE1), selectedLabelColor = Color.White,
+        ),
+        border = FilterChipDefaults.filterChipBorder(enabled = enabled, selected = selected,
+            borderColor = Color(0xFF537AC7), selectedBorderColor = Color(0xFFA14BFF)),
+    )
 }

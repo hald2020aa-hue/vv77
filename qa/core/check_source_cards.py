@@ -34,7 +34,7 @@ def validate_source_card(root, d, edition):
     # controls, divider, and title margins; leave space for the real title at 280dp.
     fixed = 10+12+d['source_icon']+48+d['source_latest']+1+4+12
     require(280-fixed >= 60, edition+' title space at 280dp')
-    require(d['source_min_width'] >= 300, edition+' minimum grid column width')
+    require(d['source_min_width'] >= 280, edition+' minimum grid column width')
 
 
 def validate_grid(source, d, edition):
@@ -45,7 +45,7 @@ def validate_grid(source, d, edition):
     require('recycler.clipBounds = viewport' in source and 'visibleBottom + gap' in source, edition+' search bar clipping retained')
     # Mirror the grid arithmetic for representative available widths/font scales.
     for width, scale in [(280,1),(360,1),(640,1),(720,1),(1000,1),(1200,1),(720,2),(1000,1.5)]:
-        minimum = int(d['source_min_width']*scale)
+        minimum = int(190 + (d['source_min_width'] - 190)*scale)
         spans = max(1,min(3,width//minimum))
         require(spans==1 or width//spans>=minimum, edition+' column width budget')
         require(spans>=1 and spans<=3, edition+' grid limits')
@@ -67,7 +67,7 @@ def main():
         else:
             root=deepcopy(base)
             mod.source_layout(root,d)
-            candidate=browse.replace('val minCardWidth = 300.dpToPx',f"val minCardWidth = {d['source_min_width']}.dpToPx")
+            candidate=browse.replace('val minCardWidth = 280.dpToPx',f"val minCardWidth = {d['source_min_width']}.dpToPx")
         require(ids==[(n.get(A+'id'),n.tag) for n in root.iter() if n.get(A+'id')], edition+' original binding types')
         validate_source_card(root,d,edition)
         validate_grid(candidate,d,edition)

@@ -170,6 +170,14 @@ class RecentsController(
             tabs.addTab(
                 tabs.newTab().setText(viewType.stringRes).also { tab ->
                     tab.view.tooltipText = null
+                    if (binding.root.resources.getBoolean(R.bool.v4_neon_mode)) {
+                        tab.setIcon(when (viewType) {
+                            RecentsViewType.GroupedAll -> R.drawable.ic_library_outline_24dp
+                            RecentsViewType.UngroupedAll -> R.drawable.ic_view_module_24dp
+                            RecentsViewType.History -> R.drawable.ic_calendar_text_outline_24dp
+                            RecentsViewType.Updates -> R.drawable.ic_refresh_24dp
+                        })
+                    }
                 },
                 viewType == selectedTab,
             )

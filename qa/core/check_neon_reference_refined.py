@@ -22,7 +22,7 @@ check('Updates actions invoke existing job and real navigation', all(x in recent
 check('Library illustration is not used for filtered-empty results', '!hasActiveFilters' in read('ui/library/LibraryController.kt') and 'R.drawable.mv_neon_library' in read('ui/library/LibraryController.kt'))
 check('Source groups derived from real adapter items', all(x in read('ui/source/SourceGroupDecoration.kt') for x in ['adapter.getItem(position)', 'is LangItem', 'is SourceItem', 'item.header?.code', 'NO_POSITION']))
 check('Source viewport remains active', 'installSourceViewport(view)' in read('ui/source/BrowseController.kt'))
-check('No MaterialButton background override on reading entry', 'startReadingButton.background =' not in read('ui/manga/MangaHeaderHolder.kt') and 'applyNeonGradient()' in read('ui/manga/MangaHeaderHolder.kt'))
+check('No MaterialButton background override on reading entry', 'startReadingButton.background =' not in read('ui/manga/MangaHeaderHolder.kt') and 'startReadingButton.applyNeonGradient(' in read('ui/manga/MangaHeaderHolder.kt'))
 check('Settings styling keeps existing preference behavior', 'NeonPreferenceBackground' in read('ui/setting/NeonSettingsStyler.kt'))
 for name in ('mv_neon_books','mv_neon_library','mv_neon_updates'):
     file = R / 'drawable-nodpi' / (name+'.webp')

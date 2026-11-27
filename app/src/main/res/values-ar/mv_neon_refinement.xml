@@ -17,4 +17,7 @@
     <string name="mv_neon_summary_advanced">خيارات التطبيق المتقدمة</string>
     <string name="mv_neon_summary_about">معلومات التطبيق والإصدار</string>
     <string name="mv_neon_discover">اكتشف مانجات جديدة</string>
+    <string name="mv_neon_empty_library_title">مكتبتك خالية</string>
+    <string name="mv_neon_empty_updates_title">لا توجد تحديثات حاليًا</string>
+    <string name="mv_neon_storage_volume">نسبة التنزيلات من سعة وحدة التخزين (%1$s)</string>
 </resources>

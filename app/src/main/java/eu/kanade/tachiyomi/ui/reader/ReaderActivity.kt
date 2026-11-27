@@ -198,6 +198,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     var menuVisible = false
         private set
 
+    private var neonPageIndicatorListener: android.view.ViewTreeObserver.OnPreDrawListener? = null
+
     /**
      * Whether the menu should stay visible.
      */
@@ -571,6 +573,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * Called when the activity is destroyed. Cleans up the viewer, configuration and any view.
      */
     override fun onDestroy() {
+        neonPageIndicatorListener?.let { listener ->
+            if (binding.root.viewTreeObserver.isAlive) binding.root.viewTreeObserver.removeOnPreDrawListener(listener)
+        }
+        neonPageIndicatorListener = null
         super.onDestroy()
         translationJob?.cancel()
         translationUpdatesJob?.cancel()
@@ -1477,6 +1483,25 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     private fun initializeMenu() {
         // Set binding.toolbar
         setSupportActionBar(binding.toolbar)
+        if (resources.getBoolean(R.bool.v4_neon_mode)) {
+            val listener = android.view.ViewTreeObserver.OnPreDrawListener {
+                val indicator = binding.pageNumber
+                val sheetTop = binding.chaptersSheet.root.top
+                val navTop = binding.navLayout.top
+                val controlsTop = if (binding.readerNav.root.isVisible && !binding.readerNav.pageSeekbar.isVertical && navTop > 0) {
+                    minOf(sheetTop, navTop)
+                } else sheetTop
+                val shift = if (menuVisible && controlsTop > 0) {
+                    val preferred = (controlsTop - 8.dpToPx - indicator.bottom).coerceAtMost(0)
+                    val upperLimit = (binding.appBar.bottom + 8.dpToPx - indicator.top).coerceAtMost(0)
+                    maxOf(preferred, upperLimit).toFloat()
+                } else 0f
+                if (indicator.translationY != shift) indicator.translationY = shift
+                true
+            }
+            neonPageIndicatorListener = listener
+            binding.root.viewTreeObserver.addOnPreDrawListener(listener)
+        }
         val primaryColor =
             ColorUtils.setAlphaComponent(
                 getResourceColor(R.attr.colorSurface),
@@ -1726,7 +1751,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         }
         binding.chaptersSheet.root.sheetBehavior
             ?.isGestureInsetBottomIgnored = true
-        val peek = 50.dpToPx
+        val peek = if (resources.getBoolean(R.bool.v4_neon_mode)) 68.dpToPx else 50.dpToPx
         lastVis = window.decorView.rootWindowInsetsCompat?.isVisible(statusBars()) ?: false
         var firstPass = true
         binding.readerLayout.doOnApplyWindowInsetsCompat { _, insets, _ ->

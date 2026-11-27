@@ -517,7 +517,7 @@ ExpandedAppBarLayout@JvmOverloads
                     mainToolbar?.isInvisible = false
                 }
                 if (tabsFrameLayout?.isVisible == false) {
-                    cardFrame?.backgroundColor = mainActivity.getResourceColor(R.attr.colorSurface)
+                    cardFrame?.backgroundColor = if (resources.getBoolean(R.bool.v4_neon_mode)) android.graphics.Color.rgb(5, 3, 15) else mainActivity.getResourceColor(R.attr.colorSurface)
                 } else {
                     cardFrame?.backgroundColor = null
                 }

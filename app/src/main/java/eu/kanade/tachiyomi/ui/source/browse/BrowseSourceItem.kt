@@ -75,7 +75,7 @@ class BrowseSourceItem(
                 binding.coverThumbnail.adjustViewBounds = false
                 binding.coverThumbnail.updateLayoutParams<ConstraintLayout.LayoutParams> {
                     height = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT
-                    dimensionRatio = "15:22"
+                    dimensionRatio = if (resources.getBoolean(R.bool.v4_neon_mode) && NeonGridMode.getColumns(context) == NeonGridMode.LARGE) "16:9" else "15:22"
                 }
             }
             BrowseSourceGridHolder(view, adapter, listType == LibraryItem.LAYOUT_COMPACT_GRID, outlineOnCovers.get())

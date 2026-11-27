@@ -98,11 +98,11 @@ internal class NeonSettingsStyler(
         } else {
             RippleDrawable(ColorStateList.valueOf(Color.argb(96, 25, 230, 255)), background, null)
         }
-        if (!category) view.minimumHeight = maxOf(view.minimumHeight, dp(56))
+        if (!category) view.minimumHeight = maxOf(view.minimumHeight, dp(if (mainMenu) 62 else 56))
 
         view.findViewById<TextView>(android.R.id.title)?.apply {
             setTextColor(if (category) cyan else Color.WHITE)
-            if (category) setTypeface(typeface, android.graphics.Typeface.BOLD)
+            if (category || mainMenu) setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
         view.findViewById<TextView>(android.R.id.summary)?.setTextColor(secondary)
         // Keep the original icon and click target, but align its visual tint with the app.
@@ -186,7 +186,7 @@ internal class NeonSettingsStyler(
                 val w = boundsRect.width()
                 val bottom = boundsRect.bottom
                 wavePaint.shader = LinearGradient(left, top, left + w * .45f, bottom,
-                    Color.argb(55, Color.red(accent), Color.green(accent), Color.blue(accent)), Color.TRANSPARENT, Shader.TileMode.CLAMP)
+                    Color.argb(78, Color.red(accent), Color.green(accent), Color.blue(accent)), Color.TRANSPARENT, Shader.TileMode.CLAMP)
                 wavePath.reset()
                 wavePath.moveTo(left, top)
                 wavePath.cubicTo(left + w * .13f, top, left + w * .20f, bottom, left + w * .45f, bottom)

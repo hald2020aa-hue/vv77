@@ -3,6 +3,8 @@ package eu.kanade.tachiyomi.ui.source
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.graphics.RectF
 import androidx.recyclerview.widget.RecyclerView
 
@@ -41,6 +43,8 @@ internal class SourceGroupDecoration(private val currentAdapter: () -> SourceAda
         for (rect in groups.values) {
             if (rect.width() <= 0f || rect.height() <= 4f * density) continue
             rect.inset(0f, 2f * density)
+            rim.shader = LinearGradient(rect.left, rect.top, rect.right, rect.top,
+                intArrayOf(Color.rgb(25, 230, 255), Color.rgb(161, 75, 255), Color.rgb(255, 47, 208)), null, Shader.TileMode.CLAMP)
             c.drawRoundRect(rect, 14f * density, 14f * density, fill)
             c.drawRoundRect(rect, 14f * density, 14f * density, rim)
         }

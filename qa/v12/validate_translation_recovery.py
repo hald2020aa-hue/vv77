@@ -38,7 +38,7 @@ assert 'resources.getBoolean(R.bool.v4_neon_mode)' in controller
 assert 'getBoolean(R.bool.v4_neon_mode)' in holder
 # Crash fix: the shared-element button must keep Material's background (see docs/AUDIT.md section 3).
 assert 'startReadingButton.background =' not in holder
-assert 'NeonGradientButton' in holder and 'applyNeonGradient()' in holder
+assert 'NeonGradientButton' in holder and 'startReadingButton.applyNeonGradient(' in holder
 for s in ('v12_neon_read_button.xml', 'v12_neon_details_header.xml'):
     ET.parse(root/'app/src/main/res/drawable'/s)
 ET.parse(root/'app/src/main/res/values/v12_neon_runtime_colors.xml')

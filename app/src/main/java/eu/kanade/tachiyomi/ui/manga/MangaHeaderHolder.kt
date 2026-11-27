@@ -655,6 +655,12 @@ class MangaHeaderHolder(
                     chip.id = id
                     chip.chipBackgroundColor = colorStateList
                     chip.setTextColor(textColor)
+                    if (binding.root.resources.getBoolean(R.bool.v4_neon_mode)) {
+                        chip.chipBackgroundColor = ColorStateList.valueOf(android.graphics.Color.rgb(20, 15, 43))
+                        chip.chipStrokeColor = ColorStateList.valueOf(android.graphics.Color.rgb(161, 75, 255))
+                        chip.chipStrokeWidth = binding.root.resources.displayMetrics.density
+                        chip.setTextColor(android.graphics.Color.WHITE)
+                    }
                     chip.text = genreText
                     chip.setOnClickListener {
                         adapter.delegate.showFloatingActionMode(chip, isTag = true)
@@ -781,7 +787,10 @@ class MangaHeaderHolder(
                 // Real gradient panel, not a solid palette tint. The button keeps Material's own
                 // background (never setBackground) so it stays a valid shared element for the
                 // reader transition; NeonGradientButton paints the gradient itself.
-                startReadingButton.applyNeonGradient()
+                startReadingButton.applyNeonGradient(
+                    fillStart = android.graphics.Color.rgb(0, 174, 208),
+                    fillEnd = android.graphics.Color.rgb(151, 36, 229),
+                )
             } else {
                 startReadingButton.backgroundTintList = ColorStateList(states, colors)
             }
