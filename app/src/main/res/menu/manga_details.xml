@@ -80,4 +80,13 @@
         android:icon="@drawable/ic_swap_calls_24dp"
         android:title="@string/migrate"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_mv_plus_find_alternatives"
+        android:title="@string/mv_plus_find_alternatives"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_mv_plus_find_related"
+        android:title="@string/mv_plus_find_related"
+        app:showAsAction="never" />
 </menu>

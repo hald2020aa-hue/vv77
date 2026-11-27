@@ -1213,6 +1213,8 @@ class MangaDetailsController :
 
     private fun updateMenuVisibility(menu: Menu?) {
         menu ?: return
+        menu.findItem(R.id.action_mv_plus_find_alternatives)?.isVisible = !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_mv_plus_find_related)?.isVisible = !presenter.isLockedFromSearch && !presenter.manga.author.isNullOrBlank()
         val editItem = menu.findItem(R.id.action_edit)
         editItem?.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_download)?.isVisible = !presenter.isLockedFromSearch &&
@@ -1237,6 +1239,20 @@ class MangaDetailsController :
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.action_mv_plus_find_alternatives -> {
+                if (!presenter.isLockedFromSearch && !isNotOnline()) {
+                    val title = presenter.manga.originalTitle.ifBlank { presenter.manga.title }
+                    if (title.isNotBlank()) {
+                        router.pushController(
+                            eu.kanade.tachiyomi.ui.source.plus.PlusAlternativesController(title, presenter.manga.source)
+                                .withFadeTransaction(),
+                        )
+                    }
+                }
+            }
+            R.id.action_mv_plus_find_related -> {
+                if (!presenter.isLockedFromSearch) presenter.manga.author?.takeIf { it.isNotBlank() }?.let(::globalSearch)
+            }
             R.id.action_edit -> openEditMangaDialog()
             R.id.action_open_in_web_view -> openInWebView()
             R.id.action_refresh_tracking -> presenter.refreshTracking(true)

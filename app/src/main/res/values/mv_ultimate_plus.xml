@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mv_plus_toggle_page_mark">Toggle page bookmark</string>
+    <string name="mv_plus_page_marks">Page bookmarks in this chapter</string>
+    <string name="mv_plus_mark_added">Page bookmark saved</string>
+    <string name="mv_plus_mark_removed">Page bookmark removed</string>
+    <string name="mv_plus_page_not_ready">Wait until the current chapter is ready</string>
+    <string name="mv_plus_no_marks">No bookmarked pages in this chapter</string>
+    <string name="mv_plus_page_label">Page %1$d</string>
+    <string name="mv_plus_private_mode">Unavailable in incognito mode</string>
+    <string name="mv_plus_reading_stats">Page reading activity</string>
+    <string name="mv_plus_stats_row">%1$d days: %2$d page visits, %3$d min %4$d sec, average %5$d sec per visit</string>
+    <string name="mv_plus_stats_note">Local activity since this feature was installed. Counts foreground visits to ready pages lasting at least one second, capped at two minutes per visit. Repeat visits count; this is not a count of completed or unique pages. Incognito visits are excluded.</string>
+    <string name="mv_plus_find_alternatives">Find other sources for this title</string>
+    <string name="mv_plus_find_related">Search sources by author</string>
+    <string name="mv_plus_related_missing">No author is available for this title</string>
+    <string name="mv_plus_detect_mode">Suggest reading mode</string>
+    <string name="mv_plus_tall_hint">This image is very tall. Switch this title to Webtoon mode?</string>
+    <string name="mv_plus_switch_webtoon">Switch to Webtoon</string>
+    <string name="mv_plus_dimensions_unknown">The current image is not ready or its original dimensions are unavailable</string>
+    <string name="mv_plus_not_tall">This page is not unusually tall. Current reading mode kept.</string>
+</resources>

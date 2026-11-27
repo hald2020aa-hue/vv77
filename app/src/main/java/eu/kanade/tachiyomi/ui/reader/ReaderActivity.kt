@@ -184,6 +184,12 @@ import kotlin.time.Duration.Companion.seconds
 class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     val viewModel by viewModels<ReaderViewModel>()
 
+    private val plusStore by lazy { eu.kanade.tachiyomi.ui.reader.plus.PlusReaderStore(applicationContext) }
+    private var plusForeground = false
+    private var plusPageJob: Job? = null
+    private var plusObservedPage: ReaderPage? = null
+    private var plusVisitStarted: Long? = null
+
     val scope = lifecycleScope
 
     /**
@@ -573,6 +579,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * Called when the activity is destroyed. Cleans up the viewer, configuration and any view.
      */
     override fun onDestroy() {
+        plusForeground = false
+        stopPlusPageObserver()
         neonPageIndicatorListener?.let { listener ->
             if (binding.root.viewTreeObserver.isAlive) binding.root.viewTreeObserver.removeOnPreDrawListener(listener)
         }
@@ -931,6 +939,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 shiftDoublePages()
                 manuallyShiftedPages = true
             }
+            R.id.action_mv_plus_toggle_page_mark -> togglePlusPageMark()
+            R.id.action_mv_plus_page_marks -> showPlusPageMarks()
+            R.id.action_mv_plus_reading_stats -> showPlusReadingStats()
+            R.id.action_mv_plus_detect_mode -> suggestPlusReadingMode()
             R.id.action_translate_chapter -> askChapterTranslationLanguage()
             R.id.action_translation_auto -> {
                 val enable = !translationUiPrefs.getBoolean("auto_translate", false)
@@ -1225,6 +1237,139 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     /** Fine-grained appearance controls, saved separately from reader and source settings. */
+    /** Local page marks, separate from the chapter bookmark and reader progress. */
+    private fun plusPrivateMode(): Boolean =
+        viewModel.manga?.let { eu.kanade.tachiyomi.source.isIncognitoModeForSource(it.source) } ?: true
+
+    private fun plusReadyPage(): ReaderPage? {
+        val page = translatedPage ?: return null
+        val chapter = viewModel.getCurrentChapter() ?: return null
+        if (page.chapter !== chapter || page.index !in 0 until (chapter.pages?.size ?: 0)) return null
+        if (chapter.chapter.url.isBlank() || viewModel.manga?.url.isNullOrBlank()) return null
+        return page
+    }
+
+    private fun togglePlusPageMark() {
+        if (plusPrivateMode()) { toast(R.string.mv_plus_private_mode); return }
+        val manga = viewModel.manga ?: return
+        val page = plusReadyPage() ?: run { toast(R.string.mv_plus_page_not_ready); return }
+        val count = page.chapter.pages?.size ?: return
+        val added = plusStore.toggle(manga.source, manga.url, page.chapter.chapter.url, page.index, count)
+        toast(if (added) R.string.mv_plus_mark_added else R.string.mv_plus_mark_removed)
+    }
+
+    private fun showPlusPageMarks() {
+        if (plusPrivateMode()) { toast(R.string.mv_plus_private_mode); return }
+        val manga = viewModel.manga ?: return
+        val page = plusReadyPage() ?: run { toast(R.string.mv_plus_page_not_ready); return }
+        val chapter = page.chapter
+        val count = chapter.pages?.size ?: return
+        val marks = plusStore.bookmarks(manga.source, manga.url, chapter.chapter.url, count)
+        if (marks.isEmpty()) { toast(R.string.mv_plus_no_marks); return }
+        materialAlertDialog()
+            .setTitle(R.string.mv_plus_page_marks)
+            .setItems(marks.map { getString(R.string.mv_plus_page_label, it + 1) }.toTypedArray()) { _, selected ->
+                // Do not jump in the wrong chapter if the viewer changed while the dialog was open.
+                if (!plusPrivateMode() && viewModel.getCurrentChapter() === chapter) {
+                    marks.getOrNull(selected)?.let { moveToPageIndex(it) }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun finishPlusVisit() {
+        val started = plusVisitStarted ?: return
+        plusVisitStarted = null
+        if (plusPrivateMode()) return
+        val elapsed = eu.kanade.tachiyomi.ui.reader.plus.PlusReaderRules.dwellMs(
+            started, android.os.SystemClock.elapsedRealtime(),
+        )
+        if (elapsed > 0L) plusStore.record(java.time.LocalDate.now(), elapsed)
+    }
+
+    private fun stopPlusPageObserver() {
+        plusPageJob?.cancel()
+        plusPageJob = null
+        plusObservedPage = null
+        finishPlusVisit()
+    }
+
+    private fun observePlusPage(page: ReaderPage?) {
+        if (!plusForeground || plusPrivateMode()) {
+            stopPlusPageObserver()
+            return
+        }
+        if (page === plusObservedPage && plusPageJob?.isActive == true) return
+        stopPlusPageObserver()
+        if (page == null) return
+        plusObservedPage = page
+        // READY is observed asynchronously so loading time is not counted as reading time.
+        plusPageJob = scope.launch {
+            page.statusFlow.collect { status ->
+                if (plusObservedPage !== page || !plusForeground || plusPrivateMode()) {
+                    plusVisitStarted = null
+                } else if (status == Page.State.READY) {
+                    if (plusVisitStarted == null) plusVisitStarted = android.os.SystemClock.elapsedRealtime()
+                } else {
+                    finishPlusVisit()
+                }
+            }
+        }
+    }
+
+    private fun showPlusReadingStats() {
+        if (plusPrivateMode()) { toast(R.string.mv_plus_private_mode); return }
+        val today = java.time.LocalDate.now()
+        val rows = listOf(1, 7, 30).map { days ->
+            val total = plusStore.totals(today, days)
+            getString(R.string.mv_plus_stats_row, days, total.visits,
+                total.durationMs / 60_000L, total.durationMs / 1000L % 60L, total.averageMs / 1000L)
+        }
+        materialAlertDialog()
+            .setTitle(R.string.mv_plus_reading_stats)
+            .setMessage(rows.joinToString("\n\n") + "\n\n" + getString(R.string.mv_plus_stats_note))
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    /** Inspect the image already decoded by the existing reader. No new source or HTTP request. */
+    private fun suggestPlusReadingMode() {
+        val page = plusReadyPage() ?: run { toast(R.string.mv_plus_page_not_ready); return }
+        val chapterId = page.chapter.chapter.id ?: return
+        fun findImage(view: View): SubsamplingScaleImageView? {
+            if (view is SubsamplingScaleImageView && view.isReady && view.sWidth > 0 && view.sHeight > 0) return view
+            if (view is ViewGroup) for (i in 0 until view.childCount) {
+                findImage(view.getChildAt(i))?.let { return it }
+            }
+            return null
+        }
+        fun findHolder(view: View): SubsamplingScaleImageView? {
+            if (view is ReaderPageImageView && view.translationChapterId == chapterId &&
+                view.translationPageIndex == page.index && !view.translationMergedSpread) return findImage(view)
+            if (view is ViewGroup) for (i in 0 until view.childCount) {
+                findHolder(view.getChildAt(i))?.let { return it }
+            }
+            return null
+        }
+        val image = findHolder(binding.viewerContainer)
+            ?: run { toast(R.string.mv_plus_dimensions_unknown); return }
+        if (!eu.kanade.tachiyomi.ui.reader.plus.PlusReaderRules.isTallPage(image.sWidth, image.sHeight)) {
+            toast(R.string.mv_plus_not_tall)
+            return
+        }
+        materialAlertDialog()
+            .setTitle(R.string.mv_plus_detect_mode)
+            .setMessage(R.string.mv_plus_tall_hint)
+            .setPositiveButton(R.string.mv_plus_switch_webtoon) { _, _ ->
+                if (translatedPage === page && viewModel.getCurrentChapter() === page.chapter) {
+                    viewModel.setMangaReadingMode(ReadingModeType.WEBTOON.flagValue)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
     private fun showTranslationAppearance() {
         val fontBar = android.widget.SeekBar(this).apply {
             max = 85 // 75..160 percent, including 100
@@ -2165,12 +2310,16 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     override fun onPause() {
+        plusForeground = false
+        stopPlusPageObserver()
         viewModel.saveCurrentChapterReadingProgress()
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
+        plusForeground = true
+        observePlusPage(translatedPage)
         viewModel.setReadStartTime()
     }
 
@@ -2424,6 +2573,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         (page.chapter.pageLoader as? eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader)
             ?.focusOnPage(page.index)
         translatedPage = page
+        observePlusPage(page)
         startAutoTranslationIfConfigured(page)
         refreshTranslationBanner()
         refreshTranslationOverlays()

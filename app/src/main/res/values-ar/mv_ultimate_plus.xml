@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mv_plus_toggle_page_mark">إضافة أو إزالة علامة الصفحة</string>
+    <string name="mv_plus_page_marks">الصفحات المعلّمة في هذا الفصل</string>
+    <string name="mv_plus_mark_added">تم حفظ علامة الصفحة</string>
+    <string name="mv_plus_mark_removed">تمت إزالة علامة الصفحة</string>
+    <string name="mv_plus_page_not_ready">انتظر حتى يجهز الفصل الحالي</string>
+    <string name="mv_plus_no_marks">لا توجد صفحات معلّمة في هذا الفصل</string>
+    <string name="mv_plus_page_label">الصفحة %1$d</string>
+    <string name="mv_plus_private_mode">غير متاح في وضع التصفح الخفي</string>
+    <string name="mv_plus_reading_stats">إحصاءات نشاط قراءة الصفحات</string>
+    <string name="mv_plus_stats_row">%1$d يوم: %2$d زيارة للصفحات، %3$d دقيقة و%4$d ثانية، متوسط %5$d ثانية للزيارة</string>
+    <string name="mv_plus_stats_note">إحصاءات محلية منذ تثبيت هذه الميزة. تُحسب زيارات الصفحات الجاهزة في الواجهة لمدة ثانية على الأقل، بحد دقيقتين لكل زيارة. تشمل الزيارات المتكررة ولا تعني عدد الصفحات الفريدة أو المكتملة. لا يُحسب التصفح الخفي.</string>
+    <string name="mv_plus_find_alternatives">البحث عن العمل في مصادر أخرى</string>
+    <string name="mv_plus_find_related">البحث في المصادر باسم المؤلف</string>
+    <string name="mv_plus_related_missing">اسم المؤلف غير متوفر لهذا العمل</string>
+    <string name="mv_plus_detect_mode">اقتراح وضع القراءة من أبعاد الصفحة</string>
+    <string name="mv_plus_tall_hint">هذه الصفحة طويلة جدًا. هل تريد تحويل عرض هذا العمل إلى وضع الويب تون؟</string>
+    <string name="mv_plus_switch_webtoon">التحويل إلى ويب تون</string>
+    <string name="mv_plus_dimensions_unknown">الصورة لم تجهز أو أبعادها الأصلية غير متاحة</string>
+    <string name="mv_plus_not_tall">هذه الصفحة ليست طويلة بشكل استثنائي. تم إبقاء وضع القراءة الحالي.</string>
+</resources>

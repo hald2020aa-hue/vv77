@@ -37,4 +37,24 @@
         android:id="@+id/action_translation_stop"
         android:title="@string/v6_translation_stop"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_mv_plus_toggle_page_mark"
+        android:title="@string/mv_plus_toggle_page_mark"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_mv_plus_page_marks"
+        android:title="@string/mv_plus_page_marks"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_mv_plus_reading_stats"
+        android:title="@string/mv_plus_reading_stats"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_mv_plus_detect_mode"
+        android:title="@string/mv_plus_detect_mode"
+        app:showAsAction="never" />
 </menu>

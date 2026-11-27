@@ -35,6 +35,10 @@ internal object NeonReaderTranslationMenu {
         R.id.action_translation_appearance to R.drawable.ic_edit_24dp,
         R.id.action_translation_retry to R.drawable.ic_refresh_24dp,
         R.id.action_translation_stop to R.drawable.ic_close_24dp,
+        R.id.action_mv_plus_toggle_page_mark to R.drawable.ic_bookmark_24dp,
+        R.id.action_mv_plus_page_marks to R.drawable.ic_bookmark_border_24dp,
+        R.id.action_mv_plus_reading_stats to R.drawable.ic_book_open_variant_24dp,
+        R.id.action_mv_plus_detect_mode to R.drawable.ic_language_24dp,
     )
 
     fun attach(toolbar: Toolbar, menu: Menu, dispatch: (MenuItem) -> Unit) {
