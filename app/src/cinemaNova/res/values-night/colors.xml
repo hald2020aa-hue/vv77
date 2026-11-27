@@ -17,4 +17,11 @@
     <color name="tachiyomi_surfaceContainer">#1A1715</color>
     <color name="tachiyomi_surfaceContainerHigh">#231F1C</color>
     <color name="tachiyomi_surfaceContainerHighest">#2E2926</color>
+    <color name="v10_neon_border_soft">#90F2B544</color>
+    <color name="v4_outline">#3A332D</color>
+    <color name="v4_card">#1A1715</color>
+    <color name="v4_text">#F5EFE6</color>
+    <color name="v4_cyan">#2FB5A6</color>
+    <color name="v4_primary">#E5484D</color>
+    <color name="v4_track">#2E2926</color>
 </resources>

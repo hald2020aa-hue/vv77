@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cinema Nova: a poster-sized cover and a stronger backdrop behind the details header. -->
+    <dimen name="cover_max_width">150dp</dimen>
+    <item name="details_backdrop_alpha" format="float" type="dimen">0.55</item>
+</resources>

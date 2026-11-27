@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle" >
+
+    <!-- Cinema Nova: warm-black scrim, denser at the bottom of the poster. -->
+    <gradient
+        android:angle="90"
+        android:startColor="#F20C0A09"
+        android:centerColor="#8C0C0A09"
+        android:centerY="0.45"
+        android:endColor="#000C0A09"/>
+
+    <corners android:radius="0dp" />
+</shape>
