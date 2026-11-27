@@ -89,6 +89,7 @@ jobs:
           python3 qa/core/check_cover_binding.py
           python3 qa/core/check_final_designs.py
           python3 qa/core/check_neon_reference_refined.py
+          python3 qa/core/check_ultimate_plus.py
       - name: Run unit tests and compile debug APKs
         run: ./gradlew -Pjh.arm64Only=true --no-daemon testDevDebugUnitTest verifySingleArm64DevApk --stacktrace
       - name: Verify single APK integrity and debug signature

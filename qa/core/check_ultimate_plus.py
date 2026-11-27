@@ -25,6 +25,14 @@ for names,xml,activity in [
     for name in names:
         id='action_mv_plus_'+name
         check(id+' registered once',items.count('@+id/'+id)==1)
+        # Android flavor resources replace entire menus, not just individual items.
+        # Check every matching overlay, including future qualified menus.
+        for overlay in sorted((ROOT/'app/src').glob('*/res/menu*/'+xml)):
+            if overlay == RES/'menu'/xml:
+                continue
+            entries = [x for x in ET.parse(overlay).getroot().iter('item') if x.get(android+'id') in ('@+id/'+id, '@id/'+id)]
+            check(id+' registered once in '+str(overlay.relative_to(ROOT)), len(entries)==1)
+            check(id+' title in '+str(overlay.relative_to(ROOT)), entries[0].get(android+'title')=='@string/mv_plus_'+name)
         check(id+' routed',activity.count('R.id.'+id+' ->')==1)
         if xml=='reader.xml': check(id+' present in neon popup','R.id.'+id+' to ' in popup)
 base=ET.parse(RES/'values/mv_ultimate_plus.xml').getroot()
