@@ -13,7 +13,6 @@ import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
@@ -32,6 +31,7 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
+import eu.kanade.tachiyomi.util.system.appNotificationAccent
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.injectLazy
@@ -67,7 +67,7 @@ class LibraryUpdateNotifier(
             setOngoing(true)
             setOnlyAlertOnce(true)
             setProgress(0, 0, true)
-            color = ContextCompat.getColor(context, R.color.primaryTachiyomi)
+            color = context.appNotificationAccent()
             addAction(R.drawable.ic_close_24dp, context.getString(android.R.string.cancel), cancelIntent)
         }
     }
@@ -89,7 +89,7 @@ class LibraryUpdateNotifier(
             progressNotificationBuilder
                 .setContentTitle("${context.getString(R.string.updating_library)} (${current + 1}/$total)")
                 .setContentText(if (preferences.hideNotificationContent()) null else manga.title)
-                .setProgress(total, current, false)
+                .setProgress(total.coerceAtLeast(0), if (total > 0) current.coerceIn(0, total) else 0, total <= 0)
                 .build(),
         )
     }
@@ -116,7 +116,7 @@ class LibraryUpdateNotifier(
                     setContentText(context.getString(R.string.tap_to_see_details))
                     setStyle(
                         NotificationCompat.BigTextStyle().bigText(
-                            errors.joinToString("\n") {
+                            (if (preferences.hideNotificationContent()) emptyList() else errors).joinToString("\n") {
                                 it.chop(TITLE_MAX_LEN)
                             },
                         ),
@@ -154,7 +154,7 @@ class LibraryUpdateNotifier(
                     setContentText(context.getString(R.string.tap_to_learn_more))
                     setStyle(
                         NotificationCompat.BigTextStyle().bigText(
-                            skips.joinToString("\n") {
+                            (if (preferences.hideNotificationContent()) emptyList() else skips).joinToString("\n") {
                                 it.chop(TITLE_MAX_LEN)
                             },
                         ),
@@ -182,7 +182,8 @@ class LibraryUpdateNotifier(
      */
     fun showResultNotification(newUpdates: Map<LibraryManga, Array<Chapter>>) {
         // create a copy of the list since it will be cleared by the time it is used
-        val updates = newUpdates.toMap()
+        val updates = newUpdates.filterValues { it.isNotEmpty() }.toMap()
+        if (updates.isEmpty()) return
         GlobalScope.launch {
             val notifications = ArrayList<Pair<Notification, Int>>()
             if (!preferences.hideNotificationContent()) {
@@ -208,6 +209,7 @@ class LibraryUpdateNotifier(
                     if (cachedIcon == null) {
                         launch {
                             val networkIcon = getMangaIconBitmap(manga, allowNetwork = true) ?: return@launch
+                            if (preferences.hideNotificationContent()) return@launch
                             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                                 != PackageManager.PERMISSION_GRANTED
                             ) {
@@ -234,7 +236,7 @@ class LibraryUpdateNotifier(
                         setSmallIcon(R.drawable.ic_tachij2k_notification)
                         setLargeIcon(notificationBitmap)
                         setContentTitle(context.getString(R.string.new_chapters_found))
-                        color = ContextCompat.getColor(context, R.color.primaryTachiyomi)
+                        color = context.appNotificationAccent()
                         if (updates.size > 1) {
                             setContentText(
                                 context.resources.getQuantityString(
@@ -271,8 +273,8 @@ class LibraryUpdateNotifier(
                     },
                 )
 
-                notifications.forEach {
-                    notify(it.second, it.first)
+                if (!preferences.hideNotificationContent()) {
+                    notifications.forEach { notify(it.second, it.first) }
                 }
             }
         }
@@ -312,7 +314,7 @@ class LibraryUpdateNotifier(
             icon?.let { setLargeIcon(it) }
             setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
             setContentTitle(manga.title)
-            color = ContextCompat.getColor(context, R.color.primaryTachiyomi)
+            color = context.appNotificationAccent()
             val chaptersNames =
                 if (chapterNames.size > MAX_CHAPTERS) {
                     "${chapterNames.take(MAX_CHAPTERS - 1).joinToString(", ")}, " +

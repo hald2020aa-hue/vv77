@@ -94,6 +94,7 @@ inline fun Context.notification(
     func: NotificationCompat.Builder.() -> Unit,
 ): Notification {
     val builder = NotificationCompat.Builder(this, channelId)
+    if (resources.getBoolean(R.bool.v4_neon_mode)) builder.setColor(appNotificationAccent())
     builder.func()
     return builder.build()
 }
@@ -228,6 +229,12 @@ val displayMaxHeightInPx: Int
 val Context.animatorDurationScale: Float
     get() = Settings.Global.getFloat(this.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
 
+/** Shared accent for system-template notifications. Keep Android in control of the outer surface. */
+@ColorInt
+fun Context.appNotificationAccent(): Int =
+    if (resources.getBoolean(R.bool.v4_neon_mode)) android.graphics.Color.rgb(25, 230, 255)
+    else ContextCompat.getColor(this, R.color.primaryTachiyomi)
+
 /**
  * Helper method to create a notification builder.
  *
@@ -242,7 +249,7 @@ fun Context.notificationBuilder(
     val builder =
         NotificationCompat
             .Builder(this, channelId)
-            .setColor(ContextCompat.getColor(this, R.color.primaryTachiyomi))
+            .setColor(appNotificationAccent())
     if (block != null) {
         builder.block()
     }

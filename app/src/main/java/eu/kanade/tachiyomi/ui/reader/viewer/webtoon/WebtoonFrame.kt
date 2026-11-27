@@ -41,7 +41,10 @@ class WebtoonFrame(
     /**
      * Dispatches a touch event to the detectors.
      */
+    var onTouchStart: (() -> Unit)? = null
+
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.actionMasked == MotionEvent.ACTION_DOWN) onTouchStart?.invoke()
         scaleDetector.onTouchEvent(ev)
         flingDetector.onTouchEvent(ev)
         return super.dispatchTouchEvent(ev)

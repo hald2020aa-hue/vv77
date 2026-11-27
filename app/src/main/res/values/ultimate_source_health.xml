@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ultimate_health_counts">%1$d reachable · %2$d limited · %3$d unavailable</string>
+    <string name="ultimate_health_all">All sources</string>
+    <string name="ultimate_health_pending">Not yet tested</string>
+    <string name="ultimate_health_fastest">Fastest response first</string>
+    <string name="ultimate_health_no_matches">No sources match this filter.</string>
+</resources>

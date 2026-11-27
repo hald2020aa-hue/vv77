@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="ultimate_auto_scroll">التمرير التلقائي (المس الصفحة للإيقاف)</string>
+    <string name="ultimate_scroll_slow">بطيء</string>
+    <string name="ultimate_scroll_medium">متوسط</string>
+    <string name="ultimate_scroll_fast">سريع</string>
+    <string name="ultimate_library_suggestions">أعمال غير مقروءة مقترحة من مكتبتك</string>
+    <string name="ultimate_library_no_suggestions">لا توجد أعمال غير مقروءة مطابقة حاليًا</string>
+    <string name="ultimate_library_alternatives">أعمال متشابهة بين المصادر (أول ٥٠ عملًا)</string>
+    <string name="ultimate_library_no_alternatives">لا توجد عناوين مطابقة بين مصادر مكتبتك</string>
+</resources>

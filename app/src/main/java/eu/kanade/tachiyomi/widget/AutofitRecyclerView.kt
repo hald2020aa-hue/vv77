@@ -8,6 +8,7 @@ import androidx.core.view.doOnNextLayout
 import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.ui.enhanced.NeonGridMode
 import eu.kanade.tachiyomi.ui.enhanced.neonColumnCount
+import eu.kanade.tachiyomi.ui.enhanced.neonContentWidthPx
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -33,6 +34,7 @@ class AutofitRecyclerView
         var lastMeasuredWidth = 0
         private var pendingSpanUpdate = false
         private var v5ModeColumns = 0
+        private var lastSpanContentWidth = -1
 
         var columnWidth = -1f
             set(value) {
@@ -53,9 +55,9 @@ class AutofitRecyclerView
         val itemWidth: Int
             get() {
                 return if (width == 0) {
-                    measuredWidth / getTempSpan()
+                    contentWidth(measuredWidth) / getTempSpan().coerceAtLeast(1)
                 } else {
-                    width / managerSpanCount
+                    contentWidth(width) / managerSpanCount.coerceAtLeast(1)
                 }
             }
 
@@ -72,9 +74,13 @@ class AutofitRecyclerView
                 (manager as? StaggeredGridLayoutManager)?.spanCount = value
             }
 
+        private fun contentWidth(outerWidth: Int): Int =
+            if (v5ModeColumns > 0) neonContentWidthPx(outerWidth, paddingLeft, paddingRight) else outerWidth
+
         private fun getTempSpan(): Int {
             if (v5ModeColumns > 0) {
-                val widthDp = (if (measuredWidth > 0) measuredWidth else resources.displayMetrics.widthPixels) / resources.displayMetrics.density
+                val outerWidth = if (measuredWidth > 0) measuredWidth else resources.displayMetrics.widthPixels
+                val widthDp = contentWidth(outerWidth) / resources.displayMetrics.density
                 return neonColumnCount(v5ModeColumns, widthDp)
             }
             if (columnWidth > 0) {
@@ -228,17 +234,25 @@ class AutofitRecyclerView
         }
 
         private fun setSpan(force: Boolean = false) {
+            val usableWidth = contentWidth(width)
+            if (usableWidth <= 0) return
+            if (isComputingLayout) {
+                pendingSpanUpdate = true
+                return
+            }
             if ((
                     spanCount == 0 ||
                         force ||
-                        // Ignore small width changes, callers should use requestSpanUpdate()
-                        (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)
+                        // Neon responds even to small window/padding changes at a column boundary.
+                        (v5ModeColumns > 0 && usableWidth != lastSpanContentWidth) ||
+                        (v5ModeColumns == 0 && width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)
                 ) &&
                 columnWidth > 0
             ) {
-                val dpWidth = (width.pxToDp / 100f).roundToInt()
+                lastSpanContentWidth = usableWidth
+                val dpWidth = (usableWidth.pxToDp / 100f).roundToInt()
                 val count = if (v5ModeColumns > 0) {
-                    neonColumnCount(v5ModeColumns, width.pxToDp.toFloat())
+                    neonColumnCount(v5ModeColumns, usableWidth / resources.displayMetrics.density)
                 } else {
                     max(1, (dpWidth / columnWidth).roundToInt())
                 }
@@ -249,7 +263,12 @@ class AutofitRecyclerView
                     val top = if (first != NO_POSITION) findViewHolderForAdapterPosition(first)?.itemView?.top else null
                     spanCount = count
                     if (top != null && first != NO_POSITION) {
-                        doOnNextLayout { scrollToPositionWithOffset(first, top - paddingTop) }
+                        val anchorManager = layoutManager
+                        doOnNextLayout {
+                            if (layoutManager === anchorManager && first in 0 until (adapter?.itemCount ?: 0)) {
+                                scrollToPositionWithOffset(first, top - paddingTop)
+                            }
+                        }
                     }
                 }
             }

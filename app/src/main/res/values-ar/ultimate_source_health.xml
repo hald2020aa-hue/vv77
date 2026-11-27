@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ultimate_health_counts">%1$d متاح · %2$d محدود · %3$d غير متاح</string>
+    <string name="ultimate_health_all">جميع المصادر</string>
+    <string name="ultimate_health_pending">لم يكتمل فحصها</string>
+    <string name="ultimate_health_fastest">الأسرع استجابة أولاً</string>
+    <string name="ultimate_health_no_matches">لا توجد مصادر تطابق هذا المرشح.</string>
+</resources>

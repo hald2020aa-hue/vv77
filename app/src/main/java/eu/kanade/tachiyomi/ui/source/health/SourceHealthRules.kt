@@ -41,3 +41,20 @@ internal object SourceHealthRules {
         return true
     }
 }
+
+/** These filters describe the base URL probe, not the availability of every chapter. */
+internal enum class SourceHealthFilter {
+    ALL, AVAILABLE, LIMITED, UNAVAILABLE, UNTESTED;
+
+    fun matches(status: ProbeStatus): Boolean = when (this) {
+        ALL -> true
+        AVAILABLE -> status == ProbeStatus.AVAILABLE
+        LIMITED -> status == ProbeStatus.LIMITED
+        UNAVAILABLE -> status == ProbeStatus.UNAVAILABLE || status == ProbeStatus.INVALID_ENDPOINT
+        UNTESTED -> status == ProbeStatus.NOT_CHECKED || status == ProbeStatus.CHECKING
+    }
+}
+
+/** Failed and untested requests must not be ranked as fast working sources. */
+internal fun sourceResponseRank(status: ProbeStatus, elapsedMs: Long?): Long =
+    elapsedMs?.takeIf { status == ProbeStatus.AVAILABLE && it >= 0L } ?: Long.MAX_VALUE

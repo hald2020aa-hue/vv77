@@ -10,9 +10,11 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.WebtoonLayoutManager
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -75,7 +77,39 @@ class WebtoonViewer(
     /**
      * Distance to scroll when the user taps on one side of the recycler view.
      */
-    private var scrollDistance = activity.resources.displayMetrics.heightPixels * 3 / 4
+    private val scrollDistance: Int
+        get() = (recycler.height.takeIf { it > 0 } ?: activity.resources.displayMetrics.heightPixels) * 3 / 4
+
+    private var autoScrollJob: Job? = null
+
+    fun stopAutoScroll() {
+        autoScrollJob?.cancel()
+        autoScrollJob = null
+    }
+
+    /** Explicit, session-only action. Never scroll while the reader is in the background. */
+    fun startAutoScroll(speed: Int) {
+        stopAutoScroll()
+        val dpPerSecond = autoScrollDpPerSecond(speed)
+        autoScrollJob = scope.launch {
+            delay(600L) // Allow the settings sheet and its menu to close.
+            var carry = 0.0
+            while (isActive && activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
+                activity.hasWindowFocus() && !activity.menuVisible && !isZoomedIn() && recycler.isShown
+            ) {
+                val page = currentPage as? ReaderPage ?: break
+                if (page.status == Page.State.ERROR) break
+                if (page.status == Page.State.READY) {
+                    if (!recycler.canScrollVertically(1)) break
+                    carry += dpPerSecond * recycler.resources.displayMetrics.density * 0.032
+                    val pixels = carry.toInt()
+                    carry -= pixels
+                    if (pixels > 0) recycler.scrollBy(0, pixels)
+                }
+                delay(32L)
+            }
+        }
+    }
 
     /**
      * Currently active item. It can be a chapter page or a chapter transition.
@@ -187,6 +221,7 @@ class WebtoonViewer(
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         frame.addView(recycler)
+        frame.onTouchStart = ::stopAutoScroll
     }
 
     private fun checkAllowPreload(page: ReaderPage?): Boolean {
@@ -218,6 +253,8 @@ class WebtoonViewer(
      * Destroys this viewer. Called when leaving the reader or swapping viewers.
      */
     override fun destroy() {
+        stopAutoScroll()
+        frame.onTouchStart = null
         super.destroy()
         scope.cancel()
     }
@@ -234,8 +271,8 @@ class WebtoonViewer(
 
         val pages = page.chapter.pages ?: return
         Timber.d("onReaderPageSelected: ${page.number}/${pages.size}")
-        // Preload next chapter once we're within the last 5 pages of the current chapter
-        val inPreloadRange = pages.size - page.number < 5
+        // Respect read-ahead preferences without blocking explicit chapter transitions.
+        val inPreloadRange = activity.viewModel.shouldPreloadAdjacentChapter(page.number, pages.size)
         if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
             Timber.d("Request preload next chapter because we're at page ${page.number} of ${pages.size}")
             val nextItem = adapter.items.getOrNull(adapter.items.size - 1)

@@ -3,6 +3,9 @@ package eu.kanade.tachiyomi.ui.reader.settings
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.widget.LinearLayout
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import androidx.core.view.isVisible
 import com.google.android.material.button.MaterialButton
 import eu.kanade.tachiyomi.R
@@ -21,6 +24,7 @@ class ReaderGeneralView
         attrs: AttributeSet? = null,
     ) : BaseReaderSettingsView<ReaderGeneralLayoutBinding>(context, attrs) {
         lateinit var sheet: TabbedReaderSettingsSheet
+        private var autoScrollButton: MaterialButton? = null
 
         override fun inflateBinding() = ReaderGeneralLayoutBinding.bind(this)
 
@@ -68,6 +72,32 @@ class ReaderGeneralView
             binding.keepscreen.bindToPreference(preferences.keepScreenOn())
             binding.alwaysShowChapterTransition.bindToPreference(preferences.alwaysShowChapterTransition())
 
+            if (autoScrollButton == null) {
+                val container = findViewById<LinearLayout>(R.id.constraint_layout)
+                autoScrollButton = MaterialButton(context).apply {
+                    setText(R.string.ultimate_auto_scroll)
+                    setOnClickListener {
+                        val reader = context as? ReaderActivity ?: return@setOnClickListener
+                        val webtoon = reader.viewer as? WebtoonViewer ?: return@setOnClickListener
+                        MaterialAlertDialogBuilder(context)
+                            .setTitle(R.string.ultimate_auto_scroll)
+                            .setItems(arrayOf(
+                                context.getString(R.string.ultimate_scroll_slow),
+                                context.getString(R.string.ultimate_scroll_medium),
+                                context.getString(R.string.ultimate_scroll_fast),
+                            )) { _, speed ->
+                                if (reader.viewer === webtoon && this@ReaderGeneralView::sheet.isInitialized) {
+                                    sheet.dismiss()
+                                    reader.hideMenu()
+                                    webtoon.startAutoScroll(speed)
+                                }
+                            }
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show()
+                    }
+                }.also { container?.addView(it, 2) }
+            }
+            autoScrollButton?.isVisible = (context as? ReaderActivity)?.viewer is WebtoonViewer
             initFlashPreferences()
             initVerticalSeekbarPreferences()
         }
@@ -184,10 +214,12 @@ class ReaderGeneralView
          * Init the preferences for the webtoon reader.
          */
         private fun initWebtoonPreferences() {
+            autoScrollButton?.isVisible = true
             sheet.updateTabs(true)
         }
 
         private fun initPagerPreferences() {
+            autoScrollButton?.isVisible = false
             sheet.updateTabs(false)
         }
     }

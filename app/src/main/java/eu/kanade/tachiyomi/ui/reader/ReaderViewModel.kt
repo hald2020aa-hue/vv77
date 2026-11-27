@@ -695,6 +695,10 @@ class ReaderViewModel(
     /**
      * Called from the activity to preload the given [chapter].
      */
+    /** Only speculative read-ahead is optional; transition pages must still load on demand. */
+    fun shouldPreloadAdjacentChapter(pageNumber: Int, pageCount: Int): Boolean =
+        shouldPreloadAdjacent(pageNumber, pageCount, preferences.preloadSize().get())
+
     suspend fun preloadChapter(chapter: ReaderChapter) {
         preload(chapter)
     }

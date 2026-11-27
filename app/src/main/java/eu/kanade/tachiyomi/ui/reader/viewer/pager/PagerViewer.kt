@@ -89,7 +89,7 @@ abstract class PagerViewer(
                 awaitingIdleViewerChapters?.let { viewerChapters ->
                     setChaptersDoubleShift(viewerChapters)
                     awaitingIdleViewerChapters = null
-                    if (viewerChapters.currChapter.pages?.size == 1) {
+                    if (viewerChapters.currChapter.pages?.size == 1 && activity.viewModel.shouldPreloadAdjacentChapter(1, 1)) {
                         adapter.nextTransition?.to?.let {
                             activity.requestPreloadChapter(it)
                         }
@@ -350,8 +350,8 @@ abstract class PagerViewer(
         } else {
             Timber.d("onReaderPageSelected: ${page.number}/${pages.size}")
         }
-        // Preload next chapter once we're within the last 5 pages of the current chapter
-        val inPreloadRange = pages.size - page.number < 5
+        // Respect read-ahead preferences without blocking explicit chapter transitions.
+        val inPreloadRange = activity.viewModel.shouldPreloadAdjacentChapter(page.number, pages.size)
         if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
             Timber.d("Request preload next chapter because we're at page ${page.number} of ${pages.size}")
             adapter.nextTransition?.to?.let {

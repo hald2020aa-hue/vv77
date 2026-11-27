@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="ultimate_auto_scroll">Auto-scroll (tap page to stop)</string>
+    <string name="ultimate_scroll_slow">Slow</string>
+    <string name="ultimate_scroll_medium">Medium</string>
+    <string name="ultimate_scroll_fast">Fast</string>
+    <string name="ultimate_library_suggestions">Suggested unread titles in your library</string>
+    <string name="ultimate_library_no_suggestions">No matching unread titles yet</string>
+    <string name="ultimate_library_alternatives">Possible duplicates across sources (first 50)</string>
+    <string name="ultimate_library_no_alternatives">No matching titles from different sources in your library</string>
+</resources>

@@ -46,6 +46,9 @@ import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.enhanced.EnhancedReadingTheme
 import eu.kanade.tachiyomi.ui.source.health.SourceHealthActivity
 import kotlinx.coroutines.CancellationException
@@ -67,6 +70,14 @@ class LibraryInsightsActivity : AppCompatActivity() {
                 LibraryInsightsScreen(
                     model = insightModel,
                     onBack = { finish() },
+                    openManga = { id ->
+                        startActivity(Intent(this, MainActivity::class.java).apply {
+                            action = MainActivity.SHORTCUT_MANGA
+                            putExtra(MangaDetailsController.MANGA_EXTRA, id)
+                            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        })
+                        finish()
+                    },
                     openSourceHealth = {
                         startActivity(Intent(this, SourceHealthActivity::class.java))
                     },
@@ -78,6 +89,7 @@ class LibraryInsightsActivity : AppCompatActivity() {
 
 internal class LibraryInsightsViewModel : ViewModel() {
     private val database: DatabaseHelper = Injekt.get()
+    private val sourceManager: SourceManager = Injekt.get()
     private val _metrics = MutableStateFlow<LibraryInsightMetrics?>(null)
     val metrics = _metrics.asStateFlow()
     private val _loading = MutableStateFlow(false)
@@ -108,6 +120,8 @@ internal class LibraryInsightsViewModel : ViewModel() {
                                 unread = manga.unread,
                                 read = manga.read,
                                 completed = manga.status == SManga.COMPLETED,
+                                genres = manga.genre.orEmpty().split(","),
+                                sourceName = sourceManager.getOrStub(manga.source).name,
                             )
                         }.toList()
                     calculateLibraryInsights(records)
@@ -130,6 +144,7 @@ private fun LibraryInsightsScreen(
     model: LibraryInsightsViewModel,
     onBack: () -> Unit,
     openSourceHealth: () -> Unit,
+    openManga: (Long) -> Unit,
 ) {
     val metrics by model.metrics.collectAsState()
     val loading by model.loading.collectAsState()
@@ -214,6 +229,34 @@ private fun LibraryInsightsScreen(
                         Text(value.toString(), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary)
                         Text(stringResource(title), style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+            if (result != null) {
+                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                    Text(stringResource(R.string.ultimate_library_suggestions), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                }
+                if (result.suggestions.isEmpty()) {
+                    item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                        Text(stringResource(R.string.ultimate_library_no_suggestions))
+                    }
+                }
+                items(result.suggestions, key = { "suggestion-${it.id}" }) { entry ->
+                    OutlinedButton(onClick = { openManga(entry.id) }, modifier = Modifier.fillMaxWidth()) {
+                        Column { Text(entry.title); Text(entry.sourceName, style = MaterialTheme.typography.labelSmall) }
+                    }
+                }
+                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                    Text(stringResource(R.string.ultimate_library_alternatives), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                }
+                if (result.alternatives.isEmpty()) {
+                    item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                        Text(stringResource(R.string.ultimate_library_no_alternatives))
+                    }
+                }
+                items(result.alternatives, key = { "alternative-${it.id}" }) { entry ->
+                    OutlinedButton(onClick = { openManga(entry.id) }, modifier = Modifier.fillMaxWidth()) {
+                        Column { Text(entry.title); Text(entry.sourceName, style = MaterialTheme.typography.labelSmall) }
                     }
                 }
             }

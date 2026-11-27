@@ -6,6 +6,8 @@ import android.os.SystemClock
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,6 +29,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -38,6 +41,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -58,6 +64,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -138,42 +145,67 @@ internal class SourceHealthViewModel : ViewModel() {
 
     fun refreshSources() {
         if (_scanning.value) return
+        val previous = _sources.value.associateBy { it.id }
         _sources.value = runCatching {
             sourceManager.getOnlineSources().distinctBy { it.id }
                 .sortedWith(compareBy({ it.name.lowercase() }, { it.id }))
                 .map { source ->
-                    HealthSource(source.id, source.name, source.lang, source.baseUrl)
+                    previous[source.id]?.takeIf { it.baseUrl == source.baseUrl }
+                        ?.copy(title = source.name, lang = source.lang)
+                        ?: HealthSource(source.id, source.name, source.lang, source.baseUrl)
                 }
-        }.getOrElse { emptyList() }
+        }.getOrElse { _sources.value }
+    }
+
+    private fun HealthSource.checking() = copy(
+        status = ProbeStatus.CHECKING, httpCode = null, elapsedMs = null, errorType = null,
+    )
+
+    // All user-initiated scan modes share one lifecycle gate. No concurrent scan can
+    // replace another scan's results or refresh the source list mid-request.
+    private fun launchScan(block: suspend () -> Unit) {
+        _scanning.value = true
+        scanJob = viewModelScope.launch {
+            try {
+                block()
+            } finally {
+                _sources.update { entries -> entries.map { entry ->
+                    val base = if (entry.status == ProbeStatus.CHECKING) {
+                        entry.copy(status = ProbeStatus.NOT_CHECKED)
+                    } else entry
+                    if (base.deepStatus == DeepProbeStatus.CHECKING) {
+                        base.copy(deepStatus = DeepProbeStatus.NOT_CHECKED)
+                    } else base
+                } }
+                _scanning.value = false
+            }
+        }
     }
 
     fun scanAll() {
         if (_scanning.value) return
         refreshSources()
-        _scanning.value = true
-        _sources.update { current -> current.map { it.copy(status = ProbeStatus.CHECKING) } }
+        if (_sources.value.isEmpty()) return
+        _sources.update { current -> current.map { it.checking() } }
         val snapshot = _sources.value
-        scanJob = viewModelScope.launch {
-            try {
+        launchScan {
+            // Publish completed results immediately, rather than waiting for the first slow source.
+            kotlinx.coroutines.coroutineScope {
                 snapshot.map { source ->
                     async(Dispatchers.IO) {
-                        scanLimit.withPermit { probe(source) }
+                        val result = scanLimit.withPermit { probe(source) }
+                        _sources.update { current -> current.map { if (it.id == result.id) result else it } }
                     }
-                }.forEach { deferred ->
-                    val result = deferred.await()
-                    _sources.update { current -> current.map { if (it.id == result.id) result else it } }
-                }
-            } finally {
-                _scanning.value = false
+                }.awaitAll()
             }
         }
     }
 
     fun scanOne(id: Long) {
         if (_scanning.value) return
-        val source = _sources.value.firstOrNull { it.id == id } ?: return
-        _sources.update { it.map { entry -> if (entry.id == id) entry.copy(status = ProbeStatus.CHECKING) else entry } }
-        viewModelScope.launch {
+        val source = _sources.value.firstOrNull { it.id == id }?.checking() ?: return
+        _sources.update { it.map { entry -> if (entry.id == id) source else entry } }
+        launchScan {
             val result = withContext(Dispatchers.IO) { scanLimit.withPermit { probe(source) } }
             _sources.update { it.map { entry -> if (entry.id == id) result else entry } }
         }
@@ -183,10 +215,11 @@ internal class SourceHealthViewModel : ViewModel() {
     fun scanDeep(id: Long) {
         if (_scanning.value) return
         val entry = _sources.value.firstOrNull { it.id == id } ?: return
-        if (entry.deepStatus == DeepProbeStatus.CHECKING) return
-        _sources.update { entries -> entries.map { if (it.id == id) it.copy(deepStatus = DeepProbeStatus.CHECKING, deepError = null) else it } }
-        viewModelScope.launch {
-            val outcome = withContext(Dispatchers.IO) { deepScanLimit.withPermit { deepProbe(entry) } }
+        val checking = entry.copy(deepStatus = DeepProbeStatus.CHECKING, catalogueCount = 0,
+            chapterCount = 0, pageCount = 0, deepError = null)
+        _sources.update { entries -> entries.map { if (it.id == id) checking else it } }
+        launchScan {
+            val outcome = withContext(Dispatchers.IO) { deepScanLimit.withPermit { deepProbe(checking) } }
             _sources.update { entries ->
                 entries.map { current ->
                     if (current.id == id) current.copy(
@@ -247,13 +280,13 @@ internal class SourceHealthViewModel : ViewModel() {
         if (!SourceHealthRules.isSafeHttpEndpoint(source.baseUrl)) {
             return source.copy(status = ProbeStatus.INVALID_ENDPOINT, errorType = "Unsafe URL")
         }
-        val request = Request.Builder()
-            .url(source.baseUrl)
-            .header("User-Agent", NetworkHelper.DEFAULT_USER_AGENT)
-            .get()
-            .build()
         val started = SystemClock.elapsedRealtime()
         return try {
+            val request = Request.Builder()
+                .url(source.baseUrl)
+                .header("User-Agent", NetworkHelper.DEFAULT_USER_AGENT)
+                .get()
+                .build()
             client.newCall(request).execute().use { response ->
                 source.copy(
                     status = SourceHealthRules.classify(response.code),
@@ -272,7 +305,7 @@ internal class SourceHealthViewModel : ViewModel() {
     }
 
     fun exportReport(): String = buildString {
-        appendLine("J2K Enhanced - HTTP source health")
+        appendLine("Manga Virus - HTTP source health")
         sources.value.forEach { source ->
             appendLine("${source.title} [${source.lang}] ${source.status} HTTP=${source.httpCode ?: "-"} ${source.elapsedMs ?: "-"}ms ${source.errorType.orEmpty()} " +
                 "browse=${source.catalogueCount} chapters=${source.chapterCount} pages=${source.pageCount} deep=${source.deepStatus} ${source.deepError.orEmpty()}")
@@ -296,7 +329,14 @@ private fun SourceHealthScreen(
 ) {
     val sources by model.sources.collectAsState()
     val scanning by model.scanning.collectAsState()
-    val inspected = sources.count { it.status !in listOf(ProbeStatus.NOT_CHECKED, ProbeStatus.CHECKING) }
+    var filter by rememberSaveable { mutableStateOf(SourceHealthFilter.ALL) }
+    var fastestFirst by rememberSaveable { mutableStateOf(false) }
+    val inspected = sources.count { !SourceHealthFilter.UNTESTED.matches(it.status) }
+    val filtered = sources.filter { filter.matches(it.status) }
+    val visibleSources = if (fastestFirst) filtered.sortedWith(
+        compareBy<HealthSource> { sourceResponseRank(it.status, it.elapsedMs) }
+            .thenBy { it.title.lowercase() }.thenBy { it.id },
+    ) else filtered
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -332,19 +372,54 @@ private fun SourceHealthScreen(
                             fontWeight = FontWeight.Bold,
                         )
                         Text(stringResource(R.string.enhanced_source_health_help), style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            stringResource(R.string.ultimate_health_counts,
+                                sources.count { SourceHealthFilter.AVAILABLE.matches(it.status) },
+                                sources.count { SourceHealthFilter.LIMITED.matches(it.status) },
+                                sources.count { SourceHealthFilter.UNAVAILABLE.matches(it.status) }),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        if (sources.isNotEmpty()) {
+                            LinearProgressIndicator(
+                                progress = { inspected.toFloat() / sources.size },
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                         Button(onClick = model::scanAll, enabled = !scanning && sources.isNotEmpty()) {
                             Icon(Icons.Default.Refresh, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(stringResource(R.string.enhanced_scan_all))
                         }
                         if (scanning) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        Row(
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            SourceHealthFilter.entries.forEach { option ->
+                                val label = when (option) {
+                                    SourceHealthFilter.ALL -> R.string.ultimate_health_all
+                                    SourceHealthFilter.AVAILABLE -> R.string.enhanced_online
+                                    SourceHealthFilter.LIMITED -> R.string.enhanced_blocked
+                                    SourceHealthFilter.UNAVAILABLE -> R.string.enhanced_unavailable
+                                    SourceHealthFilter.UNTESTED -> R.string.ultimate_health_pending
+                                }
+                                FilterChip(selected = filter == option, onClick = { filter = option },
+                                    label = { Text(stringResource(label)) })
+                            }
+                        }
+                        FilterChip(selected = fastestFirst, onClick = { fastestFirst = !fastestFirst },
+                            label = { Text(stringResource(R.string.ultimate_health_fastest)) })
                     }
                 }
             }
             if (sources.isEmpty()) {
                 item { Text(stringResource(R.string.enhanced_no_sources), modifier = Modifier.padding(16.dp)) }
             }
-            items(sources, key = { it.id }) { entry ->
+            if (sources.isNotEmpty() && visibleSources.isEmpty()) {
+                item { Text(stringResource(R.string.ultimate_health_no_matches), modifier = Modifier.padding(16.dp)) }
+            }
+            items(visibleSources, key = { it.id }) { entry ->
                 SourceHealthCard(entry = entry, scanning = scanning,
                     onRetry = { model.scanOne(entry.id) }, onDeepTest = { model.scanDeep(entry.id) })
             }
