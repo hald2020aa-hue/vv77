@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mv_notification_waiting">جارٍ التجهيز</string>
+    <string name="mv_notification_received">المستلم: %1$s</string>
+    <string name="mv_notification_sizes">المستلم: %1$s · حجم الفصل: %2$s</string>
+</resources>

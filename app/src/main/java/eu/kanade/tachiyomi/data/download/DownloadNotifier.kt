@@ -4,6 +4,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.text.format.Formatter
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
@@ -14,11 +16,11 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil.Companion.preferredChapterName
-import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import uy.kohesive.injekt.injectLazy
+import java.text.NumberFormat
 import java.util.regex.Pattern
 
 /**
@@ -67,6 +69,57 @@ internal class DownloadNotifier(
         context.notificationManager.cancel(Notifications.ID_DOWNLOAD_CHAPTER)
     }
 
+    private fun downloadTitle(download: Download, localized: Context): String {
+        val title = download.manga.title
+        val name = download.chapter.preferredChapterName(localized, download.manga, preferences)
+        val prefix = "^${Pattern.quote(title)}[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE)
+        val chapter = name.replaceFirst(prefix, "").ifBlank { name }
+        return "$title - $chapter"
+    }
+
+    /** Keep system actions and the collapsed notification native; decorate expanded content only. */
+    private fun NotificationCompat.Builder.decorateProgress(
+        localized: Context,
+        title: String,
+        status: String,
+        total: Int,
+        completed: Int,
+        download: Download?,
+        hidden: Boolean,
+    ) {
+        setStyle(null)
+        setCustomBigContentView(null)
+        setCategory(NotificationCompat.CATEGORY_PROGRESS)
+        setOnlyAlertOnce(true)
+        if (!localized.resources.getBoolean(R.bool.v4_neon_mode)) return
+        val views = RemoteViews(localized.packageName, R.layout.mv_download_notification)
+        views.setTextViewText(R.id.mv_notification_title, title)
+        views.setTextViewText(R.id.mv_notification_status, status)
+        views.setProgressBar(R.id.mv_notification_progress, total.coerceAtLeast(1), completed, total == 0)
+        val percent = if (total > 0) NumberFormat.getPercentInstance(localized.resources.configuration.locales[0])
+            .format(completed.toDouble() / total) else localized.getString(R.string.mv_notification_waiting)
+        views.setTextViewText(R.id.mv_notification_percent, percent)
+        val stats = if (hidden) null else download?.transferStats?.value
+        val bytes = stats?.let {
+            val received = Formatter.formatShortFileSize(localized, it.receivedBytes.coerceAtLeast(0L))
+            val known = it.knownChapterBytes?.let { size -> Formatter.formatShortFileSize(localized, size) }
+            if (known == null) localized.getString(R.string.mv_notification_received, received)
+            else localized.getString(R.string.mv_notification_sizes, received, known)
+        }.orEmpty()
+        views.setTextViewText(R.id.mv_notification_bytes, bytes)
+        views.setViewVisibility(R.id.mv_notification_bytes, if (bytes.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE)
+        setStyle(NotificationCompat.DecoratedCustomViewStyle())
+        setCustomBigContentView(views)
+        color = android.graphics.Color.rgb(25, 230, 255)
+    }
+
+    private fun NotificationCompat.Builder.clearProgressDecoration() {
+        setCustomBigContentView(null)
+        setStyle(null)
+        setCategory(null)
+        setOnlyAlertOnce(false)
+    }
+
     @Synchronized
     fun setPlaceholder(download: Download?): NotificationCompat.Builder {
         val context = context.localeContext
@@ -89,24 +142,13 @@ internal class DownloadNotifier(
                 )
             }
 
-            if (download != null && !preferences.hideNotificationContent()) {
-                val title = download.manga.title.chop(15)
-                val quotedTitle = Pattern.quote(title)
-                val name = download.chapter.preferredChapterName(context, download.manga, preferences)
-                val chapter =
-                    name.replaceFirst(
-                        "$quotedTitle[\\s]*[-]*[\\s]*"
-                            .toRegex(RegexOption.IGNORE_CASE),
-                        "",
-                    )
-                setContentTitle("$title - $chapter".chop(30))
-                setContentText(context.getString(R.string.downloading))
-            } else {
-                setContentTitle(context.getString(R.string.downloading))
-                setContentText(null)
-            }
+            val hidden = preferences.hideNotificationContent()
+            val status = context.getString(R.string.downloading)
+            val title = if (download != null && !hidden) downloadTitle(download, context) else status
+            setContentTitle(title)
+            setContentText(if (download != null && !hidden) status else null)
             setProgress(0, 0, true)
-            setStyle(null)
+            decorateProgress(context, title, status, 0, 0, download, hidden)
         }
         return notification
     }
@@ -138,27 +180,19 @@ internal class DownloadNotifier(
                 )
             }
 
-            val downloadingProgressText =
-                context.localeContext
-                    .getString(R.string.downloading_progress)
-                    .format(download.downloadedImages, download.pages!!.size)
-
-            if (preferences.hideNotificationContent()) {
-                setContentTitle(downloadingProgressText)
-            } else {
-                val title = download.manga.title.chop(15)
-                val quotedTitle = Pattern.quote(title)
-                val name = download.chapter.preferredChapterName(context, download.manga, preferences)
-                val chapter =
-                    name.replaceFirst(
-                        "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
-                        "",
-                    )
-                setContentTitle("$title - $chapter".chop(30))
-                setContentText(downloadingProgressText)
-            }
-            setStyle(null)
-            setProgress(download.pages!!.size, download.downloadedImages, false)
+            val localized = context.localeContext
+            // Snapshot the page list once: it can be absent or empty during a retry.
+            val pages = download.pages
+            val total = pages?.size ?: 0
+            val completed = pages?.count { it.status == eu.kanade.tachiyomi.source.model.Page.State.READY } ?: 0
+            val status = if (total > 0) localized.getString(R.string.downloading_progress, completed, total)
+                else localized.getString(R.string.downloading)
+            val hidden = preferences.hideNotificationContent()
+            val title = if (hidden) status else downloadTitle(download, localized)
+            setContentTitle(title)
+            setContentText(if (hidden) null else status)
+            setProgress(total, completed, total == 0)
+            decorateProgress(localized, title, status, total, completed, download, hidden)
         }
         // Displays the progress bar on notification
         notification.show()
@@ -171,6 +205,7 @@ internal class DownloadNotifier(
     fun onDownloadPaused() {
         val context = context.localeContext
         with(notification) {
+            clearProgressDecoration()
             setContentTitle(context.getString(R.string.paused))
             setContentText(context.getString(R.string.download_paused))
             setSmallIcon(R.drawable.ic_pause_24dp)
@@ -209,6 +244,7 @@ internal class DownloadNotifier(
     fun onWarning(reason: String) {
         val context = context.localeContext
         with(notification) {
+            clearProgressDecoration()
             setContentTitle(context.getString(R.string.downloads))
             setContentText(reason)
             color = ContextCompat.getColor(context, R.color.primaryTachiyomi)
@@ -272,6 +308,7 @@ internal class DownloadNotifier(
         // Create notification
         val context = context.localeContext
         with(notification) {
+            clearProgressDecoration()
             setContentTitle(
                 mangaTitle?.plus(": $chapter") ?: context.getString(R.string.download_error),
             )

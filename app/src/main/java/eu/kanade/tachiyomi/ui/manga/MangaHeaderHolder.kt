@@ -100,6 +100,12 @@ class MangaHeaderHolder(
     private var canCollapse = true
     private var forceFavoriteButtonResize = false
 
+    // expandDesc/collapseDesc call setDescription during construction.
+    // Initialize the delegates before the first use, including the whitespace regex.
+    private val summaryWhitespace = Regex("\\s+", setOf(RegexOption.MULTILINE))
+    private val plainMarkwon by lazy { createMarkwon(false) }
+    private val imageMarkwon by lazy { createMarkwon(true) }
+
     init {
 
         if (binding == null) {
@@ -303,10 +309,6 @@ class MangaHeaderHolder(
             adapter.delegate.updateScroll()
         }
     }
-
-    private val summaryWhitespace = Regex("\\s+", setOf(RegexOption.MULTILINE))
-    private val plainMarkwon by lazy { createMarkwon(false) }
-    private val imageMarkwon by lazy { createMarkwon(true) }
 
     private fun markwon(): Markwon =
         if (adapter.preferences.renderDescriptionImages().get()) imageMarkwon else plainMarkwon

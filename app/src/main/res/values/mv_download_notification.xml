@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mv_notification_waiting">Preparing</string>
+    <string name="mv_notification_received">Received: %1$s</string>
+    <string name="mv_notification_sizes">Received: %1$s · chapter size: %2$s</string>
+</resources>

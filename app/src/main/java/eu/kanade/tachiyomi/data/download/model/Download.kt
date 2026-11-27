@@ -84,6 +84,7 @@ class Download(
     val progress: Int
         get() {
             val pages = pages ?: return 0
+            if (pages.isEmpty()) return 0
             return pages.map(Page::progress).average().roundToInt()
         }
 

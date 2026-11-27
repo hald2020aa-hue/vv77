@@ -2,6 +2,9 @@ package eu.kanade.tachiyomi.ui.source.browse
 
 import android.view.View
 import android.view.ViewGroup
+import android.text.Layout
+import androidx.core.view.isVisible
+import androidx.core.view.updatePaddingRelative
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -63,6 +66,22 @@ class BrowseSourceItem(
                     )
                 }
                 binding.setBGAndFG(listType)
+                if (resources.getBoolean(R.bool.v4_neon_mode) && listType != LibraryItem.LAYOUT_COMPACT_GRID) {
+                    // One continuous visual card, with an equal two-line title area for every work.
+                    val inset = if (NeonGridMode.getColumns(context) == NeonGridMode.SMALL) 3.dpToPx else 6.dpToPx
+                    binding.textLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                        marginStart = inset
+                        marginEnd = inset
+                        bottomMargin = 4.dpToPx
+                    }
+                    binding.textLayout.setBackgroundResource(R.drawable.mv_browse_title_panel)
+                    binding.textLayout.updatePaddingRelative(start = 3.dpToPx, end = 3.dpToPx, top = 4.dpToPx, bottom = 5.dpToPx)
+                    binding.textLayout.minimumHeight = 0
+                    binding.title.setLines(2)
+                    binding.title.breakStrategy = Layout.BREAK_STRATEGY_HIGH_QUALITY
+                    binding.title.hyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE
+                    binding.subtitle.isVisible = false
+                }
                 binding.constraintLayout.layoutParams =
                     FrameLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -75,7 +94,12 @@ class BrowseSourceItem(
                 binding.coverThumbnail.adjustViewBounds = false
                 binding.coverThumbnail.updateLayoutParams<ConstraintLayout.LayoutParams> {
                     height = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT
-                    dimensionRatio = if (resources.getBoolean(R.bool.v4_neon_mode) && NeonGridMode.getColumns(context) == NeonGridMode.LARGE) "16:9" else "15:22"
+                    dimensionRatio = when {
+                        !resources.getBoolean(R.bool.v4_neon_mode) -> "15:22"
+                        NeonGridMode.getColumns(context) == NeonGridMode.LARGE -> "16:9"
+                        listType == LibraryItem.LAYOUT_COMPACT_GRID -> "15:22"
+                        else -> "4:5"
+                    }
                 }
             }
             BrowseSourceGridHolder(view, adapter, listType == LibraryItem.LAYOUT_COMPACT_GRID, outlineOnCovers.get())

@@ -219,6 +219,11 @@ open class BrowseSourceController(
             return
         }
 
+        // BaseController sets a theme background after inflation. Restore the actual neon surface.
+        if (view.resources.getBoolean(R.bool.v4_neon_mode)) {
+            binding.sourceLayout.setBackgroundResource(R.drawable.mv_browse_background)
+            binding.floatingBrowseBar.setBackgroundResource(R.drawable.mv_browse_dock)
+        }
         // Initialize adapter, scroll listener and recycler views
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)
@@ -310,6 +315,9 @@ open class BrowseSourceController(
                 }
             }
         recycler.clipToPadding = false
+        if (view.resources.getBoolean(R.bool.v4_neon_mode) && recycler is AutofitRecyclerView) {
+            recycler.updatePadding(left = 8.dpToPx, right = 8.dpToPx)
+        }
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
 
@@ -331,6 +339,11 @@ open class BrowseSourceController(
                     top = (bigToolbarHeight + insets.getInsets(systemBars()).top),
                     bottom = insets.getInsets(systemBars()).bottom,
                 )
+                if (view.resources.getBoolean(R.bool.v4_neon_mode) && binding.floatingBrowseBar.isVisible) {
+                    // The final row must be scrollable above the floating dock, including system insets.
+                    val dockHeight = binding.floatingBrowseBar.height.coerceAtLeast(64.dpToPx)
+                    recycler.updatePadding(bottom = insets.getInsets(systemBars()).bottom + dockHeight + 16.dpToPx)
+                }
                 searchHistory.updatePadding()
                 // The neon search frame extends to the bottom of the expanded app bar.
                 // Keep the first cover fully clear of it in every grid/list mode.

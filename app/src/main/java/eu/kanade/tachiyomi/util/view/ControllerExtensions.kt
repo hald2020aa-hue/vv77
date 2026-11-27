@@ -804,13 +804,17 @@ fun Controller.setAppBarBG(
     val floatingBar =
         (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
     if (!isControllerVisible) return
+    val neonSource = this is eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController &&
+        context.resources.getBoolean(R.bool.v4_neon_mode)
+    val surface = if (neonSource) Color.rgb(12, 17, 31) else context.getResourceColor(R.attr.colorSurface)
+    val containerSurface = if (neonSource) Color.rgb(21, 29, 51) else context.getResourceColor(R.attr.colorSurfaceContainer)
     if (floatingBar) {
-        (activityBinding?.cardView as? CardView)?.setCardBackgroundColor(context.getResourceColor(R.attr.colorSurfaceContainer))
+        (activityBinding?.cardView as? CardView)?.setCardBackgroundColor(containerSurface)
         if (this !is SmallToolbarInterface &&
             activityBinding?.appBar?.useLargeToolbar == true &&
             activityBinding?.appBar?.compactSearchMode != true
         ) {
-            val colorSurface = context.getResourceColor(R.attr.colorSurface)
+            val colorSurface = surface
             val color =
                 ColorUtils.blendARGB(
                     colorSurface,
@@ -824,16 +828,16 @@ fun Controller.setAppBarBG(
     } else {
         val color =
             ColorUtils.blendARGB(
-                context.getResourceColor(R.attr.colorSurface),
-                context.getResourceColor(R.attr.colorSurfaceContainer),
+                surface,
+                containerSurface,
                 value,
             )
         activityBinding?.appBar?.setBackgroundColor(color)
         if ((this as? FloatingSearchInterface)?.showFloatingBar() == true) {
             val invColor =
                 ColorUtils.blendARGB(
-                    context.getResourceColor(R.attr.colorSurface),
-                    context.getResourceColor(R.attr.colorSurfaceContainer),
+                    surface,
+                    containerSurface,
                     1 - value,
                 )
             (activityBinding?.cardView as? CardView)?.setCardBackgroundColor(

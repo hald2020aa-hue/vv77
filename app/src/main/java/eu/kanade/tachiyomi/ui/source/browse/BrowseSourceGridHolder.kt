@@ -52,6 +52,7 @@ class BrowseSourceGridHolder(
     override fun onSetValues(manga: Manga) {
         // Update the title of the manga.
         binding.title.text = manga.title
+        binding.behindTitle.text = manga.title
         binding.compactTitle.text = binding.title.text
         if (isDuplicateInLibrary) {
             binding.unreadDownloadBadge.root.setDuplicateInLibrary(true)
@@ -65,10 +66,12 @@ class BrowseSourceGridHolder(
 
     override fun setImage(manga: Manga) {
         if ((view.context as? Activity)?.isDestroyed == true) return
-        if (manga.thumbnail_url == null) {
+        if (manga.thumbnail_url == null || manga.id == null) {
             binding.coverThumbnail.dispose()
+            binding.coverThumbnail.setImageDrawable(null)
+            binding.progress.isVisible = false
+            binding.coverThumbnail.alpha = 1f
         } else {
-            manga.id ?: return
             val request =
                 ImageRequest
                     .Builder(view.context)
