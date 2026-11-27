@@ -649,7 +649,29 @@ private fun StorageSummaryPanel(data: StorageSnapshot?, enabled: Boolean, onRefr
                 StorageMetric(R.drawable.ic_book_24dp, stringResource(R.string.chapters), data?.chapterCount?.toString() ?: "—", Color(0xFFFF2FD0), Modifier.weight(1f))
                 StorageMetric(R.drawable.ic_storage_outline_24dp, stringResource(R.string.mv_neon_storage_size), data?.let { Formatter.formatFileSize(context, it.bytes) } ?: "—", Color(0xFF19E6FF), Modifier.weight(1f))
             }
-            if (data != null) Text(stringResource(R.string.storage_inventory_scope), style = MaterialTheme.typography.bodySmall)
+            if (data != null) {
+                Text(stringResource(R.string.storage_inventory_scope), style = MaterialTheme.typography.bodySmall)
+                var showBreakdown by remember { mutableStateOf(false) }
+                TextButton(onClick = { showBreakdown = !showBreakdown }) {
+                    Text(stringResource(if (showBreakdown) R.string.ultimate_storage_hide_breakdown else R.string.ultimate_storage_breakdown), color = Color(0xFF19E6FF))
+                }
+                if (showBreakdown) {
+                    data.breakdown.types.forEach { usage ->
+                        val label = when (usage.type) {
+                            StorageSeriesType.MANGA -> R.string.manga
+                            StorageSeriesType.MANHWA -> R.string.manhwa
+                            StorageSeriesType.MANHUA -> R.string.manhua
+                            StorageSeriesType.UNCLASSIFIED -> R.string.storage_inventory_unclassified
+                        }
+                        Text(stringResource(label), fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(stringResource(R.string.storage_inventory_summary, usage.works, usage.chapters, Formatter.formatFileSize(context, usage.bytes)), color = Color.White)
+                        val fraction = if (data.bytes > 0L) (usage.bytes.toDouble() / data.bytes).toFloat().coerceIn(0f, 1f) else 0f
+                        LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth().height(6.dp), color = Color(0xFFA14BFF), trackColor = Color(0xFF30234F))
+                    }
+                    Text(stringResource(R.string.ultimate_storage_read_size, data.breakdown.readChapters, Formatter.formatFileSize(context, data.breakdown.readBytes)), color = Color(0xFF19E6FF))
+                    Text(stringResource(R.string.ultimate_storage_read_note), style = MaterialTheme.typography.bodySmall, color = Color.White)
+                }
+            }
             Box(Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp))
                 .background(Brush.horizontalGradient(listOf(Color(0xFF00A6C7), Color(0xFF2858CB), Color(0xFF9724E5))))
                 .clickable(enabled = enabled, onClick = onRefresh).padding(10.dp), contentAlignment = Alignment.Center) {

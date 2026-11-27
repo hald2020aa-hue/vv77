@@ -27,6 +27,8 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -46,6 +48,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.enhanced.EnhancedReadingTheme
 import eu.kanade.tachiyomi.ui.source.health.SourceHealthActivity
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -110,6 +113,8 @@ internal class LibraryInsightsViewModel : ViewModel() {
                     calculateLibraryInsights(records)
                 }
                 _metrics.value = newMetrics
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (failure: Exception) {
                 _loadError.value = failure.javaClass.simpleName
             } finally {
@@ -155,6 +160,10 @@ private fun LibraryInsightsScreen(
             R.string.enhanced_metric_sources to result.sources,
             R.string.enhanced_metric_duplicates to result.likelyDuplicateTitles,
             R.string.enhanced_metric_completed to result.completedTitles,
+            R.string.ultimate_library_not_started to result.notStartedTitles,
+            R.string.ultimate_library_reading to result.inProgressTitles,
+            R.string.ultimate_library_caught_up to result.caughtUpTitles,
+            R.string.ultimate_library_unknown to result.unknownChapterTitles,
         )
         LazyVerticalGrid(
             columns = GridCells.Adaptive(145.dp),
@@ -166,6 +175,18 @@ private fun LibraryInsightsScreen(
             item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(stringResource(R.string.enhanced_metrics_description), style = MaterialTheme.typography.bodyMedium)
+                    if (loading) CircularProgressIndicator()
+                    if (result != null) {
+                        Text(stringResource(R.string.ultimate_library_progress), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        val fraction = result.readFraction
+                        if (fraction != null) {
+                            LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
+                            Text(java.text.NumberFormat.getPercentInstance().format(fraction.toDouble()))
+                        } else {
+                            Text(stringResource(R.string.ultimate_library_unknown))
+                        }
+                        Text(stringResource(R.string.ultimate_library_progress_note), style = MaterialTheme.typography.bodySmall)
+                    }
                     if (loadError != null) {
                         Text(stringResource(R.string.enhanced_metrics_error, loadError.orEmpty()),
                             color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)

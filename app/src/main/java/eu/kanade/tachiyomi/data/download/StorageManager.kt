@@ -31,13 +31,23 @@ data class StoredManga(
     val type: StorageSeriesType,
     val lastReadAt: Long,
 ) {
-    val bytes: Long get() = chapters.sumOf { it.bytes }
-    val oldestFileAt: Long? get() = chapters.map { it.modifiedAt }.filter { it > 0L }.minOrNull()
+    val bytes: Long = chapters.sumOf { it.bytes }
+    val oldestFileAt: Long? = chapters.asSequence().map { it.modifiedAt }.filter { it > 0L }.minOrNull()
 }
 
 data class StorageSnapshot(val works: List<StoredManga>) {
-    val bytes: Long get() = works.sumOf { it.bytes }
-    val chapterCount: Int get() = works.sumOf { it.chapters.size }
+    val bytes: Long = works.sumOf { it.bytes }
+    val chapterCount: Int = works.sumOf { it.chapters.size }
+    // Snapshot-only aggregates: no extra scan, network request or deletion.
+    val breakdown = calculateStorageBreakdown(works.map { work ->
+        StorageBreakdownEntry(
+            type = work.type,
+            bytes = work.bytes,
+            chapters = work.chapters.size,
+            readBytes = work.chapters.filter { it.chapter.read }.sumOf { it.bytes },
+            readChapters = work.chapters.count { it.chapter.read },
+        )
+    })
 
     fun deletionRequest(workIds: Set<Long>, readOnly: Boolean): StorageDeleteRequest {
         val candidates = works.filter { !it.manga.isLocal() && it.manga.id in workIds }.flatMap { work ->

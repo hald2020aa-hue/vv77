@@ -20,17 +20,29 @@ internal data class LibraryInsightMetrics(
     val sources: Int,
     val likelyDuplicateTitles: Int,
     val completedTitles: Int,
+    val notStartedTitles: Int,
+    val inProgressTitles: Int,
+    val caughtUpTitles: Int,
+    val unknownChapterTitles: Int,
+    val readFraction: Float?,
 )
 
 internal fun calculateLibraryInsights(entries: Collection<LibraryInsightEntry>): LibraryInsightMetrics {
     val unique = entries.distinctBy { it.id }
     val duplicateIds = crossSourceDuplicateIds(unique.map { DuplicateCandidate(it.id, it.title, it.sourceId) })
+    val read = unique.sumOf { it.read.coerceAtLeast(0).toLong() }
+    val unread = unique.sumOf { it.unread.coerceAtLeast(0).toLong() }
     return LibraryInsightMetrics(
         titles = unique.size,
-        unreadChapters = unique.sumOf { it.unread.coerceAtLeast(0) },
-        readChapters = unique.sumOf { it.read.coerceAtLeast(0) },
+        unreadChapters = unread.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+        readChapters = read.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
         sources = unique.map { it.sourceId }.distinct().size,
         likelyDuplicateTitles = duplicateIds.size,
         completedTitles = unique.count { it.completed },
+        notStartedTitles = unique.count { it.read == 0 && it.unread > 0 },
+        inProgressTitles = unique.count { it.read > 0 && it.unread > 0 },
+        caughtUpTitles = unique.count { it.read > 0 && it.unread == 0 },
+        unknownChapterTitles = unique.count { it.unread < 0 || it.read < 0 || (it.read == 0 && it.unread == 0) },
+        readFraction = if (read + unread > 0) (read.toDouble() / (read + unread)).toFloat() else null,
     )
 }

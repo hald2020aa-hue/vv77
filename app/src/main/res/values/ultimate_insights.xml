@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ultimate_library_not_started">Not started</string>
+    <string name="ultimate_library_reading">Reading in progress</string>
+    <string name="ultimate_library_caught_up">All known chapters read</string>
+    <string name="ultimate_library_unknown">No reliable chapter counts</string>
+    <string name="ultimate_library_progress">Reading progress</string>
+    <string name="ultimate_library_progress_note">Based on known chapters in the library, not time spent reading. Published completion is a separate metric.</string>
+    <string name="ultimate_storage_breakdown">Show storage breakdown</string>
+    <string name="ultimate_storage_hide_breakdown">Hide storage breakdown</string>
+    <string name="ultimate_storage_read_size">Read chapters: %1$d · %2$s</string>
+    <string name="ultimate_storage_read_note">Read-only estimate for matched downloads; no files are deleted.</string>
+</resources>

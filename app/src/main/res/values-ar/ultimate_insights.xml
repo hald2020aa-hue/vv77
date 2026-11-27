@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ultimate_library_not_started">لم تبدأ قراءتها</string>
+    <string name="ultimate_library_reading">قيد القراءة</string>
+    <string name="ultimate_library_caught_up">قُرئت جميع الفصول المعروفة</string>
+    <string name="ultimate_library_unknown">لا تتوفر أعداد فصول موثوقة</string>
+    <string name="ultimate_library_progress">تقدم القراءة</string>
+    <string name="ultimate_library_progress_note">استنادًا إلى الفصول المعروفة في المكتبة، وليس مدة القراءة. اكتمال نشر العمل مؤشر مستقل.</string>
+    <string name="ultimate_storage_breakdown">عرض تفاصيل مساحة التخزين</string>
+    <string name="ultimate_storage_hide_breakdown">إخفاء تفاصيل مساحة التخزين</string>
+    <string name="ultimate_storage_read_size">الفصول المقروءة: %1$d · %2$s</string>
+    <string name="ultimate_storage_read_note">إحصاء للفصول المنزلة المطابقة فقط؛ لا تُحذف أي ملفات.</string>
+</resources>
